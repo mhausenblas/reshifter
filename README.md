@@ -1,7 +1,10 @@
-# reshifter
-A cluster admin backup and restore tool for OpenShift
+# ReShifter
 
+A cluster admin backup and restore tool for OpenShift:
 
+- etcd is handled via [burry](http://burry.sh)
+- projects are handled via `oc export dc`
+- other cluster objects like namespaces are handled via [direct API access](https://github.com/kubernetes/client-go) 
 
 ## Development
 
