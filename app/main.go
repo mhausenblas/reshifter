@@ -24,6 +24,10 @@ func api() {
 		Target:   "local",
 		Endpoint: "",
 	}
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		version := "0.1"
+		fmt.Fprintf(w, "ReShifter in version %s", version)
+	})
 	http.HandleFunc("/v1/backup", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(bc)
