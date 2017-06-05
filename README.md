@@ -21,7 +21,7 @@ $ make create
 $ make up
 ```
 
-For a smoother workflow, that is, if you want changes automatically trigger builds and updates of the app, use the here provided script [outline.sh](outline.sh):
+For a smoother workflow, that is, if you want changes automatically trigger builds and updates of the app, use the here provided script [outline.sh](outline.sh) (which I've aliased like so: `alias outline='./outline.sh'`):
 
 ```
 $ outline create

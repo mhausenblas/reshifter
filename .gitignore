@@ -1,4 +1,5 @@
 .DS_Store
+app.yaml
 
 # Binaries for programs and plugins
 *.exe
