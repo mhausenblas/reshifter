@@ -3,13 +3,16 @@ project_name := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 app_name ?= $(project_name)-app
 public_port ?=8080
 
-.PHONY: up create init build publish destroy
+.PHONY: all up create init build publish destroy
 
-up :  build
+all : up
+
+up : build
 
 create : init build publish
 
 init :
+	@touch $(has_changes)
 	@oc new-project $(project_name)
 	@oc new-app --strategy=docker --name='$(app_name)' --context-dir='./app/' . --output yaml > app.yaml
 	@oc apply -f app.yaml

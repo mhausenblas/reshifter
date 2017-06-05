@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
+## Note that this script depends on
+## https://github.com/emcrisostomo/fswatch
+
 set -o errexit
 set -o errtrace
 set -o nounset
-set -o pipefail
+# set -o pipefail
+
+type fswatch >/dev/null 2>&1 || { echo >&2 "Need fswatch but it's not installed, so exiting …"; exit 1; }
 
 case "$1" in
 "create")
@@ -11,8 +16,7 @@ case "$1" in
     ;;
 "up")
     while true; do
-      make --silent
-      sleep 1
+      fswatch -0 $(pwd)/app/* | make
     done
     ;;
 *)
