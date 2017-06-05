@@ -28,7 +28,7 @@ $ outline create
 
 $ outline up
 
-CTRL-Z -> into background, now you can edit you code and when you save it, the app is updated
+CTRL-Z -> to background, now you can edit your code and when you save it, the app is updated
 ```
 
 ### Use a local etcd for testing
