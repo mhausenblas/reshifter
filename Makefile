@@ -12,7 +12,6 @@ up : build
 create : init build publish
 
 init :
-	@touch $(has_changes)
 	@oc new-project $(project_name)
 	@oc new-app --strategy=docker --name='$(app_name)' --context-dir='./app/' . --output yaml > app.yaml
 	@oc apply -f app.yaml
