@@ -3,8 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+
+	log "github.com/Sirupsen/logrus"
+
+	"github.com/mhausenblas/reshifter/app/pkg"
 )
 
 // BurryConfig holds all relevant config parameters for burry to run
@@ -22,41 +25,27 @@ func main() {
 func api() {
 	bc := BurryConfig{
 		Target:   "local",
-		Endpoint: "",
+		Endpoint: "localhost:2379",
 	}
-	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/v1/version", func(w http.ResponseWriter, r *http.Request) {
 		version := "0.1"
 		fmt.Fprintf(w, "ReShifter in version %s", version)
 	})
 	http.HandleFunc("/v1/backup", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		err := etcd.Backup(bc.Endpoint)
+		if err != nil {
+			log.Error(err)
+		}
 		_ = json.NewEncoder(w).Encode(bc)
 	})
-	log.Println("Serving API")
+	log.Println("Serving API from /v1")
 	_ = http.ListenAndServe(":8080", nil)
 }
 
 func ui() {
 	fs := http.FileServer(http.Dir("ui"))
 	http.Handle("/", fs)
-	log.Println("Serving UI")
+	log.Println("Serving UI from /")
 	_ = http.ListenAndServe(":8080", nil)
-}
-
-func backup() {
-	var url = ""
-	var accessToken = ""
-	var bearer = fmt.Sprintf("Bearer %s", accessToken)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("authorization", bearer)
-
-	// TBD: fetch content
-
-	// resp, err := client.Do(req)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer resp.Body.Close()
-	//
-	// body, _ := ioutil.ReadAll(resp.Body)
 }
