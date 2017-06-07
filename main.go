@@ -6,8 +6,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-
-	"github.com/mhausenblas/reshifter/app/pkg"
+	"github.com/mhausenblas/reshifter/pkg"
 )
 
 // BurryConfig holds all relevant config parameters for burry to run
