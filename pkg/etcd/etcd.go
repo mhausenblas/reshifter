@@ -35,7 +35,6 @@ type reap func(string, string)
 // and creates a ZIP archive of the content in the current directory
 func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
-	log.WithFields(log.Fields{"func": "backup"}).Info(fmt.Sprintf("Backing up to %s/", based))
 	cfg := client.Config{
 		Endpoints:               []string{"http://" + endpoint},
 		Transport:               client.DefaultTransport,

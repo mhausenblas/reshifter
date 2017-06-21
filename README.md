@@ -36,4 +36,4 @@ In general:
 $ go test -v
 ```
 
-For end-to-end tests, Docker is required to provide a local etcd instance. See the [e2e-test/](e2e-test/) directory for details.
+For end-to-end tests, Docker is required to provide a local etcd instance.

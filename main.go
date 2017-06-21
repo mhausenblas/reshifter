@@ -49,11 +49,12 @@ func backupHandler(w http.ResponseWriter, r *http.Request) {
 		URL:     "localhost:2379",
 	}
 	outcome := "success"
-	err := etcd.Backup(ep.URL)
+	b, err := etcd.Backup(ep.URL)
 	if err != nil {
 		outcome = "failed"
 		log.Error(err)
 	}
+	log.Println("Created backup from %s in %s", ep.URL, b)
 	_ = json.NewEncoder(w).Encode(ep)
 	backupTotal.WithLabelValues(outcome).Inc()
 }

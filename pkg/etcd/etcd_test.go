@@ -1,13 +1,11 @@
 package etcd
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
+	"os/exec"
 	"testing"
-	"time"
 
 	"github.com/coreos/etcd/client"
 )
@@ -28,22 +26,36 @@ var (
 )
 
 func TestBackup(t *testing.T) {
-	tetcd := "localhost:2379"
-	version := fmt.Sprintf("http://%s/version", tetcd)
-	// check if local test etcd is available, otherwise abort right here:
-	res, err := http.Get(version)
+	port := "2379"
+	tetcd := "localhost:" + port
+	err := etcd2up(port)
 	if err != nil {
-		t.Errorf("Can't connect to local etcd at %s. Run e2e-test/etcd-up.sh to launch it and try again", tetcd)
+		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
 		return
 	}
-	j, _ := ioutil.ReadAll(res.Body)
-	t.Logf("Got %s from %s", j, version)
-	_ = res.Body.Close()
-	// create some key-value pairs
-	kapi, _ := newKeysAPI(tetcd)
-	setkv(t, kapi, "/foo", "some")
-	setkv(t, kapi, "/that", "")
-	setkv(t, kapi, "/that/here", "moar")
+	// create some key-value pairs:
+	c2, err := newClient2(tetcd, false)
+	if err != nil {
+		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
+		return
+	}
+
+	kapi := client.NewKeysAPI(c2)
+	err = setKV2(kapi, "/foo", "some")
+	if err != nil {
+		t.Errorf("Can't create key /foo: %s", err)
+		return
+	}
+	err = setKV2(kapi, "/that", "")
+	if err != nil {
+		t.Errorf("Can't create key /that: %s", err)
+		return
+	}
+	err = setKV2(kapi, "/that/here", "moar")
+	if err != nil {
+		t.Errorf("Can't create key /that/here: %s", err)
+	}
+
 	based, err := Backup(tetcd)
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
@@ -53,7 +65,9 @@ func TestBackup(t *testing.T) {
 	if err != nil {
 		t.Errorf("No archive found: %s", err)
 	}
-	t.Logf("Note: you can now run e2e-test/etcd-down.sh to shut down local etcd")
+	// make sure to clean up:
+	_ = os.Remove(based + ".zip")
+	_ = etcddown()
 }
 
 func TestStore(t *testing.T) {
@@ -83,30 +97,46 @@ func readcontent(path string) string {
 	return string(content)
 }
 
-func setkv(t *testing.T, kapi client.KeysAPI, key, val string) {
-	if val == "" {
-		_, err := kapi.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevIgnore})
-		if err != nil {
-			t.Errorf("Can't set key %s: %s", key, err)
-		}
-		return
-	}
-	_, err := kapi.Set(context.Background(), key, val, &client.SetOptions{Dir: false, PrevExist: client.PrevIgnore})
+func etcd2up(port string) error {
+	// var out bytes.Buffer
+	cmd := exec.Command("docker", "run", "--rm", "-d",
+		"-p", port+":"+port, "--name", "test-etcd", "quay.io/coreos/etcd:v2.3.8",
+		"--advertise-client-urls", "http://0.0.0.0:"+port,
+		"--listen-client-urls", "http://0.0.0.0:"+port)
+	// cmd.Stdout = &out
+	fmt.Printf("%s\n", cmd.Args)
+	err := cmd.Run()
 	if err != nil {
-		t.Errorf("Can't set key %s with value %s: %s", key, val, err)
+		return err
 	}
+	// fmt.Printf("%s\n", out.String())
+	// time.Sleep(time.Second * 2)
+	return nil
 }
 
-func newKeysAPI(endpoint string) (client.KeysAPI, error) {
-	cfg := client.Config{
-		Endpoints:               []string{"http://" + endpoint},
-		Transport:               client.DefaultTransport,
-		HeaderTimeoutPerRequest: time.Second,
-	}
-	c, err := client.New(cfg)
+func etcd3up(port string) error {
+	// var out bytes.Buffer
+	cmd := exec.Command("docker", "run", "--rm", "-d",
+		"-p", port+":"+port, "--name", "test-etcd",
+		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
+		"--advertise-client-urls", "http://0.0.0.0:"+port,
+		"--listen-client-urls", "http://0.0.0.0:"+port)
+	// cmd.Stdout = &out
+	fmt.Printf("%s\n", cmd.Args)
+	err := cmd.Run()
 	if err != nil {
-		return nil, fmt.Errorf("Can't create etcd client: %s", err)
+		return err
 	}
-	kapi := client.NewKeysAPI(c)
-	return kapi, nil
+	// fmt.Printf("%s\n", out.String())
+	// time.Sleep(time.Second * 2)
+	return nil
+}
+
+func etcddown() error {
+	cmd := exec.Command("docker", "kill", "test-etcd")
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }
