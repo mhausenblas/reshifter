@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/mhausenblas/reshifter/pkg/etcd"
@@ -71,12 +72,12 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		Version: "2",
 		URL:     "localhost:2379",
 	}
-	// cwd, _ := os.Getwd()
+	cwd, _ := os.Getwd()
 	afile := r.URL.Query().Get("archive")
-	// b, err := etcd.Restore(afile, cwd, ep.URL)
-	// if err != nil {
-	// 	log.Error(err)
-	// }
+	err := etcd.Restore(afile, cwd, ep.URL)
+	if err != nil {
+		log.Error(err)
+	}
 	log.Infof("Restored from %s to %s", afile, ep.URL)
 	_ = json.NewEncoder(w).Encode(ep)
 }
