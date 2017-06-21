@@ -31,9 +31,9 @@ type Endpoint struct {
 // some side effect, such as storing, on the node
 type reap func(string, string)
 
-// Backup traverses all paths of an etcd2 server starting from the root
+// Backup traverses all paths of an etcd server starting from the root
 // and creates a ZIP archive of the content in the current directory
-func Backup(endpoint string) error {
+func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
 	log.WithFields(log.Fields{"func": "backup"}).Info(fmt.Sprintf("Backing up to %s/", based))
 	cfg := client.Config{
@@ -44,21 +44,21 @@ func Backup(endpoint string) error {
 	c, err := client.New(cfg)
 	if err != nil {
 		log.WithFields(log.Fields{"func": "backup"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
-		return fmt.Errorf("Can't connect to etcd: %s", err)
+		return "", fmt.Errorf("Can't connect to etcd: %s", err)
 	}
 
 	kapi := client.NewKeysAPI(c)
 	visit(kapi, "/", func(path string, val string) {
 		_, _ = store(based, path, val)
 		// if err != nil {
-		// 	return fmt.Errorf("Can't store value locally: %s", err)
+		// 	return "", fmt.Errorf("Can't store value locally: %s", err)
 		// }
 	})
 	_, err = arch(based)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return based, nil
 }
 
 // visit recursively visits a path in the etcd tree and applies the reap function
