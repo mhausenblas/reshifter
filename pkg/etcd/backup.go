@@ -14,21 +14,15 @@ import (
 )
 
 // Backup traverses all paths of an etcd server starting from the root
-// and creates a ZIP archive of the content in the current directory
+// and creates a ZIP archive of the content in the current directory.
 func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
-	cfg := client.Config{
-		Endpoints:               []string{"http://" + endpoint},
-		Transport:               client.DefaultTransport,
-		HeaderTimeoutPerRequest: time.Second,
-	}
-	c, err := client.New(cfg)
+	c2, err := newClient2(endpoint, false)
 	if err != nil {
-		log.WithFields(log.Fields{"func": "backup"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
+		log.WithFields(log.Fields{"func": "Backup"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
 		return "", fmt.Errorf("Can't connect to etcd: %s", err)
 	}
-
-	kapi := client.NewKeysAPI(c)
+	kapi := client.NewKeysAPI(c2)
 	visit(kapi, "/", func(path string, val string) {
 		_, _ = store(based, path, val)
 		// if err != nil {
@@ -37,6 +31,7 @@ func Backup(endpoint string) (string, error) {
 	})
 	_, err = arch(based)
 	if err != nil {
+		log.WithFields(log.Fields{"func": "Backup"}).Error(err)
 		return "", err
 	}
 	return based, nil
@@ -114,13 +109,11 @@ func arch(based string) (string, error) {
 	cwd, _ := os.Getwd()
 	opath := filepath.Join(cwd, based+".zip")
 	ipath := filepath.Join(cwd, based, "/")
-	progress := func(apath string) {
+	err := zip.ArchiveFile(ipath, opath, func(apath string) {
 		log.WithFields(log.Fields{"func": "arch"}).Debug(fmt.Sprintf("%s", apath))
-	}
-	err := zip.ArchiveFile(ipath, opath, progress)
+	})
 	if err != nil {
-		log.WithFields(log.Fields{"func": "arch"}).Error(fmt.Sprintf("Can't create archive: %s", err))
-		return "", fmt.Errorf("Can't create archive: %s", err)
+		return "", fmt.Errorf("Can't create archive %s: %s", opath, err)
 	}
 	return opath, nil
 }

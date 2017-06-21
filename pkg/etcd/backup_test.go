@@ -23,6 +23,22 @@ var (
 	}
 )
 
+func TestStore(t *testing.T) {
+	for _, tt := range storetests {
+		p, err := store(".", tt.path, tt.val)
+		if err != nil {
+			continue
+		}
+		got := readcontent(p)
+		want := tt.val
+		if got != want {
+			t.Errorf("etcd.store(\".\", %q, %q) => %q, want %q", tt.path, tt.val, got, want)
+		}
+	}
+	// make sure to clean up remaining directories:
+	_ = os.RemoveAll(tmpTestDir)
+}
+
 func TestBackup(t *testing.T) {
 	port := "2379"
 	tetcd := "localhost:" + port
@@ -66,22 +82,6 @@ func TestBackup(t *testing.T) {
 	// make sure to clean up:
 	_ = os.Remove(based + ".zip")
 	_ = etcddown()
-}
-
-func TestStore(t *testing.T) {
-	for _, tt := range storetests {
-		p, err := store(".", tt.path, tt.val)
-		if err != nil {
-			continue
-		}
-		got := readcontent(p)
-		want := tt.val
-		if got != want {
-			t.Errorf("etcd.store(\".\", %q, %q) => %q, want %q", tt.path, tt.val, got, want)
-		}
-	}
-	// make sure to clean up remaining directories:
-	_ = os.RemoveAll(tmpTestDir)
 }
 
 func readcontent(path string) string {
