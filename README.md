@@ -36,4 +36,4 @@ In general:
 $ go test -v
 ```
 
-See [test/](test/) directory for `etc-*` scripts.
+For end-to-end tests, Docker is required to provide a local etcd instance. See the [e2e-test/](e2e-test/) directory for details.
