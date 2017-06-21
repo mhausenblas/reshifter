@@ -1,42 +1,49 @@
 package etcd
 
 import (
-	"fmt"
+	"io/ioutil"
 	"os"
-	"path/filepath"
 	"testing"
 )
 
-var storetests = []struct {
-	inpath string
-	inval  string
-	out    string
-}{
-	{"", "", ""},
-	{"/", "root", ContentFile},
-	{"/test", "some", "test/" + ContentFile},
-	{"/test/this:also", "escaped", "test/thisESC_COLONalso/" + ContentFile},
-}
+var (
+	tmpTestDir = "test/"
+	storetests = []struct {
+		path string
+		val  string
+	}{
+		{"", ""},
+		{"non-valid-key", ""},
+		{"/", "root"},
+		{"/" + tmpTestDir, "some"},
+		{"/" + tmpTestDir + "/first-level", "another"},
+		{"/" + tmpTestDir + "/this:also", "escaped"},
+	}
+)
 
 func TestStore(t *testing.T) {
-	cwd, _ := os.Getwd()
 	for _, tt := range storetests {
-		got, _ := store(".", tt.inpath, tt.inval)
-		got, _ = filepath.Rel(cwd, got)
-		want := tt.out
-		if got != want {
-			t.Errorf("etcd.store(\".\", %q, %q) => %q, want %q", tt.inpath, tt.inval, got, want)
+		p, err := store(".", tt.path, tt.val)
+		if err != nil {
+			continue
 		}
-		// t.Logf("etcd.store(\".\", %q, %q) => %q", tt.inpath, tt.inval, got)
-		// now clean up the directories and files created as a side effect:
-		if got != "" {
-			if got != "." {
-				err := os.Remove(got)
-				if err != nil {
-					fmt.Printf("%s\n", err)
-				}
-			}
+		got := readcontent(p)
+		want := tt.val
+		if got != want {
+			t.Errorf("etcd.store(\".\", %q, %q) => %q, want %q", tt.path, tt.val, got, want)
 		}
 	}
-	_ = os.RemoveAll("test/")
+	// make sure to clean up remaining directories:
+	_ = os.RemoveAll(tmpTestDir)
+}
+
+func readcontent(path string) string {
+	// make sure to clean up individual files
+	defer func() {
+		if path != "." {
+			_ = os.Remove(path)
+		}
+	}()
+	content, _ := ioutil.ReadFile(path)
+	return string(content)
 }

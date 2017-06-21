@@ -14,7 +14,9 @@ import (
 )
 
 const (
+	// EscapeColon represents the : in an etcd key
 	EscapeColon = "ESC_COLON"
+	// ContentFile is the name of the file an etcd value is stored
 	ContentFile = "content"
 )
 
@@ -88,7 +90,9 @@ func visit(kapi client.KeysAPI, path string, fn reap) {
 // any valid etcd key (with : characters being escaped automatically).
 func store(based string, path string, val string) (string, error) {
 
-	if path == "" {
+	// make sure we're dealing with a valid path
+	// that is, non-empty and has to start with /:
+	if path == "" || (strings.Index(path, "/") != 0) {
 		return "", fmt.Errorf("Path has to be non-empty")
 	}
 	cwd, _ := os.Getwd()
