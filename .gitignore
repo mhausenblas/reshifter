@@ -1,5 +1,6 @@
 .DS_Store
 vendor/
+*.zip
 
 # Binaries for programs and plugins
 *.exe

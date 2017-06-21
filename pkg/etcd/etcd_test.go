@@ -1,7 +1,9 @@
 package etcd
 
 import (
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"testing"
 )
@@ -20,6 +22,24 @@ var (
 		{"/" + tmpTestDir + "/this:also", "escaped"},
 	}
 )
+
+func TestBackup(t *testing.T) {
+	tetcd := "localhost:2379"
+	version := fmt.Sprintf("http://%s/version", tetcd)
+	// check if local test etcd is available, otherwise abort right here:
+	res, err := http.Get(version)
+	if err != nil {
+		t.Errorf("Can't connect to local etcd at %s. Run e2e-test/etcd-up.sh to launch it and try again.", tetcd)
+	}
+	j, _ := ioutil.ReadAll(res.Body)
+	t.Logf("Got %s from %s", j, version)
+	_ = res.Body.Close()
+	err = Backup(tetcd)
+	if err != nil {
+		t.Errorf("Error during backup: %s.", err)
+	}
+	// TODO: pull in setup (populate etcd with content), check if content is as expected, hint at shutdown
+}
 
 func TestStore(t *testing.T) {
 	for _, tt := range storetests {
