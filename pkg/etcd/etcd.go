@@ -13,6 +13,11 @@ import (
 	"golang.org/x/net/context"
 )
 
+const (
+	EscapeColon = "ESC_COLON"
+	ContentFile = "content"
+)
+
 // Endpoint represents an etcd server, available in
 // a certain version at a certain URL.
 type Endpoint struct {
@@ -42,7 +47,10 @@ func Backup(endpoint string) error {
 
 	kapi := client.NewKeysAPI(c)
 	visit(kapi, "/", func(path string, val string) {
-		store(based, path, val)
+		_, _ = store(based, path, val)
+		// if err != nil {
+		// 	return fmt.Errorf("Can't store value locally: %s", err)
+		// }
 	})
 	_, err = arch(based)
 	if err != nil {
@@ -75,11 +83,17 @@ func visit(kapi client.KeysAPI, path string, fn reap) {
 	}
 }
 
-// store stores value val at path path in the local filesystem in dir based
-func store(based string, path string, val string) {
+// store creates a file at based+path with val as its content.
+// based is the relative base directory to use and path can be
+// any valid etcd key (with : characters being escaped automatically).
+func store(based string, path string, val string) (string, error) {
+
+	if path == "" {
+		return "", fmt.Errorf("Path has to be non-empty")
+	}
 	cwd, _ := os.Getwd()
 	// escape ":" in the path so that we have no issues storing it in the filesystem:
-	fpath, _ := filepath.Abs(filepath.Join(cwd, based, strings.Replace(path, ":", "ESC_COLON", -1)))
+	fpath, _ := filepath.Abs(filepath.Join(cwd, based, strings.Replace(path, ":", EscapeColon, -1)))
 	if path == "/" {
 		log.WithFields(log.Fields{"func": "store"}).Debug(fmt.Sprintf("Rewriting root"))
 		fpath, _ = filepath.Abs(filepath.Join(cwd, based))
@@ -87,12 +101,13 @@ func store(based string, path string, val string) {
 	err := os.MkdirAll(fpath, os.ModePerm)
 	if err != nil {
 		log.WithFields(log.Fields{"func": "store"}).Error(fmt.Sprintf("%s", err))
-		return
+		return "", fmt.Errorf("%s", err)
 	}
-	cpath, _ := filepath.Abs(filepath.Join(fpath, "content"))
-	c, cerr := os.Create(cpath)
-	if cerr != nil {
-		log.WithFields(log.Fields{"func": "store"}).Error(fmt.Sprintf("%s", cerr))
+	cpath, _ := filepath.Abs(filepath.Join(fpath, ContentFile))
+	c, err := os.Create(cpath)
+	if err != nil {
+		log.WithFields(log.Fields{"func": "store"}).Error(fmt.Sprintf("%s", err))
+		return "", fmt.Errorf("%s", err)
 	}
 	defer func() {
 		_ = c.Close()
@@ -100,8 +115,10 @@ func store(based string, path string, val string) {
 	nbytes, err := c.WriteString(val)
 	if err != nil {
 		log.WithFields(log.Fields{"func": "store"}).Error(fmt.Sprintf("%s", err))
+		return "", fmt.Errorf("%s", err)
 	}
 	log.WithFields(log.Fields{"func": "store"}).Debug(fmt.Sprintf("Stored %s in %s with %d bytes", path, fpath, nbytes))
+	return cpath, nil
 }
 
 // arch creates a ZIP archive of the content store() has generated

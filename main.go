@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/mhausenblas/reshifter/pkg"
+	"github.com/mhausenblas/reshifter/pkg/etcd"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
