@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	"fmt"
+	"os/exec"
 	"time"
 
 	"github.com/coreos/etcd/client"
@@ -41,6 +42,50 @@ func setKV2(kapi client.KeysAPI, key, val string) error {
 	_, err := kapi.Set(context.Background(), key, val, &client.SetOptions{Dir: false, PrevExist: client.PrevIgnore})
 	if err != nil {
 		return fmt.Errorf("Can't set key %s with value %s: %s", key, val, err)
+	}
+	return nil
+}
+
+func etcd2up(port string) error {
+	// var out bytes.Buffer
+	cmd := exec.Command("docker", "run", "--rm", "-d",
+		"-p", port+":"+port, "--name", "test-etcd", "quay.io/coreos/etcd:v2.3.8",
+		"--advertise-client-urls", "http://0.0.0.0:"+port,
+		"--listen-client-urls", "http://0.0.0.0:"+port)
+	// cmd.Stdout = &out
+	fmt.Printf("%s\n", cmd.Args)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	// fmt.Printf("%s\n", out.String())
+	// time.Sleep(time.Second * 2)
+	return nil
+}
+
+func etcd3up(port string) error {
+	// var out bytes.Buffer
+	cmd := exec.Command("docker", "run", "--rm", "-d",
+		"-p", port+":"+port, "--name", "test-etcd",
+		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
+		"--advertise-client-urls", "http://0.0.0.0:"+port,
+		"--listen-client-urls", "http://0.0.0.0:"+port)
+	// cmd.Stdout = &out
+	fmt.Printf("%s\n", cmd.Args)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	// fmt.Printf("%s\n", out.String())
+	// time.Sleep(time.Second * 2)
+	return nil
+}
+
+func etcddown() error {
+	cmd := exec.Command("docker", "kill", "test-etcd")
+	err := cmd.Run()
+	if err != nil {
+		return err
 	}
 	return nil
 }

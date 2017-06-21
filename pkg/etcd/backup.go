@@ -13,24 +13,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-const (
-	// EscapeColon represents the : in an etcd key
-	EscapeColon = "ESC_COLON"
-	// ContentFile is the name of the file an etcd value is stored
-	ContentFile = "content"
-)
-
-// Endpoint represents an etcd server, available in
-// a certain version at a certain URL.
-type Endpoint struct {
-	Version string `json:"version"`
-	URL     string `json:"url"`
-}
-
-// reap function types take a node path and a value as parameters and performs
-// some side effect, such as storing, on the node
-type reap func(string, string)
-
 // Backup traverses all paths of an etcd server starting from the root
 // and creates a ZIP archive of the content in the current directory
 func Backup(endpoint string) (string, error) {
