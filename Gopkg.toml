@@ -1,0 +1,20 @@
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/Sirupsen/logrus"
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/coreos/etcd"
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/pierrre/archivefile"
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/prometheus/client_golang"
+
+[[dependencies]]
+  branch = "master"
+  name = "golang.org/x/net"

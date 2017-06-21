@@ -1,0 +1,85 @@
+memo = ""
+
+[[projects]]
+  branch = "master"
+  name = "github.com/Sirupsen/logrus"
+  packages = ["."]
+  revision = "3d4380f53a34dcdc95f0c1db702615992b38d9a4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/beorn7/perks"
+  packages = ["quantile"]
+  revision = "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/coreos/etcd"
+  packages = ["client"]
+  revision = "a40cdc7baa333e230098ee3de5d4d36b31716dda"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/coreos/go-semver"
+  packages = ["semver"]
+  revision = "1817cd4bea52af76542157eeabd74b057d1a199e"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  revision = "1fb8fd32a09087bcd727225167edd31e1b9ceb24"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/matttproud/golang_protobuf_extensions"
+  packages = ["pbutil"]
+  revision = "c12348ce28de40eed0136aa2b644d0ee0650e56c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/pierrre/archivefile"
+  packages = ["zip"]
+  revision = "e2d100bc74f58ed7d2f41175cd2cf5fe29446399"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/prometheus/client_golang"
+  packages = ["prometheus","prometheus/promhttp"]
+  revision = "de4d4ffe63b9eff7f27484fdef6e421597e6abb4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/prometheus/client_model"
+  packages = ["go"]
+  revision = "6f3806018612930941127f2a7c6c453ba2c527d2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/prometheus/common"
+  packages = ["expfmt","model"]
+  revision = "0d0c3d572886e0f2323ed376557f9eb99b97d25b"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/prometheus/procfs"
+  packages = ["."]
+  revision = "822d4a1f8edcbcbc71e8d1fd6527b12331a6d0ad"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/ugorji/go"
+  packages = ["codec"]
+  revision = "5efa3251c7f7d05e5d9704a69a984ec9f1386a40"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  revision = "057a25b06247e0c51ba15d8ae475feb2fcb72164"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  revision = "fb4cac33e3196ff7f507ab9b2d2a44b0142f5b5a"

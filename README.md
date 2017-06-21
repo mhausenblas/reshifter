@@ -1,11 +1,34 @@
 # ReShifter
 
-A cluster admin backup and restore tool for OpenShift:
+A cluster admin backup and restore tool for OpenShift. Traverses etcd and stores the state of all objects.
 
-- etcd is handled via code based on [burry](http://burry.sh)
-- projects are handled via `oc export dc`
-- other cluster objects like namespaces are handled via [direct API access](https://github.com/kubernetes/client-go)
+Supported:
 
-## Local etcd for testing
+- Cluster: Kubernetes 1.5
+- Client: Linux, macOS
+
+## Using it
+
+### Deployment
+
+TBD
+
+### Monitoring
+
+Prometheus metrics are available via `/metrics`.
+
+## Extending it
+
+## Vendoring
+
+Using Go [dep](https://github.com/golang/dep) for dependency management.
+
+### Testing
+
+In general:
+
+```
+$ go test -v
+```
 
 See [test/](test/) directory for `etc-*` scripts.
