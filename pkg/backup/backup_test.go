@@ -1,4 +1,4 @@
-package etcd
+package backup
 
 import (
 	"io/ioutil"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/coreos/etcd/client"
+	"github.com/mhausenblas/reshifter/pkg/util"
 )
 
 var (
@@ -46,30 +47,30 @@ func TestStore(t *testing.T) {
 func TestBackup(t *testing.T) {
 	port := "2379"
 	tetcd := "localhost:" + port
-	err := etcd2up(port)
+	err := util.Etcd2up(port)
 	if err != nil {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
 		return
 	}
 	// create some key-value pairs:
-	c2, err := newClient2(tetcd, false)
+	c2, err := util.NewClient2(tetcd, false)
 	if err != nil {
 		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
 		return
 	}
 
 	kapi := client.NewKeysAPI(c2)
-	err = setKV2(kapi, "/foo", "some")
+	err = util.SetKV2(kapi, "/foo", "some")
 	if err != nil {
 		t.Errorf("Can't create key /foo: %s", err)
 		return
 	}
-	err = setKV2(kapi, "/that", "")
+	err = util.SetKV2(kapi, "/that", "")
 	if err != nil {
 		t.Errorf("Can't create key /that: %s", err)
 		return
 	}
-	err = setKV2(kapi, "/that/here", "moar")
+	err = util.SetKV2(kapi, "/that/here", "moar")
 	if err != nil {
 		t.Errorf("Can't create key /that/here: %s", err)
 	}
@@ -85,5 +86,5 @@ func TestBackup(t *testing.T) {
 	}
 	// make sure to clean up:
 	_ = os.Remove(based + ".zip")
-	_ = etcddown()
+	_ = util.Etcddown()
 }

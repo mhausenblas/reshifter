@@ -1,4 +1,4 @@
-package etcd
+package restore
 
 import (
 	"context"
@@ -10,6 +10,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/etcd/client"
+	"github.com/mhausenblas/reshifter/pkg/types"
+	"github.com/mhausenblas/reshifter/pkg/util"
 	"github.com/pierrre/archivefile/zip"
 )
 
@@ -27,7 +29,7 @@ func Restore(afile, target string, endpoint string) (int, error) {
 		return numrestored, err
 	}
 	target, _ = filepath.Abs(filepath.Join(target, afile, "/"))
-	c2, err := newClient2(endpoint, false)
+	c2, err := util.NewClient2(endpoint, false)
 	if err != nil {
 		log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
 		return numrestored, fmt.Errorf("Can't connect to etcd: %s", err)
@@ -37,8 +39,8 @@ func Restore(afile, target string, endpoint string) (int, error) {
 	err = filepath.Walk(target, func(path string, f os.FileInfo, e error) error {
 		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Looking at path: %s, f: %v, err: %v", path, f.Name(), e))
 		key, _ := filepath.Rel(target, path)
-		key = "/" + strings.Replace(key, EscapeColon, ":", -1)
-		if f.Name() == ContentFile {
+		key = "/" + strings.Replace(key, types.EscapeColon, ":", -1)
+		if f.Name() == types.ContentFile {
 			key = filepath.Dir(key)
 			c, cerr := ioutil.ReadFile(path)
 			if cerr != nil {

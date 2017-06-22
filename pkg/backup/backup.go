@@ -1,4 +1,4 @@
-package etcd
+package backup
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/etcd/client"
+	"github.com/mhausenblas/reshifter/pkg/types"
+	"github.com/mhausenblas/reshifter/pkg/util"
 	"github.com/pierrre/archivefile/zip"
 	"golang.org/x/net/context"
 )
@@ -22,7 +24,7 @@ import (
 //		bID, err := etcd.Backup("localhost:2379")
 func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
-	c2, err := newClient2(endpoint, false)
+	c2, err := util.NewClient2(endpoint, false)
 	if err != nil {
 		log.WithFields(log.Fields{"func": "Backup"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
 		return "", fmt.Errorf("Can't connect to etcd: %s", err)
@@ -47,7 +49,7 @@ func Backup(endpoint string) (string, error) {
 
 // visit recursively visits a path in the etcd tree and applies the reap function
 // on a node, if it is a leaf node, otherwise descents the tree
-func visit(kapi client.KeysAPI, path string, fn reap) error {
+func visit(kapi client.KeysAPI, path string, fn types.Reap) error {
 	log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("On node %s", path))
 	copts := client.GetOptions{
 		Recursive: true,
@@ -81,7 +83,7 @@ func store(based string, path string, val string) (string, error) {
 	}
 	cwd, _ := os.Getwd()
 	// escape ":" in the path so that we have no issues storing it in the filesystem:
-	fpath, _ := filepath.Abs(filepath.Join(cwd, based, strings.Replace(path, ":", EscapeColon, -1)))
+	fpath, _ := filepath.Abs(filepath.Join(cwd, based, strings.Replace(path, ":", types.EscapeColon, -1)))
 	if path == "/" {
 		log.WithFields(log.Fields{"func": "store"}).Debug(fmt.Sprintf("Rewriting root"))
 		fpath, _ = filepath.Abs(filepath.Join(cwd, based))
@@ -90,7 +92,7 @@ func store(based string, path string, val string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s", err)
 	}
-	cpath, _ := filepath.Abs(filepath.Join(fpath, ContentFile))
+	cpath, _ := filepath.Abs(filepath.Join(fpath, types.ContentFile))
 	c, err := os.Create(cpath)
 	if err != nil {
 		return "", fmt.Errorf("%s", err)

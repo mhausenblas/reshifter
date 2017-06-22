@@ -1,4 +1,4 @@
-package etcd
+package types
 
 const (
 	// EscapeColon represents the : in an etcd key
@@ -26,6 +26,6 @@ type RestoreResult struct {
 	KeysRestored int    `json:"keysrestored"`
 }
 
-// reap function types take a node path and a value as parameters and performs
+// Reap function types take a node path and a value as parameters and performs
 // some side effect, such as storing, on the node
-type reap func(string, string) error
+type Reap func(string, string) error

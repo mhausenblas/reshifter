@@ -37,9 +37,9 @@ printf "Getting ReShifter version:\n"
 http localhost:8080/v1/version
 
 printf "=========================================================================\n"
-printf "Performing backup operation:"
+printf "Performing backup operation:\n"
 bid=$(http localhost:8080/v1/backup | jq -r .backupid)
-printf " got backup ID %s\n" $bid
+printf "got backup ID %s\n" $bid
 
 printf "\n=========================================================================\n"
 printf "Restarting etcd2 ...\n"
@@ -47,7 +47,7 @@ etcd2down
 etcd2up
 
 printf "\n=========================================================================\n"
-printf "Performing restore operation:"
+printf "Performing restore operation:\n"
 http localhost:8080/v1/restore?archive=$bid
 
 printf "=========================================================================\n"

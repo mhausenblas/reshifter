@@ -1,4 +1,4 @@
-package etcd
+package util
 
 import (
 	"context"
@@ -20,7 +20,7 @@ func IsBackupID(id string) bool {
 
 // newClient2 create an etcd2 client, optionally using SSL/TLS if secure is true.
 // The endpoint is both host and port, for example, localhost:2379.
-func newClient2(endpoint string, secure bool) (client.Client, error) {
+func NewClient2(endpoint string, secure bool) (client.Client, error) {
 	if secure {
 		return nil, fmt.Errorf("Secure etcd2 connection not yet supported")
 	}
@@ -39,7 +39,7 @@ func newClient2(endpoint string, secure bool) (client.Client, error) {
 
 // setKV2 sets the key with val in an etcd2 cluster and
 // iff val is empty, creates a directory key.
-func setKV2(kapi client.KeysAPI, key, val string) error {
+func SetKV2(kapi client.KeysAPI, key, val string) error {
 	if val == "" {
 		_, err := kapi.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevIgnore})
 		if err != nil {
@@ -54,7 +54,7 @@ func setKV2(kapi client.KeysAPI, key, val string) error {
 	return nil
 }
 
-func etcd2up(port string) error {
+func Etcd2up(port string) error {
 	// var out bytes.Buffer
 	cmd := exec.Command("docker", "run", "--rm", "-d",
 		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8", "quay.io/coreos/etcd:v2.3.8",
@@ -71,7 +71,7 @@ func etcd2up(port string) error {
 	return nil
 }
 
-func etcd3up(port string) error {
+func Etcd3up(port string) error {
 	// var out bytes.Buffer
 	cmd := exec.Command("docker", "run", "--rm", "-d",
 		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8",
@@ -89,7 +89,7 @@ func etcd3up(port string) error {
 	return nil
 }
 
-func etcddown() error {
+func Etcddown() error {
 	cmd := exec.Command("docker", "kill", "test-etcd")
 	err := cmd.Run()
 	if err != nil {

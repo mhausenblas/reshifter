@@ -8,7 +8,10 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/mhausenblas/reshifter/pkg/etcd"
+	"github.com/mhausenblas/reshifter/pkg/backup"
+	"github.com/mhausenblas/reshifter/pkg/restore"
+	"github.com/mhausenblas/reshifter/pkg/types"
+	"github.com/mhausenblas/reshifter/pkg/util"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -28,21 +31,21 @@ func api() {
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.17"
+	version := "0.1.18"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
 func backupHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	ep := etcd.Endpoint{
+	ep := types.Endpoint{
 		Version: "2",
 		URL:     "localhost:2379",
 	}
-	br := etcd.BackupResult{
+	br := types.BackupResult{
 		Outcome:  operationSuccess,
 		BackupID: "0",
 	}
-	bid, err := etcd.Backup(ep.URL)
+	bid, err := backup.Backup(ep.URL)
 	if err != nil {
 		br.Outcome = operationFail
 		log.Error(err)
@@ -59,23 +62,23 @@ func backupHandler(w http.ResponseWriter, r *http.Request) {
 
 func restoreHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	ep := etcd.Endpoint{
+	ep := types.Endpoint{
 		Version: "2",
 		URL:     "localhost:2379",
 	}
-	rr := etcd.RestoreResult{
+	rr := types.RestoreResult{
 		Outcome:      operationSuccess,
 		KeysRestored: 0,
 	}
 	target := "/tmp"
 	afile := r.URL.Query().Get("archive")
-	if !etcd.IsBackupID(afile) {
+	if !util.IsBackupID(afile) {
 		abortreason := fmt.Sprintf("Aborting restore: %s is not a valid backup ID", afile)
 		http.Error(w, abortreason, 409)
 		log.Error(abortreason)
 		return
 	}
-	krestored, err := etcd.Restore(afile, target, ep.URL)
+	krestored, err := restore.Restore(afile, target, ep.URL)
 	if err != nil {
 		rr.Outcome = operationFail
 		log.Error(err)
