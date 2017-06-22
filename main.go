@@ -12,6 +12,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+const (
+	operationSuccess = "success"
+	operationFail    = "fail"
+)
+
 var (
 	backupTotal *prometheus.CounterVec
 )
@@ -49,7 +54,7 @@ func api() {
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.8"
+	version := "0.1.16"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -60,23 +65,22 @@ func backupHandler(w http.ResponseWriter, r *http.Request) {
 		URL:     "localhost:2379",
 	}
 	br := etcd.BackupResult{
-		Outcome:  "success",
+		Outcome:  operationSuccess,
 		BackupID: "0",
 	}
 	bid, err := etcd.Backup(ep.URL)
 	if err != nil {
-		br.Outcome = "fail"
+		br.Outcome = operationFail
 		log.Error(err)
 	}
 	br.BackupID = bid
 	backupTotal.WithLabelValues(br.Outcome).Inc()
-	log.Infof("Completed backup operation from %s: %v", ep.URL, br)
-	if br.Outcome == "fail" {
+	log.Infof("Completed backup from %s: %v", ep.URL, br)
+	if br.Outcome == operationFail {
 		http.Error(w, err.Error(), 409)
 		return
 	}
 	_ = json.NewEncoder(w).Encode(br)
-
 }
 
 func restoreHandler(w http.ResponseWriter, r *http.Request) {
@@ -86,17 +90,28 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		URL:     "localhost:2379",
 	}
 	rr := etcd.RestoreResult{
-		Outcome:      "success",
+		Outcome:      operationSuccess,
 		KeysRestored: 0,
 	}
 	target := "/tmp"
 	afile := r.URL.Query().Get("archive")
+	if !etcd.IsBackupID(afile) {
+		abortreason := fmt.Sprintf("Aborting restore: %s is not a valid backup ID", afile)
+		http.Error(w, abortreason, 409)
+		log.Error(abortreason)
+		return
+	}
 	krestored, err := etcd.Restore(afile, target, ep.URL)
 	if err != nil {
+		rr.Outcome = operationFail
 		log.Error(err)
 	}
 	rr.KeysRestored = krestored
-	log.Infof("Restored from %s to %s: %v", afile, ep.URL, rr)
+	log.Infof("Completed restore from %s to %s: %v", afile, ep.URL, rr)
+	if rr.Outcome == "fail" {
+		http.Error(w, err.Error(), 409)
+		return
+	}
 	_ = json.NewEncoder(w).Encode(rr)
 }
 

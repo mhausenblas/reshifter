@@ -4,10 +4,19 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"time"
 
 	"github.com/coreos/etcd/client"
 )
+
+// IsBackupID tests if a string is a valid backup ID.
+// A valid backup ID is a 10 digit integer, representing
+// a Unix timestamp.
+func IsBackupID(id string) bool {
+	re := regexp.MustCompile("\\d{10}")
+	return re.Match([]byte(id))
+}
 
 // newClient2 create an etcd2 client, optionally using SSL/TLS if secure is true.
 // The endpoint is both host and port, for example, localhost:2379.

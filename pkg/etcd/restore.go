@@ -33,44 +33,40 @@ func Restore(afile, target string, endpoint string) (int, error) {
 		return numrestored, fmt.Errorf("Can't connect to etcd: %s", err)
 	}
 	kapi := client.NewKeysAPI(c2)
+	log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Operating in target: %s", target))
 	err = filepath.Walk(target, func(path string, f os.FileInfo, e error) error {
-		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("target: %s, path: %s, f: %v, err: %v", target, path, f.Name(), e))
-		if f.Name() == afile {
-			return nil
-		}
-		base, _ := filepath.Abs(filepath.Join(target, afile))
-		key, _ := filepath.Rel(base, path)
+		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Looking at path: %s, f: %v, err: %v", path, f.Name(), e))
+		key, _ := filepath.Rel(target, path)
 		key = "/" + strings.Replace(key, EscapeColon, ":", -1)
-		if f.IsDir() {
-			cfile, _ := filepath.Abs(filepath.Join(path, ContentFile))
-			_, err = os.Stat(cfile)
-			if err != nil { // empty directory (no content file) inserting a non-leaf key
-				_, err = kapi.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevNoExist})
-				if err != nil {
-					log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't restore key %s: %s", key, err))
-					return nil
-				}
-				log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Restored %s", key))
-				numrestored++
-				return nil
-			}
-			// otherwise, there is a content file at this path, inserting a leaf key:
-			c, cerr := ioutil.ReadFile(cfile)
+		if f.Name() == ContentFile {
+			key = filepath.Dir(key)
+			c, cerr := ioutil.ReadFile(path)
 			if cerr != nil {
-				log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't read content file %s: %s", cfile, cerr))
+				log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't read content file %s: %s", path, cerr))
 				return nil
 			}
 			_, err = kapi.Set(context.Background(), key, string(c), &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
 			if err != nil {
+				log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't restore leaf key %s: %s", key, err))
 				return nil
 			}
-			log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Restored %s", key))
+			log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Restored leaf key %s from %s", key, path))
 			numrestored++
+			return nil
 		}
+		// if f.IsDir() && key != "/." {
+		// 	_, err = kapi.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevNoExist})
+		// 	if err != nil {
+		// 		log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't restore non-leaf key %s: %s", key, err))
+		// 		return nil
+		// 	}
+		// 	log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Restored non-leaf key %s from %s", key, path))
+		// 	numrestored++
+		// 	return nil
+		// }
 		return nil
 	})
 	if err != nil {
-		log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't traverse directory %s: %s", target, err))
 		return 0, fmt.Errorf("Can't traverse directory %s: %s", target, err)
 	}
 	return numrestored, nil
