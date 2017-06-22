@@ -1,5 +1,6 @@
 // The ReShifter app enables backing up and restoring OpenShift clusters.
-
+// When launching the app with the defaults, the backups are created in the
+// current directory and the temporary work files are placed in the /tmp directory.
 package main
 
 import (
