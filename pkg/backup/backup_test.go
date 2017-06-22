@@ -37,7 +37,7 @@ func TestStore(t *testing.T) {
 		}
 		want := tt.val
 		if got != want {
-			t.Errorf("etcd.store(\".\", %q, %q) => %q, want %q", tt.path, tt.val, got, want)
+			t.Errorf("backup.store(\".\", %q, %q) => %q, want %q", tt.path, tt.val, got, want)
 		}
 	}
 	// make sure to clean up remaining directories:
