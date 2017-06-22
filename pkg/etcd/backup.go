@@ -56,7 +56,6 @@ func visit(kapi client.KeysAPI, path string, fn reap) error {
 	}
 	res, err := kapi.Get(context.Background(), path, &copts)
 	if err != nil {
-		log.WithFields(log.Fields{"func": "visit"}).Error(fmt.Sprintf("%s", err))
 		return err
 	}
 	if res.Node.Dir { // there are children
@@ -89,13 +88,11 @@ func store(based string, path string, val string) (string, error) {
 	}
 	err := os.MkdirAll(fpath, os.ModePerm)
 	if err != nil {
-		log.WithFields(log.Fields{"func": "store"}).Error(fmt.Sprintf("%s", err))
 		return "", fmt.Errorf("%s", err)
 	}
 	cpath, _ := filepath.Abs(filepath.Join(fpath, ContentFile))
 	c, err := os.Create(cpath)
 	if err != nil {
-		log.WithFields(log.Fields{"func": "store"}).Error(fmt.Sprintf("%s", err))
 		return "", fmt.Errorf("%s", err)
 	}
 	defer func() {
@@ -103,7 +100,6 @@ func store(based string, path string, val string) (string, error) {
 	}()
 	nbytes, err := c.WriteString(val)
 	if err != nil {
-		log.WithFields(log.Fields{"func": "store"}).Error(fmt.Sprintf("%s", err))
 		return "", fmt.Errorf("%s", err)
 	}
 	log.WithFields(log.Fields{"func": "store"}).Debug(fmt.Sprintf("Stored %s in %s with %d bytes", path, fpath, nbytes))
