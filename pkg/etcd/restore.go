@@ -53,9 +53,9 @@ func Restore(afile, target string, endpoint string) (int, error) {
 				return nil
 			}
 			// otherwise, there is a content file at this path, inserting a leaf key:
-			c, err := ioutil.ReadFile(cfile)
-			if err != nil {
-				log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't read content file %s: %s", cfile, err))
+			c, cerr := ioutil.ReadFile(cfile)
+			if cerr != nil {
+				log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't read content file %s: %s", cfile, cerr))
 				return nil
 			}
 			_, err = kapi.Set(context.Background(), key, string(c), &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})

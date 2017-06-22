@@ -29,7 +29,11 @@ func TestStore(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		got := readcontent(p)
+		c, _ := ioutil.ReadFile(p)
+		got := string(c)
+		if tt.path == "/" {
+			_ = os.Remove(p)
+		}
 		want := tt.val
 		if got != want {
 			t.Errorf("etcd.store(\".\", %q, %q) => %q, want %q", tt.path, tt.val, got, want)
@@ -82,15 +86,4 @@ func TestBackup(t *testing.T) {
 	// make sure to clean up:
 	_ = os.Remove(based + ".zip")
 	_ = etcddown()
-}
-
-func readcontent(path string) string {
-	// make sure to clean up individual files
-	defer func() {
-		if path != "." {
-			_ = os.Remove(path)
-		}
-	}()
-	content, _ := ioutil.ReadFile(path)
-	return string(content)
 }
