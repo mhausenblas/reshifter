@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/mhausenblas/reshifter/pkg/util"
@@ -28,14 +29,12 @@ func TestProbeEtcd(t *testing.T) {
 		t.Errorf("Can't launch etcd at %s: %s", tetcd, err)
 		return
 	}
-
 	v, s, err := ProbeEtcd(probetests[0].scheme + "://" + tetcd)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if v != probetests[0].version || s != probetests[0].secure {
-		t.Errorf("discovery.ProbeEtcd(%s) => (%s, %t) want (%s, %t)", tetcd, v, s, probetests[0].version, probetests[0].secure)
+	if !strings.HasPrefix(v, probetests[0].version) || s != probetests[0].secure {
+		t.Errorf("discovery.ProbeEtcd(%s) => (%s, %t) want (%s.x.x, %t)", tetcd, v, s, probetests[0].version, probetests[0].secure)
 	}
-
 }

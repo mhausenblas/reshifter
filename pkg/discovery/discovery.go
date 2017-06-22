@@ -1,18 +1,20 @@
 package discovery
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/mhausenblas/reshifter/pkg/types"
 )
 
-// ProbeEtcd probes an endpoint to figure which version of etcd
-// and in which mode (secure or insecure) it is used.
+// ProbeEtcd probes an endpoint at path /version to figure
+// which version of etcd it is and in which mode (secure or insecure)
+// it is used.
 func ProbeEtcd(endpoint string) (string, bool, error) {
 	issecure := false
-	version := "2"
-	u, err := url.Parse(endpoint)
+	u, err := url.Parse(endpoint + "/version")
 	if err != nil {
 		return "", false, fmt.Errorf("Can't parse endpoint %s: %s", endpoint, err)
 	}
@@ -23,8 +25,8 @@ func ProbeEtcd(endpoint string) (string, bool, error) {
 	if err != nil {
 		return "", false, fmt.Errorf("Can't connect to etcd at %s: %s", endpoint, err)
 	}
-	j, _ := ioutil.ReadAll(res.Body)
-	_ = j
+	var etcd2r types.Etcd2Response
+	err = json.NewDecoder(res.Body).Decode(&etcd2r)
 	_ = res.Body.Close()
-	return version, issecure, nil
+	return etcd2r.EtcdServerVersion, issecure, nil
 }

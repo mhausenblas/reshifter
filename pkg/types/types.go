@@ -26,6 +26,17 @@ type RestoreResult struct {
 	KeysRestored int    `json:"keysrestored"`
 }
 
+// Etcd2Response represents the response of an etcd2 server at /version
+// We expect something like:
+//		{
+//			"etcdserver": "2.3.8",
+//			"etcdcluster": "2.3.0"
+//		}
+type Etcd2Response struct {
+	EtcdServerVersion  string `json:"etcdserver"`
+	EtcdClusterVersion string `json:"etcdcluster"`
+}
+
 // Reap function types take a node path and a value as parameters and performs
 // some side effect, such as storing, on the node
 type Reap func(string, string) error
