@@ -54,16 +54,6 @@ func Restore(afile, target string, endpoint string) (int, error) {
 			numrestored++
 			return nil
 		}
-		// if f.IsDir() && key != "/." {
-		// 	_, err = kapi.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevNoExist})
-		// 	if err != nil {
-		// 		log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't restore non-leaf key %s: %s", key, err))
-		// 		return nil
-		// 	}
-		// 	log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Restored non-leaf key %s from %s", key, path))
-		// 	numrestored++
-		// 	return nil
-		// }
 		return nil
 	})
 	if err != nil {

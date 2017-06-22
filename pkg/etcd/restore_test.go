@@ -15,14 +15,13 @@ func TestRestore(t *testing.T) {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
 		return
 	}
-	// create some key-value pairs:
 	c2, err := newClient2(tetcd, false)
 	if err != nil {
 		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
 		return
 	}
-
 	kapi := client.NewKeysAPI(c2)
+	// create some key-value pairs:
 	err = setKV2(kapi, "/foo", "some")
 	if err != nil {
 		t.Errorf("Can't create key /foo: %s", err)
@@ -32,7 +31,12 @@ func TestRestore(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 	}
-
+	_ = etcddown()
+	err = etcd2up(port)
+	if err != nil {
+		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
+		return
+	}
 	target := "/tmp"
 	afile := based
 	_, err = Restore(afile, target, tetcd)

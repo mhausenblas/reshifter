@@ -30,10 +30,15 @@ We are using Go [dep](https://github.com/golang/dep) for dependency management.
 
 ### Testing
 
-In general:
+In general, for unit tests we use the `go test` command, for example
 
 ```
+$ cd pkg/etcd/
 $ go test -v
 ```
 
-For end-to-end tests, Docker is required to provide a local etcd instance.
+For end-to-end tests run `./test-e2e-etcd2.sh`. Note that full end-to-end tests requires the following:
+
+- Docker CE (tested with v1.17)
+- [http](https://httpie.org)
+- [jq](https://stedolan.github.io/jq/)
