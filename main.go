@@ -49,7 +49,7 @@ func api() {
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.6"
+	version := "0.1.8"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -59,15 +59,24 @@ func backupHandler(w http.ResponseWriter, r *http.Request) {
 		Version: "2",
 		URL:     "localhost:2379",
 	}
-	outcome := "success"
-	b, err := etcd.Backup(ep.URL)
+	br := etcd.BackupResult{
+		Outcome:  "success",
+		BackupID: "0",
+	}
+	bid, err := etcd.Backup(ep.URL)
 	if err != nil {
-		outcome = "failed"
+		br.Outcome = "fail"
 		log.Error(err)
 	}
-	log.Infof("Created backup from %s in %s", ep.URL, b)
-	_ = json.NewEncoder(w).Encode(ep)
-	backupTotal.WithLabelValues(outcome).Inc()
+	br.BackupID = bid
+	backupTotal.WithLabelValues(br.Outcome).Inc()
+	log.Infof("Completed backup operation from %s: %v", ep.URL, br)
+	if br.Outcome == "fail" {
+		http.Error(w, err.Error(), 409)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(br)
+
 }
 
 func restoreHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,14 +85,19 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		Version: "2",
 		URL:     "localhost:2379",
 	}
+	rr := etcd.RestoreResult{
+		Outcome:      "success",
+		KeysRestored: 0,
+	}
 	target := "/tmp"
 	afile := r.URL.Query().Get("archive")
-	err := etcd.Restore(afile, target, ep.URL)
+	krestored, err := etcd.Restore(afile, target, ep.URL)
 	if err != nil {
 		log.Error(err)
 	}
-	log.Infof("Restored from %s to %s", afile, ep.URL)
-	_ = json.NewEncoder(w).Encode(ep)
+	rr.KeysRestored = krestored
+	log.Infof("Restored from %s to %s: %v", afile, ep.URL, rr)
+	_ = json.NewEncoder(w).Encode(rr)
 }
 
 func ui() {

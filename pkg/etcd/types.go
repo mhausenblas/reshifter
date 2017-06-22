@@ -14,6 +14,18 @@ type Endpoint struct {
 	URL     string `json:"url"`
 }
 
+// BackupResult represents the results of a backup operation.
+type BackupResult struct {
+	Outcome  string `json:"outcome"`
+	BackupID string `json:"backupid"`
+}
+
+// RestoreResult represents the results of a restore operation.
+type RestoreResult struct {
+	Outcome      string `json:"outcome"`
+	KeysRestored int    `json:"keysrestored"`
+}
+
 // reap function types take a node path and a value as parameters and performs
 // some side effect, such as storing, on the node
 type reap func(string, string) error

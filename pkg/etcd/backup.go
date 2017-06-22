@@ -15,6 +15,11 @@ import (
 
 // Backup traverses all paths of an etcd server starting from the root
 // and creates a ZIP archive of the content in the current directory.
+// On success, it returns the backup ID, which is the Unix time encoded
+// point in time the backup operation was started, for example 1498050161.
+//
+//		Example invocation:
+//		bID, err := etcd.Backup("localhost:2379")
 func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
 	c2, err := newClient2(endpoint, false)
@@ -31,12 +36,10 @@ func Backup(endpoint string) (string, error) {
 		return nil
 	})
 	if err != nil {
-		log.WithFields(log.Fields{"func": "Backup"}).Error(err)
 		return "", err
 	}
 	_, err = arch(based)
 	if err != nil {
-		log.WithFields(log.Fields{"func": "Backup"}).Error(err)
 		return "", err
 	}
 	return based, nil
@@ -72,7 +75,6 @@ func visit(kapi client.KeysAPI, path string, fn reap) error {
 // based is the relative base directory to use and path can be
 // any valid etcd key (with : characters being escaped automatically).
 func store(based string, path string, val string) (string, error) {
-
 	// make sure we're dealing with a valid path
 	// that is, non-empty and has to start with /:
 	if path == "" || (strings.Index(path, "/") != 0) {
@@ -120,7 +122,7 @@ func arch(based string) (string, error) {
 		log.WithFields(log.Fields{"func": "arch"}).Debug(fmt.Sprintf("%s", apath))
 	})
 	if err != nil {
-		return "", fmt.Errorf("Can't create archive %s: %s", opath, err)
+		return "", fmt.Errorf("Can't create archive or no content to back up in %s: %s", opath, err)
 	}
 	return opath, nil
 }
