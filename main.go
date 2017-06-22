@@ -1,4 +1,6 @@
-// The ReShifter app enables backing up and restoring OpenShift clusters.
+// ReShifter enables backing up and restoring OpenShift clusters.
+// The ReShifter app launches an API and a UI at port 8080.
+// The API is instrumented, exposing Prometheus metrics.
 // When launching the app with the defaults, the backups are created in the
 // current directory and the temporary work files are placed in the /tmp directory.
 package main
@@ -16,8 +18,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// The ReShifter main app launches an API and a UI at port 8080.
-// Note that the API is instrumented, exposing Prometheus metrics.
 func main() {
 	go api()
 	go ui()
