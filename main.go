@@ -27,6 +27,10 @@ func init() {
 		[]string{"outcome"},
 	)
 	prometheus.MustRegister(backupTotal)
+
+	if envd := os.Getenv("DEBUG"); envd != "" {
+		log.SetLevel(log.DebugLevel)
+	}
 }
 
 func main() {
@@ -45,7 +49,7 @@ func api() {
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1"
+	version := "0.1.6"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -72,9 +76,9 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		Version: "2",
 		URL:     "localhost:2379",
 	}
-	cwd, _ := os.Getwd()
+	target := "/tmp"
 	afile := r.URL.Query().Get("archive")
-	err := etcd.Restore(afile, cwd, ep.URL)
+	err := etcd.Restore(afile, target, ep.URL)
 	if err != nil {
 		log.Error(err)
 	}

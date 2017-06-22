@@ -23,11 +23,12 @@ func Backup(endpoint string) (string, error) {
 		return "", fmt.Errorf("Can't connect to etcd: %s", err)
 	}
 	kapi := client.NewKeysAPI(c2)
-	visit(kapi, "/", func(path string, val string) {
-		_, _ = store(based, path, val)
-		// if err != nil {
-		// 	return "", fmt.Errorf("Can't store value locally: %s", err)
-		// }
+	visit(kapi, "/", func(path string, val string) error {
+		_, err = store(based, path, val)
+		if err != nil {
+			return fmt.Errorf("Can't store value locally: %s", err)
+		}
+		return nil
 	})
 	_, err = arch(based)
 	if err != nil {
@@ -39,26 +40,28 @@ func Backup(endpoint string) (string, error) {
 
 // visit recursively visits a path in the etcd tree and applies the reap function
 // on a node, if it is a leaf node, otherwise descents the tree
-func visit(kapi client.KeysAPI, path string, fn reap) {
+func visit(kapi client.KeysAPI, path string, fn reap) error {
 	log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("On node %s", path))
 	copts := client.GetOptions{
 		Recursive: true,
 		Sort:      false,
 		Quorum:    true,
 	}
-	if resp, err := kapi.Get(context.Background(), path, &copts); err != nil {
+	res, err := kapi.Get(context.Background(), path, &copts)
+	if err != nil {
 		log.WithFields(log.Fields{"func": "visit"}).Error(fmt.Sprintf("%s", err))
-	} else {
-		if resp.Node.Dir { // there are children
-			log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("%s has %d children", path, len(resp.Node.Nodes)))
-			for _, node := range resp.Node.Nodes {
-				log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("Next visiting child %s", node.Key))
-				visit(kapi, node.Key, fn)
-			}
-		} else { // we're on a leaf node
-			fn(resp.Node.Key, string(resp.Node.Value))
-		}
+		return err
 	}
+	if res.Node.Dir { // there are children
+		log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("%s has %d children", path, len(res.Node.Nodes)))
+		for _, node := range res.Node.Nodes {
+			log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("Next visiting child %s", node.Key))
+			visit(kapi, node.Key, fn)
+		}
+		return nil
+	}
+	// otherwise we're on a leaf node:
+	return fn(res.Node.Key, string(res.Node.Value))
 }
 
 // store creates a file at based+path with val as its content.

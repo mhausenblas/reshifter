@@ -16,4 +16,4 @@ type Endpoint struct {
 
 // reap function types take a node path and a value as parameters and performs
 // some side effect, such as storing, on the node
-type reap func(string, string)
+type reap func(string, string) error
