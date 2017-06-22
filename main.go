@@ -1,42 +1,16 @@
+// The ReShifter app, exposing an HTTP API as well as a UI.
+// Note that the API is instrumented, exposing Prometheus metrics.
 package main
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/mhausenblas/reshifter/pkg/etcd"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
-
-const (
-	operationSuccess = "success"
-	operationFail    = "fail"
-)
-
-var (
-	backupTotal *prometheus.CounterVec
-)
-
-func init() {
-	backupTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: "dev",
-			Subsystem: "app_server",
-			Name:      "backup_total",
-			Help:      "The count of backup attempts.",
-		},
-		[]string{"outcome"},
-	)
-	prometheus.MustRegister(backupTotal)
-
-	if envd := os.Getenv("DEBUG"); envd != "" {
-		log.SetLevel(log.DebugLevel)
-	}
-}
 
 func main() {
 	go api()
@@ -49,12 +23,12 @@ func api() {
 	http.HandleFunc("/v1/version", versionHandler)
 	http.HandleFunc("/v1/backup", backupHandler)
 	http.HandleFunc("/v1/restore", restoreHandler)
-	log.Println("Serving API from /v1")
+	log.Println("Serving API from :8080/v1")
 	_ = http.ListenAndServe(":8080", nil)
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.16"
+	version := "0.1.17"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -107,6 +81,7 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 	}
 	rr.KeysRestored = krestored
+	keysRestored.Add(float64(krestored))
 	log.Infof("Completed restore from %s to %s: %v", afile, ep.URL, rr)
 	if rr.Outcome == "fail" {
 		http.Error(w, err.Error(), 409)
@@ -118,6 +93,6 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 func ui() {
 	fs := http.FileServer(http.Dir("ui"))
 	http.Handle("/", fs)
-	log.Println("Serving UI from /")
+	log.Println("Serving UI from :8080/")
 	_ = http.ListenAndServe(":8080", nil)
 }
