@@ -9,6 +9,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/etcd/client"
+	"github.com/mhausenblas/reshifter/pkg/discovery"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 	"github.com/pierrre/archivefile/zip"
@@ -24,22 +25,31 @@ import (
 //		bID, err := etcd.Backup("http://localhost:2379")
 func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
-	c2, err := util.NewClient2(endpoint, false)
+	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
-		log.WithFields(log.Fields{"func": "Backup"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
-		return "", fmt.Errorf("Can't connect to etcd: %s", err)
+		return "", fmt.Errorf("Can't understand endpoint: %s", err)
 	}
-	kapi := client.NewKeysAPI(c2)
-	err = visit(kapi, "/", func(path string, val string) error {
-		_, err = store(based, path, val)
-		if err != nil {
-			return fmt.Errorf("Can't store value locally: %s", err)
+	if strings.HasPrefix(version, "3") {
+		return "", fmt.Errorf("Endpoint version %s.x not supported", version)
+	}
+	if strings.HasPrefix(version, "2") {
+		c2, cerr := util.NewClient2(endpoint, secure)
+		if cerr != nil {
+			return "", fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
-		return nil
-	})
-	if err != nil {
-		return "", err
+		kapi := client.NewKeysAPI(c2)
+		err = visit(kapi, "/", func(path string, val string) error {
+			_, err = store(based, path, val)
+			if err != nil {
+				return fmt.Errorf("Can't store backup locally: %s", err)
+			}
+			return nil
+		})
+		if err != nil {
+			return "", err
+		}
 	}
+
 	_, err = arch(based)
 	if err != nil {
 		return "", err
@@ -120,7 +130,7 @@ func arch(based string) (string, error) {
 		log.WithFields(log.Fields{"func": "arch"}).Debug(fmt.Sprintf("%s", apath))
 	})
 	if err != nil {
-		return "", fmt.Errorf("Can't create archive or no content to back up: %s", opath, err)
+		return "", fmt.Errorf("Can't create archive or no content to back up: %s", err)
 	}
 	return opath, nil
 }

@@ -21,7 +21,7 @@ func IsBackupID(id string) bool {
 }
 
 // NewClient2 creates an etcd2 client, optionally using SSL/TLS if secure is true.
-// The endpoint is both host and port, for example, localhost:2379.
+// The endpoint is an URL such as http://localhost:2379.
 func NewClient2(endpoint string, secure bool) (client.Client, error) {
 	if secure {
 		return nil, fmt.Errorf("Secure etcd2 connection not yet supported")
