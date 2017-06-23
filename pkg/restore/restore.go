@@ -21,7 +21,7 @@ import (
 // content of the sub-directories. On success returns the number of keys restored.
 // Example:
 //
-//		krestored, err := Restore("1498055655", "localhost:2379")
+//		krestored, err := Restore("1498055655", "/tmp", "localhost:2379")
 func Restore(afile, target string, endpoint string) (int, error) {
 	numrestored := 0
 	err := unarch(afile+".zip", target)
