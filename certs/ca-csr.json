@@ -1,0 +1,16 @@
+{
+    "CN": "The ReShifter CA",
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "US",
+            "L": "CA",
+            "O": "ReShifter",
+            "ST": "San Francisco",
+            "OU": "Pier 39"
+        }
+    ]
+}

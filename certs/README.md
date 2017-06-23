@@ -1,6 +1,6 @@
 # Setting up etcd in a secure way
 
-## etcd2
+Use the pre-generated certs in this directory or create your own following below steps.
 
 ### Create Certificate Authority
 
