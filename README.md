@@ -37,7 +37,7 @@ $ cd pkg/etcd/
 $ go test -v
 ```
 
-For end-to-end tests, run `./test-e2e-etcd2.sh`. Note that full end-to-end tests require the following:
+For end-to-end tests, run `./test-e2e-etcd*.sh`. Note that full end-to-end tests require the following:
 
 - Docker CE (tested with v1.17)
 - [http](https://httpie.org)
