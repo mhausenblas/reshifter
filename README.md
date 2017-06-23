@@ -45,7 +45,7 @@ For end-to-end tests, run `./test-e2e-etcd*.sh`. Note that full end-to-end tests
 
 The test matrix is as follows:
 
-|version   | plain     | secure       |
+|version   | insecure  | secure       |
 | --------:| --------- | ------------ |
 | 2.x      | available | available*   |
 | 3.x      | available | available**  |
