@@ -15,8 +15,9 @@ var (
 		version    string
 		secure     bool
 	}{
-		{util.Etcd2up, "http", "2379", "2", false},
-		{util.Etcd3up, "http", "2379", "3", false},
+		{util.Etcd2Up, "http", "2379", "2", false},
+		{util.Etcd3Up, "http", "2379", "3", false},
+		{util.Etcd2SecureUp, "https", "2379", "2", true},
 	}
 )
 
@@ -36,7 +37,7 @@ func TestProbeEtcd(t *testing.T) {
 
 func testEtcdX(t *testing.T, etcdLaunchFunc func(string) error, scheme string, port string, version string, secure bool) {
 	defer func() {
-		_ = util.Etcddown()
+		_ = util.EtcdDown()
 	}()
 	tetcd := "localhost:" + port
 	err := etcdLaunchFunc(port)
@@ -50,6 +51,6 @@ func testEtcdX(t *testing.T, etcdLaunchFunc func(string) error, scheme string, p
 		return
 	}
 	if !strings.HasPrefix(v, version) || s != secure {
-		t.Errorf("discovery.ProbeEtcd(%s) => (%s, %t) want (%s.x.x, %t)", tetcd, v, s, version, secure)
+		t.Errorf("discovery.ProbeEtcd(%s://%s) => (%s, %t) want (%s.x.x, %t)", scheme, tetcd, v, s, version, secure)
 	}
 }

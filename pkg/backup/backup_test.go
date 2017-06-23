@@ -47,7 +47,7 @@ func TestStore(t *testing.T) {
 func TestBackup(t *testing.T) {
 	port := "2379"
 	tetcd := "localhost:" + port
-	err := util.Etcd2up(port)
+	err := util.Etcd2Up(port)
 	if err != nil {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
 		return
@@ -58,7 +58,6 @@ func TestBackup(t *testing.T) {
 		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
 		return
 	}
-
 	kapi := client.NewKeysAPI(c2)
 	err = util.SetKV2(kapi, "/foo", "some")
 	if err != nil {
@@ -74,7 +73,6 @@ func TestBackup(t *testing.T) {
 	if err != nil {
 		t.Errorf("Can't create key /that/here: %s", err)
 	}
-
 	based, err := Backup(tetcd)
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
@@ -86,5 +84,5 @@ func TestBackup(t *testing.T) {
 	}
 	// make sure to clean up:
 	_ = os.Remove(based + ".zip")
-	_ = util.Etcddown()
+	_ = util.EtcdDown()
 }

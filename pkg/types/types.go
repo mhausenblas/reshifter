@@ -26,14 +26,14 @@ type RestoreResult struct {
 	KeysRestored int    `json:"keysrestored"`
 }
 
-// Etcd2Response represents the response of an etcd2 server at /version
+// EtcdResponse represents the response of an etcd2 server at /version
 // endpoint. Example:
 //
 //		{
 //			"etcdserver": "2.3.8",
 //			"etcdcluster": "2.3.0"
 //		}
-type Etcd2Response struct {
+type EtcdResponse struct {
 	EtcdServerVersion  string `json:"etcdserver"`
 	EtcdClusterVersion string `json:"etcdcluster"`
 }

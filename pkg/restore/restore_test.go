@@ -12,7 +12,7 @@ import (
 func TestRestore(t *testing.T) {
 	port := "2379"
 	tetcd := "localhost:" + port
-	err := util.Etcd2up(port)
+	err := util.Etcd2Up(port)
 	if err != nil {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
 		return
@@ -33,8 +33,8 @@ func TestRestore(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 	}
-	_ = util.Etcddown()
-	err = util.Etcd2up(port)
+	_ = util.EtcdDown()
+	err = util.Etcd2Up(port)
 	if err != nil {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
 		return
@@ -48,5 +48,5 @@ func TestRestore(t *testing.T) {
 
 	// make sure to clean up:
 	_ = os.Remove(based + ".zip")
-	_ = util.Etcddown()
+	_ = util.EtcdDown()
 }
