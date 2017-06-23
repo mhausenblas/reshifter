@@ -1,10 +1,53 @@
 # Setting up etcd in a secure way
 
-Use the pre-generated certs in this directory or create your own following below steps.
+Use the pre-generated certs and keys in this directory or create your own following below steps.
 
-### Create Certificate Authority
+Pre-generated certs and keys are:
 
-Use following options for the Certificate Authority (CA):
+- [ca.pem](ca.pem) … Certificate Authority (CA) file
+- [server.pem](server.pem) … server certificate
+- [server-key.pem](server-key.pem) … server private key
+- [client.p12](client.p12) … client PKCS12 certificate+key with password `reshifter`
+- [client-key.pem](client-key.pem) … client PKCS12 private key
+
+
+## etcd2
+
+To launch a secure etcd2:
+
+```
+$ cd certs/
+$ docker run -d  -v $(pwd)/:/etc/ssl/certs -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 \
+--ca-file /etc/ssl/certs/ca.pem --cert-file /etc/ssl/certs/server.pem --key-file /etc/ssl/certs/server-key.pem \
+--advertise-client-urls https://0.0.0.0:2379 --listen-client-urls https://0.0.0.0:2379
+```
+
+To query the secure etcd2:
+
+```
+$ cd certs/
+
+# using curl, with SSL/TLS verification, using the CA file:
+$ curl --cacert $(pwd)/ca.pem --cert $(pwd)/client.p12 --pass reshifter -L https://127.0.0.1:2379/version
+
+# using curl, without SSL/TLS verification:
+$ curl --insecure --cert $(pwd)/client.p12 --pass reshifter -L https://127.0.0.1:2379/version
+
+# using http, without SSL/TLS verification (since http doesn't do verification, neither password checks the client key):
+$ http --verify=no --cert=./client.pem --cert-key=./client-key.pem  https://127.0.0.1:2379/version
+```
+
+## etcd3
+
+TBD.
+
+## Create your own certificates
+
+You will need [openssl](https://www.openssl.org/source/) and [cfssl](https://pkg.cfssl.org/) for the following steps.
+
+### Create CA
+
+Use following options for the CA:
 
 ```
 $ cat ca-config.json
@@ -120,4 +163,11 @@ $ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=cl
 $ openssl x509 -in ca.pem -text -noout
 $ openssl x509 -in server.pem -text -noout
 $ openssl x509 -in client.pem -text -noout
+```
+
+### Convert to PKCS12
+
+```
+$ cd certs/
+$ openssl pkcs12 -export -in ./client.pem -inkey ./client-key.pem -out client.p12 -password pass:reshifter
 ```
