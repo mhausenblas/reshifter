@@ -29,7 +29,7 @@ func Etcd2Up(port string) error {
 // Etcd2SecureUp launches a secure etcd2 server on port.
 func Etcd2SecureUp(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"-v", Certsdir("")+"/:/etc/ssl/certs", "-p", port+":"+port,
+		"-v", Certsdir()+"/:/etc/ssl/certs", "-p", port+":"+port,
 		"--name", "test-etcd", "--dns", "8.8.8.8",
 		"quay.io/coreos/etcd:v2.3.8",
 		"--ca-file", "/etc/ssl/certs/ca.pem",
@@ -65,7 +65,7 @@ func Etcd3Up(port string) error {
 // Etcd3SecureUp launches a secure etcd3 server on port.
 func Etcd3SecureUp(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"-v", Certsdir("")+"/:/etc/ssl/certs", "-p", port+":"+port,
+		"-v", Certsdir()+"/:/etc/ssl/certs", "-p", port+":"+port,
 		"--name", "test-etcd", "--dns", "8.8.8.8",
 		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
 		"--ca-file", "/etc/ssl/certs/ca.pem",
@@ -95,10 +95,8 @@ func EtcdDown() error {
 
 // Certsdir returns the absolute path to the directory
 // where the pre-generated certs and keys are.
-func Certsdir(base string) string {
-	if base == "" {
-		base, _ = os.Getwd()
-	}
+func Certsdir() string {
+	base, _ := os.Getwd()
 	certsrel := filepath.Join(base, "../../certs")
 	certs, _ := filepath.Abs(certsrel)
 	return certs

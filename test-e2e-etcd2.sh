@@ -15,21 +15,14 @@ etcd2up () {
 }
 
 etcd2secureup () {
-  dr=$(docker run -d  -v $(pwd)/certs/:/etc/ssl/certs -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 \
+  dr=$(docker run --rm -d -v $(pwd)/certs/:/etc/ssl/certs -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 \
   --ca-file /etc/ssl/certs/ca.pem --cert-file /etc/ssl/certs/server.pem --key-file /etc/ssl/certs/server-key.pem \
   --advertise-client-urls https://0.0.0.0:2379 --listen-client-urls https://0.0.0.0:2379)
   sleep 3s
 }
 
 etcddown () {
-  dr=$(docker kill test-etcd)
-}
-
-restartetcd () {
-  printf "\n=========================================================================\n"
-  printf "Restarting etcd2 ...\n"
-  etcddown
-  $1
+  dk=$(docker kill test-etcd)
 }
 
 populate() {
@@ -40,10 +33,10 @@ populate() {
 }
 
 populatesecure() {
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://127.0.0.1:2379/v2/keys/foo -XPUT -d value="bar"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://127.0.0.1:2379/v2/keys/that/here -XPUT -d value="moar"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://127.0.0.1:2379/v2/keys/this:also -XPUT -d value="escaped"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://127.0.0.1:2379/v2/keys/other -XPUT -d value="value"
+  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/foo -XPUT -d value="bar"
+  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/that/here -XPUT -d value="moar"
+  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/this:also -XPUT -d value="escaped"
+  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/other -XPUT -d value="value"
 }
 
 doversion() {
@@ -89,14 +82,18 @@ RESHIFTER_PID=$!
 sleep 3s
 doversion
 dobackup http://localhost:2379
-restartetcd etcd2up
+etcddown
+etcd2up
 dorestore http://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"
 
-sleep 5s
+sleep 3s
 
 # main test plan etcd2 secure:
+export RS_ETCD_CLIENT_CERT=$(pwd)/certs/client.pem
+export RS_ETCD_CLIENT_KEY=$(pwd)/certs/client-key.pem
+export RS_ETCD_CA_CERT=$(pwd)/certs/ca.pem
 printf "\n=========================================================================\n"
 printf "Ramping up secure etcd2 and populating it with a few keys:\n"
 etcd2secureup
@@ -108,7 +105,8 @@ RESHIFTER_PID=$!
 sleep 3s
 doversion
 dobackup https://localhost:2379
-restartetcd etcd2secureup
+etcddown
+etcd2secureup
 dorestore https://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"

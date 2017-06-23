@@ -7,7 +7,6 @@ import (
 
 	"net/http"
 	"net/url"
-	"path/filepath"
 
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
@@ -24,7 +23,11 @@ func ProbeEtcd(endpoint string) (string, bool, error) {
 		return "", false, fmt.Errorf("Can't parse endpoint %s: %s", endpoint, err)
 	}
 	if u.Scheme == "https" { // secure etcd
-		version, verr := getVersionSecure(u.String())
+		clientcert, clientkey, err := util.ClientCertAndKeyFromEnv()
+		if err != nil {
+			return "", false, err
+		}
+		version, verr := getVersionSecure(u.String(), clientcert, clientkey)
 		if verr != nil {
 			return "", false, verr
 		}
@@ -51,11 +54,8 @@ func getVersion(endpoint string) (string, error) {
 	return etcdr.EtcdServerVersion, nil
 }
 
-func getVersionSecure(endpoint string) (string, error) {
+func getVersionSecure(endpoint, clientcert, clientkey string) (string, error) {
 	var etcdr types.EtcdResponse
-	cd := util.Certsdir("")
-	clientcert := filepath.Join(cd, "client.pem")
-	clientkey := filepath.Join(cd, "client-key.pem")
 	cert, err := tls.LoadX509KeyPair(clientcert, clientkey)
 	if err != nil {
 		return "", err

@@ -13,7 +13,7 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.23"
+	version := "0.1.26"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 

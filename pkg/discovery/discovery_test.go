@@ -1,6 +1,8 @@
 package discovery
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -23,6 +25,8 @@ var (
 )
 
 func TestProbeEtcd(t *testing.T) {
+	_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
+	_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
 	for _, tt := range probetests {
 		testEtcdX(t, tt.launchfunc, tt.scheme, tt.port, tt.version, tt.secure)
 	}

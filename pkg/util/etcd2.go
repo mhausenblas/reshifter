@@ -3,9 +3,10 @@ package util
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/coreos/etcd/client"
@@ -49,17 +50,30 @@ func newSecureEtcd2Client(tr *http.Transport, endpoint string) (client.Client, e
 }
 
 func etcd2transport() (*http.Transport, error) {
-	cd := "./certs/" //Certsdir("")
-	clientcert := filepath.Join(cd, "client.pem")
-	clientkey := filepath.Join(cd, "client-key.pem")
+	clientcert, clientkey, err := ClientCertAndKeyFromEnv()
+	if err != nil {
+		return nil, err
+	}
 	cert, err := tls.LoadX509KeyPair(clientcert, clientkey)
 	if err != nil {
 		return nil, err
 	}
+	cafile, err := CACertFromEnv()
+	if err != nil {
+		return nil, err
+	}
+	cacert, err := ioutil.ReadFile(cafile)
+	if err != nil {
+		return nil, err
+	}
+	cacertpool := x509.NewCertPool()
+	cacertpool.AppendCertsFromPEM(cacert)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			Certificates:       []tls.Certificate{cert},
-			InsecureSkipVerify: true},
+			RootCAs:            cacertpool,
+			InsecureSkipVerify: true,
+		},
 	}
 	return tr, nil
 }

@@ -10,6 +10,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/etcd/client"
+	"github.com/mhausenblas/reshifter/pkg/discovery"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 	"github.com/pierrre/archivefile/zip"
@@ -29,37 +30,47 @@ func Restore(afile, target string, endpoint string) (int, error) {
 		return numrestored, err
 	}
 	target, _ = filepath.Abs(filepath.Join(target, afile, "/"))
-	c2, err := util.NewClient2(endpoint, false)
+
+	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
-		log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
-		return numrestored, fmt.Errorf("Can't connect to etcd: %s", err)
+		return 0, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
 	}
-	kapi := client.NewKeysAPI(c2)
-	log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Operating in target: %s", target))
-	err = filepath.Walk(target, func(path string, f os.FileInfo, e error) error {
-		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Looking at path: %s, f: %v, err: %v", path, f.Name(), e))
-		key, _ := filepath.Rel(target, path)
-		key = "/" + strings.Replace(key, types.EscapeColon, ":", -1)
-		if f.Name() == types.ContentFile {
-			key = filepath.Dir(key)
-			c, cerr := ioutil.ReadFile(path)
-			if cerr != nil {
-				log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't read content file %s: %s", path, cerr))
-				return nil
-			}
-			_, err = kapi.Set(context.Background(), key, string(c), &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
-			if err != nil {
-				log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't restore leaf key %s: %s", key, err))
-				return nil
-			}
-			log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Restored leaf key %s from %s", key, path))
-			numrestored++
-			return nil
+	if strings.HasPrefix(version, "3") {
+		return 0, fmt.Errorf("Endpoint version %s.x not supported", version)
+	}
+	if strings.HasPrefix(version, "2") {
+		c2, err := util.NewClient2(endpoint, secure)
+		if err != nil {
+			log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
+			return numrestored, fmt.Errorf("Can't connect to etcd: %s", err)
 		}
-		return nil
-	})
-	if err != nil {
-		return 0, fmt.Errorf("Can't traverse directory %s: %s", target, err)
+		kapi := client.NewKeysAPI(c2)
+		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Operating in target: %s", target))
+		err = filepath.Walk(target, func(path string, f os.FileInfo, e error) error {
+			log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Looking at path: %s, f: %v, err: %v", path, f.Name(), e))
+			key, _ := filepath.Rel(target, path)
+			key = "/" + strings.Replace(key, types.EscapeColon, ":", -1)
+			if f.Name() == types.ContentFile {
+				key = filepath.Dir(key)
+				c, cerr := ioutil.ReadFile(path)
+				if cerr != nil {
+					log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't read content file %s: %s", path, cerr))
+					return nil
+				}
+				_, err = kapi.Set(context.Background(), key, string(c), &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
+				if err != nil {
+					log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't restore key %s: %s", key, err))
+					return nil
+				}
+				log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Restored key %s from %s", key, path))
+				numrestored++
+				return nil
+			}
+			return nil
+		})
+		if err != nil {
+			return 0, fmt.Errorf("Can't traverse directory %s: %s", target, err)
+		}
 	}
 	return numrestored, nil
 }
@@ -71,7 +82,7 @@ func unarch(afile, target string) error {
 		log.WithFields(log.Fields{"func": "unarch"}).Debug(fmt.Sprintf("%s", apath))
 	})
 	if err != nil {
-		return fmt.Errorf("Can't unpack archive: %s", afile, err)
+		return fmt.Errorf("Can't unpack archive: %s", err)
 	}
 	return nil
 }

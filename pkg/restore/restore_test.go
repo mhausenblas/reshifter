@@ -11,7 +11,7 @@ import (
 
 func TestRestore(t *testing.T) {
 	port := "2379"
-	tetcd := "localhost:" + port
+	tetcd := "http://localhost:" + port
 	err := util.Etcd2Up(port)
 	if err != nil {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)

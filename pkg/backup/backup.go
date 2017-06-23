@@ -27,7 +27,7 @@ func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
-		return "", fmt.Errorf("Can't understand endpoint: %s", err)
+		return "", fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
 	}
 	if strings.HasPrefix(version, "3") {
 		return "", fmt.Errorf("Endpoint version %s.x not supported", version)
@@ -49,7 +49,6 @@ func Backup(endpoint string) (string, error) {
 			return "", err
 		}
 	}
-
 	_, err = arch(based)
 	if err != nil {
 		return "", err
