@@ -21,7 +21,7 @@ import (
 // point in time the backup operation was started, for example 1498050161.
 // Example:
 //
-//		bID, err := etcd.Backup("localhost:2379")
+//		bID, err := etcd.Backup("http://localhost:2379")
 func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
 	c2, err := util.NewClient2(endpoint, false)
@@ -120,7 +120,7 @@ func arch(based string) (string, error) {
 		log.WithFields(log.Fields{"func": "arch"}).Debug(fmt.Sprintf("%s", apath))
 	})
 	if err != nil {
-		return "", fmt.Errorf("Can't create archive or no content to back up in %s: %s", opath, err)
+		return "", fmt.Errorf("Can't create archive or no content to back up: %s", opath, err)
 	}
 	return opath, nil
 }

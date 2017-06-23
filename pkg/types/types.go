@@ -7,17 +7,21 @@ const (
 	ContentFile = "content"
 )
 
-// Endpoint represents an etcd server, available in
-// a certain version at a certain URL.
-type Endpoint struct {
-	Version string `json:"version"`
-	URL     string `json:"url"`
+// BackupRequest represents the request for a backup operation.
+type BackupRequest struct {
+	Endpoint string `json:"endpoint"`
 }
 
 // BackupResult represents the results of a backup operation.
 type BackupResult struct {
 	Outcome  string `json:"outcome"`
 	BackupID string `json:"backupid"`
+}
+
+// RestoreRequest represents the request for a restore operation.
+type RestoreRequest struct {
+	Endpoint string `json:"endpoint"`
+	Archive  string `json:"archive"`
 }
 
 // RestoreResult represents the results of a restore operation.

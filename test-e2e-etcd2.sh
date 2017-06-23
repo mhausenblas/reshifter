@@ -55,14 +55,14 @@ doversion() {
 dobackup() {
   printf "=========================================================================\n"
   printf "Performing backup operation:\n"
-  bid=$(http localhost:8080/v1/backup | jq -r .backupid)
+  bid=$(http POST localhost:8080/v1/backup endpoint=$1 | jq -r .backupid)
   printf "got backup ID %s\n" $bid
 }
 
 dorestore() {
   printf "\n=========================================================================\n"
   printf "Performing restore operation:\n"
-  http localhost:8080/v1/restore?archive=$bid
+  http POST localhost:8080/v1/restore endpoint=$1 archive=$bid
 }
 
 cleanup () {
@@ -88,9 +88,9 @@ reshifter &
 RESHIFTER_PID=$!
 sleep 3s
 doversion
-dobackup
+dobackup http://localhost:2379
 restartetcd etcd2up
-dorestore
+dorestore http://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"
 
@@ -107,8 +107,8 @@ reshifter &
 RESHIFTER_PID=$!
 sleep 3s
 doversion
-dobackup
+dobackup https://localhost:2379
 restartetcd etcd2secureup
-dorestore
+dorestore https://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"

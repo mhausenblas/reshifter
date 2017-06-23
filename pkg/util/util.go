@@ -28,7 +28,7 @@ func NewClient2(endpoint string, secure bool) (client.Client, error) {
 	}
 	// create plain HTTP-based client:
 	cfg := client.Config{
-		Endpoints:               []string{"http://" + endpoint},
+		Endpoints:               []string{endpoint},
 		Transport:               client.DefaultTransport,
 		HeaderTimeoutPerRequest: time.Second,
 	}

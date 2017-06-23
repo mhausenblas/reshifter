@@ -71,7 +71,7 @@ func unarch(afile, target string) error {
 		log.WithFields(log.Fields{"func": "unarch"}).Debug(fmt.Sprintf("%s", apath))
 	})
 	if err != nil {
-		return fmt.Errorf("Can't unpack archive %s: %s", afile, err)
+		return fmt.Errorf("Can't unpack archive: %s", afile, err)
 	}
 	return nil
 }
