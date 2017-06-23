@@ -78,7 +78,8 @@ func Etcd2SecureUp(port string) error {
 		"-v", Certsdir("")+"/:/etc/ssl/certs", "-p", port+":"+port,
 		"--name", "test-etcd", "--dns", "8.8.8.8",
 		"quay.io/coreos/etcd:v2.3.8",
-		"--ca-file", "/etc/ssl/certs/ca.pem", "--cert-file", "/etc/ssl/certs/server.pem",
+		"--ca-file", "/etc/ssl/certs/ca.pem",
+		"--cert-file", "/etc/ssl/certs/server.pem",
 		"--key-file", "/etc/ssl/certs/server-key.pem",
 		"--advertise-client-urls", "https://0.0.0.0:"+port,
 		"--listen-client-urls", "https://0.0.0.0:"+port)
@@ -98,6 +99,26 @@ func Etcd3Up(port string) error {
 		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
 		"--advertise-client-urls", "http://0.0.0.0:"+port,
 		"--listen-client-urls", "http://0.0.0.0:"+port)
+	fmt.Printf("%s\n", cmd.Args)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	time.Sleep(time.Second * 1)
+	return nil
+}
+
+// Etcd3SecureUp launches a secure etcd3 server on port.
+func Etcd3SecureUp(port string) error {
+	cmd := exec.Command("docker", "run", "--rm", "-d",
+		"-v", Certsdir("")+"/:/etc/ssl/certs", "-p", port+":"+port,
+		"--name", "test-etcd", "--dns", "8.8.8.8",
+		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
+		"--ca-file", "/etc/ssl/certs/ca.pem",
+		"--cert-file", "/etc/ssl/certs/server.pem",
+		"--key-file", "/etc/ssl/certs/server-key.pem",
+		"--advertise-client-urls", "https://0.0.0.0:"+port,
+		"--listen-client-urls", "https://0.0.0.0:"+port)
 	fmt.Printf("%s\n", cmd.Args)
 	err := cmd.Run()
 	if err != nil {

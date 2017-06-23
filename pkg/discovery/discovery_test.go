@@ -18,6 +18,7 @@ var (
 		{util.Etcd2Up, "http", "2379", "2", false},
 		{util.Etcd3Up, "http", "2379", "3", false},
 		{util.Etcd2SecureUp, "https", "2379", "2", true},
+		{util.Etcd3SecureUp, "https", "2379", "3", true},
 	}
 )
 

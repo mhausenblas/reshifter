@@ -45,10 +45,10 @@ For end-to-end tests, run `./test-e2e-etcd2.sh`. Note that full end-to-end tests
 
 The test matrix is as follows:
 
-|version   | plain     | secure  |
-| --------:| --------- | ------- |
-| 2.x      | available | WIP*    |
-| 3.x      | available | WIP**   |
+|version   | plain     | secure       |
+| --------:| --------- | ------------ |
+| 2.x      | available | available*   |
+| 3.x      | available | available**  |
 
 Legend:
 
