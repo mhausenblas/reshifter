@@ -57,7 +57,8 @@ func SetKV2(kapi client.KeysAPI, key, val string) error {
 // Etcd2up launches an etcd2 server on port.
 func Etcd2up(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8", "quay.io/coreos/etcd:v2.3.8",
+		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8",
+		"quay.io/coreos/etcd:v2.3.8",
 		"--advertise-client-urls", "http://0.0.0.0:"+port,
 		"--listen-client-urls", "http://0.0.0.0:"+port)
 	fmt.Printf("%s\n", cmd.Args)
@@ -71,19 +72,16 @@ func Etcd2up(port string) error {
 
 // Etcd3up launches an etcd3 server on port.
 func Etcd3up(port string) error {
-	// var out bytes.Buffer
 	cmd := exec.Command("docker", "run", "--rm", "-d",
 		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8",
 		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
 		"--advertise-client-urls", "http://0.0.0.0:"+port,
 		"--listen-client-urls", "http://0.0.0.0:"+port)
-	// cmd.Stdout = &out
 	fmt.Printf("%s\n", cmd.Args)
 	err := cmd.Run()
 	if err != nil {
 		return err
 	}
-	// fmt.Printf("%s\n", out.String())
 	time.Sleep(time.Second * 1)
 	return nil
 }

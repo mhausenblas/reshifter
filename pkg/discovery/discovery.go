@@ -11,7 +11,9 @@ import (
 
 // ProbeEtcd probes an endpoint at path /version to figure
 // which version of etcd it is and in which mode (secure or insecure)
-// it is used.
+// it is used. Example:
+//
+//		version, secure, err := ProbeEtcd("http://localhost:2379")
 func ProbeEtcd(endpoint string) (string, bool, error) {
 	issecure := false
 	u, err := url.Parse(endpoint + "/version")
@@ -23,10 +25,14 @@ func ProbeEtcd(endpoint string) (string, bool, error) {
 	}
 	res, err := http.Get(u.String())
 	if err != nil {
-		return "", false, fmt.Errorf("Can't connect to etcd at %s: %s", endpoint, err)
+		return "", false, fmt.Errorf("Can't query %s/version endpoint: %s", endpoint, err)
 	}
 	var etcd2r types.Etcd2Response
 	err = json.NewDecoder(res.Body).Decode(&etcd2r)
+	if err != nil {
+		return "", false, fmt.Errorf("Can't decode response from etcd: %s", err)
+	}
+
 	_ = res.Body.Close()
 	return etcd2r.EtcdServerVersion, issecure, nil
 }

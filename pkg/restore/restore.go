@@ -19,8 +19,8 @@ import (
 // unpacks it into a target directory. It then traverses the target directory
 // in the local filesystem and populates an etcd server at endpoint with the
 // content of the sub-directories. On success returns the number of keys restored.
+// Example:
 //
-//		Example invocation:
 //		krestored, err := Restore("1498055655", "localhost:2379")
 func Restore(afile, target string, endpoint string) (int, error) {
 	numrestored := 0

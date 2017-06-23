@@ -27,7 +27,8 @@ type RestoreResult struct {
 }
 
 // Etcd2Response represents the response of an etcd2 server at /version
-// We expect something like:
+// endpoint. Example:
+//
 //		{
 //			"etcdserver": "2.3.8",
 //			"etcdcluster": "2.3.0"

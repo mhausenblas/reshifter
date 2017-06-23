@@ -19,8 +19,8 @@ import (
 // and creates a ZIP archive of the content in the current directory.
 // On success, it returns the backup ID, which is the Unix time encoded
 // point in time the backup operation was started, for example 1498050161.
+// Example:
 //
-//		Example invocation:
 //		bID, err := etcd.Backup("localhost:2379")
 func Backup(endpoint string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
