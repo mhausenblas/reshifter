@@ -37,8 +37,20 @@ $ cd pkg/etcd/
 $ go test -v
 ```
 
-For end-to-end tests run `./test-e2e-etcd2.sh`. Note that full end-to-end tests requires the following:
+For end-to-end tests, run `./test-e2e-etcd2.sh`. Note that full end-to-end tests require the following:
 
 - Docker CE (tested with v1.17)
 - [http](https://httpie.org)
 - [jq](https://stedolan.github.io/jq/)
+
+The test matrix is as follows:
+
+|version   | plain     | secure  |
+| --------:| --------- | ------- |
+| 2.x      | available | WIP*    |
+| 3.x      | available | WIP**   |
+
+Legend:
+
+- `*` … based on the etcd2 [security flags](https://coreos.com/etcd/docs/latest/v2/configuration.html#security-flags) and the etcd2 [security model](https://coreos.com/etcd/docs/latest/v2/security.html)
+- `**` … based on the etcd3 [security flags](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#security-flags) and the etcd3 [security model](https://coreos.com/etcd/docs/latest/op-guide/security.html)
