@@ -1,60 +1,14 @@
 package util
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"time"
-
-	"github.com/coreos/etcd/client"
 )
 
-// IsBackupID tests if a string is a valid backup ID.
-// A valid backup ID is a 10 digit integer, representing
-// a Unix timestamp.
-func IsBackupID(id string) bool {
-	re := regexp.MustCompile("\\d{10}")
-	return re.Match([]byte(id))
-}
-
-// NewClient2 creates an etcd2 client, optionally using SSL/TLS if secure is true.
-// The endpoint is an URL such as http://localhost:2379.
-func NewClient2(endpoint string, secure bool) (client.Client, error) {
-	if secure {
-		return nil, fmt.Errorf("Secure etcd2 connection not yet supported")
-	}
-	// create plain HTTP-based client:
-	cfg := client.Config{
-		Endpoints:               []string{endpoint},
-		Transport:               client.DefaultTransport,
-		HeaderTimeoutPerRequest: time.Second,
-	}
-	c, err := client.New(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("Can't connect to etcd2: %s", err)
-	}
-	return c, nil
-}
-
-// SetKV2 sets the key with val in an etcd2 cluster and
-// iff val is empty, creates a directory key.
-func SetKV2(kapi client.KeysAPI, key, val string) error {
-	if val == "" {
-		_, err := kapi.Set(context.Background(), key, "", &client.SetOptions{Dir: true, PrevExist: client.PrevIgnore})
-		if err != nil {
-			return fmt.Errorf("Can't set directory key %s: %s", key, err)
-		}
-		return nil
-	}
-	_, err := kapi.Set(context.Background(), key, val, &client.SetOptions{Dir: false, PrevExist: client.PrevIgnore})
-	if err != nil {
-		return fmt.Errorf("Can't set key %s with value %s: %s", key, val, err)
-	}
-	return nil
-}
+// Functions that provide container-assisted testing (CAT)
 
 // Etcd2Up launches an etcd2 server on port.
 func Etcd2Up(port string) error {
