@@ -39,7 +39,16 @@ $ http --verify=no --cert=./client.pem --cert-key=./client-key.pem  https://127.
 
 ## etcd3
 
-TBD.
+To launch a secure etcd3:
+
+```
+$ cd certs/
+$ docker run -d  -v $(pwd)/:/etc/ssl/certs -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd \
+--ca-file /etc/ssl/certs/ca.pem --cert-file /etc/ssl/certs/server.pem --key-file /etc/ssl/certs/server-key.pem \
+--advertise-client-urls https://0.0.0.0:2379 --listen-client-urls https://0.0.0.0:2379
+```
+
+To query the secure etcd3, use the same commands as above for etcd2.
 
 ## Create your own certificates
 
