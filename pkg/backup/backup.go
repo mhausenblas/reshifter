@@ -29,9 +29,27 @@ func Backup(endpoint string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
 	}
+	// deal with etcd3 servers:
 	if strings.HasPrefix(version, "3") {
-		return "", fmt.Errorf("Endpoint version %s.x not supported", version)
+		c3, cerr := util.NewClient3(endpoint, secure)
+		if cerr != nil {
+			return "", fmt.Errorf("Can't connect to etcd: %s", cerr)
+		}
+		defer func() { _ = c3.Close() }()
+		//TESTING:
+		_, err = c3.Put(context.TODO(), "foo", "bar")
+		if err != nil {
+			return "", fmt.Errorf("Can't put /foo in etcd3: %s", err)
+		}
+		resp, gerr := c3.Get(context.Background(), "foo")
+		if gerr != nil {
+			return "", fmt.Errorf("Can't get /foo from etcd3: %s", gerr)
+		}
+		for _, ev := range resp.Kvs {
+			fmt.Printf("%s : %s\n", ev.Key, ev.Value)
+		}
 	}
+	// deal with etcd2 servers:
 	if strings.HasPrefix(version, "2") {
 		c2, cerr := util.NewClient2(endpoint, secure)
 		if cerr != nil {
