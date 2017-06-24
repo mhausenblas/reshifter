@@ -9,6 +9,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/etcd/client"
+	"github.com/coreos/etcd/clientv3"
 	"github.com/mhausenblas/reshifter/pkg/discovery"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
@@ -36,27 +37,7 @@ func Backup(endpoint string) (string, error) {
 			return "", fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
-		//TESTING:
-		_, err = c3.Put(context.TODO(), "foo", "bar")
-		if err != nil {
-			return "", fmt.Errorf("Can't put /foo in etcd3: %s", err)
-		}
-		resp, gerr := c3.Get(context.Background(), "foo")
-		if gerr != nil {
-			return "", fmt.Errorf("Can't get /foo from etcd3: %s", gerr)
-		}
-		for _, ev := range resp.Kvs {
-			fmt.Printf("%s : %s\n", ev.Key, ev.Value)
-		}
-	}
-	// deal with etcd2 servers:
-	if strings.HasPrefix(version, "2") {
-		c2, cerr := util.NewClient2(endpoint, secure)
-		if cerr != nil {
-			return "", fmt.Errorf("Can't connect to etcd: %s", cerr)
-		}
-		kapi := client.NewKeysAPI(c2)
-		err = visit(kapi, "/", func(path string, val string) error {
+		err = visit3(c3, "/", func(path string, val string) error {
 			_, err = store(based, path, val)
 			if err != nil {
 				return fmt.Errorf("Can't store backup locally: %s", err)
@@ -67,6 +48,25 @@ func Backup(endpoint string) (string, error) {
 			return "", err
 		}
 	}
+	// deal with etcd2 servers:
+	if strings.HasPrefix(version, "2") {
+		c2, cerr := util.NewClient2(endpoint, secure)
+		if cerr != nil {
+			return "", fmt.Errorf("Can't connect to etcd: %s", cerr)
+		}
+		kapi := client.NewKeysAPI(c2)
+		err = visit2(kapi, "/", func(path string, val string) error {
+			_, err = store(based, path, val)
+			if err != nil {
+				return fmt.Errorf("Can't store backup locally: %s", err)
+			}
+			return nil
+		})
+		if err != nil {
+			return "", err
+		}
+	}
+	// create ZIP file of the reaped content:
 	_, err = arch(based)
 	if err != nil {
 		return "", err
@@ -74,10 +74,11 @@ func Backup(endpoint string) (string, error) {
 	return based, nil
 }
 
-// visit recursively visits a path in the etcd tree and applies the reap function
-// on a node, if it is a leaf node, otherwise descents the tree
-func visit(kapi client.KeysAPI, path string, fn types.Reap) error {
-	log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("On node %s", path))
+// visit2 recursively visits an etcd2 server from the root and applies
+// the reap function on leaf nodes (keys that don't have sub-keys),
+// otherwise descents the tree.
+func visit2(kapi client.KeysAPI, path string, fn types.Reap) error {
+	log.WithFields(log.Fields{"func": "backup.visit2"}).Debug(fmt.Sprintf("On node %s", path))
 	copts := client.GetOptions{
 		Recursive: true,
 		Sort:      false,
@@ -88,15 +89,34 @@ func visit(kapi client.KeysAPI, path string, fn types.Reap) error {
 		return err
 	}
 	if res.Node.Dir { // there are children
-		log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("%s has %d children", path, len(res.Node.Nodes)))
+		log.WithFields(log.Fields{"func": "backup.visit2"}).Debug(fmt.Sprintf("%s has %d children", path, len(res.Node.Nodes)))
 		for _, node := range res.Node.Nodes {
-			log.WithFields(log.Fields{"func": "visit"}).Debug(fmt.Sprintf("Next visiting child %s", node.Key))
-			_ = visit(kapi, node.Key, fn)
+			log.WithFields(log.Fields{"func": "backup.visit2"}).Debug(fmt.Sprintf("Next visiting child %s", node.Key))
+			_ = visit2(kapi, node.Key, fn)
 		}
 		return nil
 	}
 	// otherwise we're on a leaf node:
 	return fn(res.Node.Key, string(res.Node.Value))
+}
+
+// visit3 visits all paths of an etcd3 server and applies the reap function
+// on the keys.
+func visit3(c3 *clientv3.Client, path string, fn types.Reap) error {
+	log.WithFields(log.Fields{"func": "backup.visit3"}).Info(fmt.Sprintf("Processing path %s", path))
+	// assume the prefix / is not valid
+	res, err := c3.Get(context.Background(), path, clientv3.WithPrefix())
+	if err != nil {
+		return err
+	}
+	for _, ev := range res.Kvs {
+		log.WithFields(log.Fields{"func": "backup.visit3"}).Info(fmt.Sprintf("key: %s, value: %s", ev.Key, ev.Value))
+		err = fn(string(ev.Key), string(ev.Value))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // store creates a file at based+path with val as its content.

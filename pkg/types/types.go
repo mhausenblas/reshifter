@@ -1,11 +1,24 @@
 package types
 
 const (
-	// EscapeColon represents the : in an etcd key
+	// EscapeColon represents the ':' character in an etcd key
 	EscapeColon = "ESC_COLON"
 	// ContentFile is the name of the file an etcd value is stored
 	ContentFile = "content"
+	// KubernetesPrefix represents the etcd key prefix for core Kubernetes
+	KubernetesPrefix = "/kubernetes.io"
+	// OpenShiftPrefix epresents the etcd key prefix for OpenShift
+	OpenShiftPrefix = "/openshift.io"
+	// NotADistro represents the fact that no Kubernetes distro-related prefixes exit in etcd
+	NotADistro KubernetesDistro = iota
+	// Vanilla represents the vanilla, upstream Kubernetes distribution.
+	Vanilla
+	// OpenShift represents an OpenShift Kubernetes distribution.
+	OpenShift
 )
+
+// KubernetesDistro represents a Kubernetes distribution.
+type KubernetesDistro int
 
 // BackupRequest represents the request for a backup operation.
 type BackupRequest struct {

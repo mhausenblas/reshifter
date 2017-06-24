@@ -1,13 +1,16 @@
 package discovery
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"net/http"
 	"net/url"
 
+	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 )
@@ -38,6 +41,50 @@ func ProbeEtcd(endpoint string) (string, bool, error) {
 		return "", false, verr
 	}
 	return version, false, nil
+}
+
+// ProbeKubernetesDistro probes an etcd cluster for which Kubernetes
+// distribution is present by scanning the available keys.
+func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
+	version, secure, err := ProbeEtcd(endpoint)
+	if err != nil {
+		return types.NotADistro, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
+	}
+	// deal with etcd3 servers:
+	if strings.HasPrefix(version, "3") {
+		c3, cerr := util.NewClient3(endpoint, secure)
+		if cerr != nil {
+			return types.NotADistro, fmt.Errorf("Can't connect to etcd: %s", cerr)
+		}
+		defer func() { _ = c3.Close() }()
+		_, err := c3.Get(context.Background(), types.KubernetesPrefix)
+		if err != nil {
+			return types.NotADistro, nil
+		}
+		_, err = c3.Get(context.Background(), types.OpenShiftPrefix)
+		if err != nil {
+			return types.Vanilla, nil
+		}
+		return types.OpenShift, nil
+	}
+	// deal with etcd2 servers:
+	if strings.HasPrefix(version, "2") {
+		c2, cerr := util.NewClient2(endpoint, secure)
+		if cerr != nil {
+			return types.NotADistro, fmt.Errorf("Can't connect to etcd: %s", cerr)
+		}
+		kapi := client.NewKeysAPI(c2)
+		_, err := kapi.Get(context.Background(), types.KubernetesPrefix, nil)
+		if err != nil {
+			return types.NotADistro, nil
+		}
+		_, err = kapi.Get(context.Background(), types.OpenShiftPrefix, nil)
+		if err != nil {
+			return types.Vanilla, nil
+		}
+		return types.OpenShift, nil
+	}
+	return types.NotADistro, fmt.Errorf("Can't determine Kubernetes distro")
 }
 
 func getVersion(endpoint string) (string, error) {

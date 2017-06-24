@@ -1,6 +1,7 @@
 package backup
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -45,17 +46,23 @@ func TestStore(t *testing.T) {
 }
 
 func TestBackup(t *testing.T) {
-	defer func() {
-		_ = util.EtcdDown()
-	}()
 	port := "2379"
+	// testing insecure etcd 2 and 3:
 	tetcd := "http://localhost:" + port
+	etcd2Backup(t, port, tetcd)
+	etcd3Backup(t, port, tetcd)
+	// testing secure etcd 2 and 3:
+	// tetcd := "https://localhost:" + port
+	// TBD
+}
+
+func etcd2Backup(t *testing.T, port, tetcd string) {
+	defer func() { _ = util.EtcdDown() }()
 	err := util.Etcd2Up(port)
 	if err != nil {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
 		return
 	}
-	// create some key-value pairs:
 	c2, err := util.NewClient2(tetcd, false)
 	if err != nil {
 		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
@@ -68,6 +75,42 @@ func TestBackup(t *testing.T) {
 		return
 	}
 	err = util.SetKV2(kapi, "/that/here", "moar")
+	if err != nil {
+		t.Errorf("Can't create key /that/here: %s", err)
+		return
+	}
+	based, err := Backup(tetcd)
+	if err != nil {
+		t.Errorf("Error during backup: %s", err)
+		return
+	}
+	// TODO: check if content is as expected
+	_, err = os.Stat(based + ".zip")
+	if err != nil {
+		t.Errorf("No archive found: %s", err)
+	}
+	// make sure to clean up:
+	_ = os.Remove(based + ".zip")
+}
+
+func etcd3Backup(t *testing.T, port, tetcd string) {
+	defer func() { _ = util.EtcdDown() }()
+	err := util.Etcd3Up(port)
+	if err != nil {
+		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
+		return
+	}
+	c3, err := util.NewClient3(tetcd, false)
+	if err != nil {
+		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
+		return
+	}
+	_, err = c3.Put(context.Background(), "/foo", "some")
+	if err != nil {
+		t.Errorf("Can't create key /foo: %s", err)
+		return
+	}
+	_, err = c3.Put(context.Background(), "/that/here", "moar")
 	if err != nil {
 		t.Errorf("Can't create key /that/here: %s", err)
 		return
