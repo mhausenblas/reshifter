@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/coreos/etcd/client"
+	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 )
 
@@ -95,6 +96,7 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 
 func etcd3Backup(t *testing.T, port, tetcd string) {
 	defer func() { _ = util.EtcdDown() }()
+	os.Setenv("DEBUG", "true")
 	err := util.Etcd3Up(port)
 	if err != nil {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
@@ -105,14 +107,10 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
 		return
 	}
-	_, err = c3.Put(context.Background(), "/foo", "some")
+
+	_, err = c3.Put(context.Background(), types.KubernetesPrefix+"namespaces/kube-system", "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}")
 	if err != nil {
-		t.Errorf("Can't create key /foo: %s", err)
-		return
-	}
-	_, err = c3.Put(context.Background(), "/that/here", "moar")
-	if err != nil {
-		t.Errorf("Can't create key /that/here: %s", err)
+		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
 		return
 	}
 	based, err := Backup(tetcd)

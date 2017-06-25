@@ -6,9 +6,11 @@ const (
 	// ContentFile is the name of the file an etcd value is stored
 	ContentFile = "content"
 	// KubernetesPrefix represents the etcd key prefix for core Kubernetes
-	KubernetesPrefix = "/kubernetes.io"
+	KubernetesPrefix = "/kubernetes.io/"
+	// 	KubernetesPrefixLast represents a stop marker for core Kubernetes
+	KubernetesPrefixLast = "/kubernetes.io/zzzzzzzzzz"
 	// OpenShiftPrefix epresents the etcd key prefix for OpenShift
-	OpenShiftPrefix = "/openshift.io"
+	OpenShiftPrefix = "/openshift.io/"
 	// NotADistro represents the fact that no Kubernetes distro-related prefixes exit in etcd
 	NotADistro KubernetesDistro = iota
 	// Vanilla represents the vanilla, upstream Kubernetes distribution.

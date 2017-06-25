@@ -26,10 +26,7 @@ etcddown () {
 }
 
 populate() {
-  curl localhost:2379/v2/keys/foo -XPUT -d value="bar"
-  curl localhost:2379/v2/keys/that/here -XPUT -d value="moar"
-  curl localhost:2379/v2/keys/this:also -XPUT -d value="escaped"
-  curl localhost:2379/v2/keys/other -XPUT -d value="value"
+  curl localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}"
 }
 
 populatesecure() {
@@ -88,25 +85,25 @@ dorestore http://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"
 
-sleep 3s
+# sleep 3s
 
 # main test plan etcd3 secure:
-export RS_ETCD_CLIENT_CERT=$(pwd)/certs/client.pem
-export RS_ETCD_CLIENT_KEY=$(pwd)/certs/client-key.pem
-export RS_ETCD_CA_CERT=$(pwd)/certs/ca.pem
-printf "\n=========================================================================\n"
-printf "Ramping up secure etcd3 and populating it with a few keys:\n"
-etcd3secureup
-populatesecure
-printf "\n=========================================================================\n"
-printf "Launching ReShifter in the background:\n"
-reshifter &
-RESHIFTER_PID=$!
-sleep 3s
-doversion
-dobackup https://localhost:2379
-etcddown
-etcd3secureup
-dorestore https://localhost:2379
-cleanup
-printf "\nDONE=====================================================================\n"
+# export RS_ETCD_CLIENT_CERT=$(pwd)/certs/client.pem
+# export RS_ETCD_CLIENT_KEY=$(pwd)/certs/client-key.pem
+# export RS_ETCD_CA_CERT=$(pwd)/certs/ca.pem
+# printf "\n=========================================================================\n"
+# printf "Ramping up secure etcd3 and populating it with a few keys:\n"
+# etcd3secureup
+# populatesecure
+# printf "\n=========================================================================\n"
+# printf "Launching ReShifter in the background:\n"
+# reshifter &
+# RESHIFTER_PID=$!
+# sleep 3s
+# doversion
+# dobackup https://localhost:2379
+# etcddown
+# etcd3secureup
+# dorestore https://localhost:2379
+# cleanup
+# printf "\nDONE=====================================================================\n"

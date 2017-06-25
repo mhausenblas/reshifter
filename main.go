@@ -7,12 +7,16 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
+	if envd := os.Getenv("DEBUG"); envd != "" {
+		log.SetLevel(log.DebugLevel)
+	}
 	go api()
 	go ui()
 	select {}

@@ -1,9 +1,6 @@
 package main
 
 import (
-	"os"
-
-	log "github.com/Sirupsen/logrus"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -36,8 +33,4 @@ func init() {
 		})
 	prometheus.MustRegister(backupTotal)
 	prometheus.MustRegister(keysRestored)
-
-	if envd := os.Getenv("DEBUG"); envd != "" {
-		log.SetLevel(log.DebugLevel)
-	}
 }

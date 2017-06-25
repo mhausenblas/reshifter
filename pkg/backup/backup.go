@@ -25,6 +25,9 @@ import (
 //
 //		bID, err := etcd.Backup("http://localhost:2379")
 func Backup(endpoint string) (string, error) {
+	// if envd := os.Getenv("DEBUG"); envd != "" {
+	// 	log.SetLevel(log.DebugLevel)
+	// }
 	based := fmt.Sprintf("%d", time.Now().Unix())
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
@@ -37,7 +40,8 @@ func Backup(endpoint string) (string, error) {
 			return "", fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
-		err = visit3(c3, "/", func(path string, val string) error {
+		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with %v", c3.Endpoints()))
+		err = visit3(c3, types.KubernetesPrefix, func(path string, val string) error {
 			_, err = store(based, path, val)
 			if err != nil {
 				return fmt.Errorf("Can't store backup locally: %s", err)
@@ -55,6 +59,8 @@ func Backup(endpoint string) (string, error) {
 			return "", fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		kapi := client.NewKeysAPI(c2)
+		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
+
 		err = visit2(kapi, "/", func(path string, val string) error {
 			_, err = store(based, path, val)
 			if err != nil {
@@ -103,14 +109,14 @@ func visit2(kapi client.KeysAPI, path string, fn types.Reap) error {
 // visit3 visits all paths of an etcd3 server and applies the reap function
 // on the keys.
 func visit3(c3 *clientv3.Client, path string, fn types.Reap) error {
-	log.WithFields(log.Fields{"func": "backup.visit3"}).Info(fmt.Sprintf("Processing path %s", path))
-	// assume the prefix / is not valid
-	res, err := c3.Get(context.Background(), path, clientv3.WithPrefix())
+	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Processing %s", path))
+	res, err := c3.Get(context.Background(), types.KubernetesPrefix+"*", clientv3.WithRange(types.KubernetesPrefixLast))
 	if err != nil {
 		return err
 	}
+	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Got %v", res.Kvs))
 	for _, ev := range res.Kvs {
-		log.WithFields(log.Fields{"func": "backup.visit3"}).Info(fmt.Sprintf("key: %s, value: %s", ev.Key, ev.Value))
+		log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("key: %s, value: %s", ev.Key, ev.Value))
 		err = fn(string(ev.Key), string(ev.Value))
 		if err != nil {
 			return err
