@@ -28,6 +28,60 @@
 
 $(document).ready(function($){
 
+  // ACTIONS:
+
+  $('#dobackup').click(function(event) {
+    var ep = $('#endpoint').val();
+    $.ajax({
+        type: "POST",
+        url: 'http://localhost:8080/v1/backup',
+        dataType: 'json',
+        async: false,
+        data: '{"endpoint": "' + ep +'"}',
+        error: function (d) {
+          console.info(d);
+          $('#backup-result').html('<h2>Result</h2>')
+          $('#backup-result').append('<div>There was a problem carrying out the backup:<br><code>'+ d.responseText + '</code> </div>')
+        },
+        success: function (d) {
+          console.info(d);
+          $('#backup-result').html('<h2>Result</h2>')
+          if(d.outcome == 'success'){
+            $('#backup-result').append('<div>The backup with ID <code>' + d.backupid +'</code> is now available <a href="/v1/backup/'+ d.backupid + '">here</a> for download.</div>')
+          } else{
+            $('#backup-result').append('<div>There was a problem carrying out the backup:<br><pre>'+ d + '"</pre> </div>')
+          }
+        }
+    })
+  });
+
+  $('#dorestore').click(function(event) {
+    var ep = $('#endpoint').val();
+    var bid = $('#backupid').val();
+    $.ajax({
+        type: "POST",
+        url: 'http://localhost:8080/v1/restore',
+        dataType: 'json',
+        async: false,
+        data: '{ "endpoint": "' + ep +'", "archive": "' + bid +'" }',
+        error: function (d) {
+          console.info(d);
+          $('#restore-result').html('<h2>Result</h2>')
+          $('#restore-result').append('<div>There was a problem carrying out the restore:<br><code>'+ d.responseText + '</code> </div>')
+        },
+        success: function (d) {
+          console.info(d);
+          $('#restore-result').html('<h2>Result</h2>')
+          if(d.outcome == 'success'){
+            $('#restore-result').append('<div>Restored ' + d.keysrestored + ' keys from backup with ID <code>' + bid +'</code> to <code>'+ ep + '</code>.</div>')
+          } else{
+            $('#restore-result').append('<div>There was a problem carrying out the restore:<br><pre>'+ d + '</pre> </div>')
+          }
+        }
+    })
+  });
+
+
   // Add class .active to current link
   $.navigation.find('a').each(function(){
 
@@ -59,6 +113,7 @@ $(document).ready(function($){
     }
 
   });
+
 
   function resizeBroadcast() {
 

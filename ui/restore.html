@@ -40,12 +40,20 @@
 
     <!-- Main content -->
     <main class="main">
-      <div class="container-fluid">
-        <h3 class="display-3">Restore</h3>
-        <p class="lead">
-          Trigger a restore operation.
-        </p>
-
+      <div id="config" class="container-fluid">
+        <h3 class="display-3">Cluster restore</h3>
+        <form>
+          <div class="form-group">
+            <label for="endpoint">The etcd endpoint:</label>
+            <input class="form-control" id="endpoint" value="http://localhost:2379">
+          </div>
+          <div class="form-group">
+            <label for="endpoint">The backup ID:</label>
+            <input class="form-control" id="backupid" placeholder="1498413955">
+          </div>
+          <div style="pointer: pointer;" class="btn btn-primary" id="dorestore">Start!</div>
+      </form>
+      <div style="margin-top: 50px;" id="restore-result"></div>
       </div>
     </main>
 
