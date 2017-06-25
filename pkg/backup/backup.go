@@ -24,11 +24,9 @@ import (
 // Example:
 //
 //		bID, err := etcd.Backup("http://localhost:2379")
-func Backup(endpoint string) (string, error) {
-	// if envd := os.Getenv("DEBUG"); envd != "" {
-	// 	log.SetLevel(log.DebugLevel)
-	// }
+func Backup(endpoint, target string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
+	target, _ = filepath.Abs(filepath.Join(target, based))
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
 		return "", fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
@@ -42,7 +40,7 @@ func Backup(endpoint string) (string, error) {
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with %v", c3.Endpoints()))
 		err = visit3(c3, types.KubernetesPrefix, func(path string, val string) error {
-			_, err = store(based, path, val)
+			_, err = store(target, path, val)
 			if err != nil {
 				return fmt.Errorf("Can't store backup locally: %s", err)
 			}
@@ -62,7 +60,7 @@ func Backup(endpoint string) (string, error) {
 		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
 
 		err = visit2(kapi, "/", func(path string, val string) error {
-			_, err = store(based, path, val)
+			_, err = store(target, path, val)
 			if err != nil {
 				return fmt.Errorf("Can't store backup locally: %s", err)
 			}
@@ -73,7 +71,7 @@ func Backup(endpoint string) (string, error) {
 		}
 	}
 	// create ZIP file of the reaped content:
-	_, err = arch(based)
+	_, err = arch(target)
 	if err != nil {
 		return "", err
 	}
@@ -126,20 +124,19 @@ func visit3(c3 *clientv3.Client, path string, fn types.Reap) error {
 }
 
 // store creates a file at based+path with val as its content.
-// based is the relative base directory to use and path can be
-// any valid etcd key (with : characters being escaped automatically).
+// based is the output directory to use and path can be
+// any valid etcd key (with ':'' characters being escaped automatically).
 func store(based string, path string, val string) (string, error) {
 	// make sure we're dealing with a valid path
 	// that is, non-empty and has to start with /:
 	if path == "" || (strings.Index(path, "/") != 0) {
 		return "", fmt.Errorf("Path has to be non-empty")
 	}
-	cwd, _ := os.Getwd()
 	// escape ":" in the path so that we have no issues storing it in the filesystem:
-	fpath, _ := filepath.Abs(filepath.Join(cwd, based, strings.Replace(path, ":", types.EscapeColon, -1)))
+	fpath, _ := filepath.Abs(filepath.Join(based, strings.Replace(path, ":", types.EscapeColon, -1)))
 	if path == "/" {
 		log.WithFields(log.Fields{"func": "store"}).Debug(fmt.Sprintf("Rewriting root"))
-		fpath, _ = filepath.Abs(filepath.Join(cwd, based))
+		fpath = based
 	}
 	err := os.MkdirAll(fpath, os.ModePerm)
 	if err != nil {
@@ -166,10 +163,8 @@ func arch(based string) (string, error) {
 	defer func() {
 		_ = os.RemoveAll(based)
 	}()
-	cwd, _ := os.Getwd()
-	opath := filepath.Join(cwd, based+".zip")
-	ipath := filepath.Join(cwd, based, "/")
-	err := zip.ArchiveFile(ipath, opath, func(apath string) {
+	opath := based + ".zip"
+	err := zip.ArchiveFile(based, opath, func(apath string) {
 		log.WithFields(log.Fields{"func": "arch"}).Debug(fmt.Sprintf("%s", apath))
 	})
 	if err != nil {

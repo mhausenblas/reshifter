@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/coreos/etcd/client"
@@ -80,18 +81,18 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't create key /that/here: %s", err)
 		return
 	}
-	based, err := Backup(tetcd)
+	based, err := Backup(tetcd, "/tmp")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 		return
 	}
-	// TODO: check if content is as expected
-	_, err = os.Stat(based + ".zip")
+	opath, _ := filepath.Abs(filepath.Join("/tmp", based))
+	_, err = os.Stat(opath + ".zip")
 	if err != nil {
 		t.Errorf("No archive found: %s", err)
 	}
 	// make sure to clean up:
-	_ = os.Remove(based + ".zip")
+	_ = os.Remove(opath + ".zip")
 }
 
 func etcd3Backup(t *testing.T, port, tetcd string) {
@@ -122,16 +123,17 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 	// }
 	// t.Logf(fmt.Sprintf("GET response: %v", res.Kvs))
 
-	based, err := Backup(tetcd)
+	based, err := Backup(tetcd, "/tmp")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 		return
 	}
-	// TODO: check if content is as expected
-	_, err = os.Stat(based + ".zip")
+	opath, _ := filepath.Abs(filepath.Join("/tmp", based))
+	_, err = os.Stat(opath + ".zip")
 	if err != nil {
 		t.Errorf("No archive found: %s", err)
 	}
 	// make sure to clean up:
-	_ = os.Remove(based + ".zip")
+	_ = os.Remove(opath + ".zip")
+
 }
