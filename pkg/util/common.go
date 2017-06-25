@@ -1,7 +1,9 @@
 package util
 
 import (
+	"errors"
 	"fmt"
+	"net"
 	"os"
 	"regexp"
 )
@@ -37,4 +39,44 @@ func CACertFromEnv() (string, error) {
 		return "", fmt.Errorf("Can't find CA cert file: RS_ETCD_CA_CERT environment variable is not set.")
 	}
 	return cacertfile, nil
+}
+
+// ExternalIP retrieves the public IP of the host
+// ReShifter is running on, adapted from:
+// https://stackoverflow.com/questions/23558425/how-do-i-get-the-local-ip-address-in-go
+func ExternalIP() (string, error) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp == 0 {
+			continue // interface down
+		}
+		if iface.Flags&net.FlagLoopback != 0 {
+			continue // loopback interface
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			return "", err
+		}
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip == nil || ip.IsLoopback() {
+				continue
+			}
+			ip = ip.To4()
+			if ip == nil {
+				continue // not an IPv4 address
+			}
+			return ip.String(), nil
+		}
+	}
+	return "", errors.New("are you connected to the network?")
 }
