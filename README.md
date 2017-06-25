@@ -31,8 +31,13 @@ POST /v1/restore          … start restore
 
 - [x] etcd2 support (insecure and secure)
 - [x] simple UI
+- [x] create backup, stored in local filesystem
+- [x] restore backup from local filesystem
+- [ ] download backup
+- [ ] upload backup in S3
+- [ ] restore backup from S3
 - [ ] deployment
-- [ ]
+
 
 ### Monitoring
 
