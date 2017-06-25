@@ -33,7 +33,7 @@ POST /v1/restore          … start restore
 - [x] create backup, stored in local filesystem
 - [x] restore backup from local filesystem
 - [x] download backup
-- [ ] offer a simple UI
+- [x] offer a simple UI
 - [ ] upload backup in S3
 - [ ] restore backup from S3
 - [ ] support insecure and secure etcd v3
