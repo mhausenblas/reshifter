@@ -14,7 +14,7 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.44"
+	version := "0.1.45"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -32,7 +32,8 @@ func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 		Outcome:  operationSuccess,
 		BackupID: "0",
 	}
-	bid, err := backup.Backup(breq.Endpoint)
+	target := "/tmp"
+	bid, err := backup.Backup(breq.Endpoint, target)
 	if err != nil {
 		bres.Outcome = operationFail
 		log.Error(err)

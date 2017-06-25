@@ -16,6 +16,24 @@ Supported:
 
 TBD
 
+### API
+
+```
+GET  /reshifter           … the ReShifter Web UI
+GET  /metrics             … Prometheus metrics
+GET  /v1/version          … list ReShifter status and version
+POST /v1/backup           … start backup
+GET  /v1/backup/$BACKUPID … download backup $BACKUPID
+POST /v1/restore          … start restore
+```
+
+### Status
+
+- [x] etcd2 support (insecure and secure)
+- [x] simple UI
+- [ ] deployment
+- [ ]
+
 ### Monitoring
 
 Prometheus metrics are available via `/metrics`.
