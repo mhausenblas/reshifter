@@ -26,7 +26,7 @@ etcddown () {
 }
 
 populate() {
-  curl localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}"
+  curl localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="stuff"
 }
 
 populatesecure() {
