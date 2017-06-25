@@ -10,30 +10,28 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
+	port := "8080"
 	if envd := os.Getenv("DEBUG"); envd != "" {
 		log.SetLevel(log.DebugLevel)
 	}
-	go api()
-	go ui()
-	select {}
-}
+	r := mux.NewRouter()
+	r.PathPrefix("/reshifter").Handler(http.StripPrefix("/reshifter", http.FileServer(http.Dir("ui"))))
+	log.Printf("Serving API from: %s/\n", port)
+	r.Handle("/metrics", promhttp.Handler())
+	r.HandleFunc("/v1/version", versionHandler)
+	r.HandleFunc("/v1/backup", backupCreateHandler).Methods("POST")
+	r.HandleFunc("/v1/backup/{afile:[0-9]+}", backupRetrieveHandler).Methods("GET")
+	r.HandleFunc("/v1/restore", restoreHandler)
+	log.Printf("Serving API from: %s/v1\n", port)
 
-func api() {
-	http.Handle("/metrics", promhttp.Handler())
-	http.HandleFunc("/v1/version", versionHandler)
-	http.HandleFunc("/v1/backup", backupHandler)
-	http.HandleFunc("/v1/restore", restoreHandler)
-	log.Println("Serving API from :8080/v1")
-	_ = http.ListenAndServe(":8080", nil)
-}
-
-func ui() {
-	fs := http.FileServer(http.Dir("ui"))
-	http.Handle("/", fs)
-	log.Println("Serving UI from :8080/")
-	_ = http.ListenAndServe(":8080", nil)
+	srv := &http.Server{
+		Handler: r,
+		Addr:    "0.0.0.0:" + port,
+	}
+	log.Fatal(srv.ListenAndServe())
 }

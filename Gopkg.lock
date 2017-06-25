@@ -1,4 +1,4 @@
-memo = "3bd899c3a262f1986f5327c31bc87e28fce62f0ac854849c1ba49a3932d35019"
+memo = "02daf87c1f2ddc4e2e3034ebfaa815969a391bab89c50aced2cae03b8b099b8e"
 
 [[projects]]
   branch = "master"
@@ -29,6 +29,18 @@ memo = "3bd899c3a262f1986f5327c31bc87e28fce62f0ac854849c1ba49a3932d35019"
   name = "github.com/golang/protobuf"
   packages = ["proto","ptypes/any"]
   revision = "6a1fa9404c0aebf36c879bc50152edcc953910d2"
+
+[[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  revision = "bcd8bc72b08df0f70df986b97f95590779502d31"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"

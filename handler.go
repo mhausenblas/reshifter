@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/gorilla/mux"
 	"github.com/mhausenblas/reshifter/pkg/backup"
 	"github.com/mhausenblas/reshifter/pkg/restore"
 	"github.com/mhausenblas/reshifter/pkg/types"
@@ -13,17 +14,11 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.43"
+	version := "0.1.44"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
-// backupHandler responds to HTTP POST requests such as:
-//		http POST localhost:8080/v1/backup endpoint=http://localhost:2379
-func backupHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Only HTTP POST is supported", http.StatusMethodNotAllowed)
-		return
-	}
+func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var breq types.BackupRequest
 	err := decoder.Decode(&breq)
@@ -50,6 +45,18 @@ func backupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_ = json.NewEncoder(w).Encode(bres)
+}
+
+func backupRetrieveHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	afile := vars["afile"]
+	if !util.IsBackupID(afile) {
+		abortreason := fmt.Sprintf("Aborting backup retrieve: %s is not a valid backup ID", afile)
+		http.Error(w, abortreason, http.StatusConflict)
+		log.Error(abortreason)
+		return
+	}
+	fmt.Fprintf(w, "Here's the content of backup %s", afile)
 }
 
 // restoreHandler responds to HTTP POST requests such as:
