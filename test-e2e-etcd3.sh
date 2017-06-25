@@ -59,7 +59,7 @@ cleanup () {
   printf "=========================================================================\n"
   printf "Cleaning up:\nremoving local backup file\ntearing down etcd3\n"
   rm ./$bid.zip
-  kr=$(kill $RESHIFTER_PID)
+  pkill -f reshifter
   etcddown
 }
 
@@ -74,14 +74,13 @@ etcd3up
 populate
 printf "\n=========================================================================\n"
 printf "Launching ReShifter in the background:\n"
-reshifter &
-RESHIFTER_PID=$!
+DEBUG=true reshifter &
 sleep 3s
 doversion
 dobackup http://localhost:2379
-etcddown
-etcd2up
-dorestore http://localhost:2379
+# etcddown
+# etcd3up
+# dorestore http://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"
 

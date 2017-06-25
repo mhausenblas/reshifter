@@ -47,7 +47,7 @@ func TestStore(t *testing.T) {
 }
 
 func TestBackup(t *testing.T) {
-	port := "2379"
+	port := "4001"
 	// testing insecure etcd 2 and 3:
 	tetcd := "http://localhost:" + port
 	etcd2Backup(t, port, tetcd)
@@ -96,7 +96,6 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 
 func etcd3Backup(t *testing.T, port, tetcd string) {
 	defer func() { _ = util.EtcdDown() }()
-	os.Setenv("DEBUG", "true")
 	err := util.Etcd3Up(port)
 	if err != nil {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
@@ -108,11 +107,21 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 		return
 	}
 
-	_, err = c3.Put(context.Background(), types.KubernetesPrefix+"namespaces/kube-system", "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}")
+	pr, err := c3.Put(context.Background(), types.KubernetesPrefix+"namespaces/kube-system", "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}")
 	if err != nil {
 		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
 		return
 	}
+	_ = pr
+	// t.Logf(fmt.Sprintf("PUT response: %v", pr))
+
+	// res, err := c3.Get(context.Background(), types.KubernetesPrefix+"*", clientv3.WithRange(types.KubernetesPrefixLast))
+	// if err != nil {
+	// 	t.Errorf("No value retrieved: %s", err)
+	// 	return
+	// }
+	// t.Logf(fmt.Sprintf("GET response: %v", res.Kvs))
+
 	based, err := Backup(tetcd)
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)

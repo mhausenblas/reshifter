@@ -109,14 +109,14 @@ func visit2(kapi client.KeysAPI, path string, fn types.Reap) error {
 // visit3 visits all paths of an etcd3 server and applies the reap function
 // on the keys.
 func visit3(c3 *clientv3.Client, path string, fn types.Reap) error {
-	log.WithFields(log.Fields{"func": "backup.visit3"}).Error(fmt.Sprintf("Processing %s", path))
+	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Processing %s", path))
 	res, err := c3.Get(context.Background(), types.KubernetesPrefix+"*", clientv3.WithRange(types.KubernetesPrefixLast))
 	if err != nil {
 		return err
 	}
-	log.WithFields(log.Fields{"func": "backup.visit3"}).Error(fmt.Sprintf("Got %v", res.Kvs))
+	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Got %v", res.Kvs))
 	for _, ev := range res.Kvs {
-		log.WithFields(log.Fields{"func": "backup.visit3"}).Error(fmt.Sprintf("key: %s, value: %s", ev.Key, ev.Value))
+		log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("key: %s, value: %s", ev.Key, ev.Value))
 		err = fn(string(ev.Key), string(ev.Value))
 		if err != nil {
 			return err
