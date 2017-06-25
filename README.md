@@ -29,13 +29,14 @@ POST /v1/restore          … start restore
 
 ### Status
 
-- [x] etcd2 support (insecure and secure)
-- [x] simple UI
+- [x] support insecure and secure etcd v2
 - [x] create backup, stored in local filesystem
 - [x] restore backup from local filesystem
-- [ ] download backup
+- [x] download backup
+- [ ] offer a simple UI
 - [ ] upload backup in S3
 - [ ] restore backup from S3
+- [ ] support insecure and secure etcd v3
 - [ ] deployment
 
 
