@@ -61,7 +61,7 @@ dorestore() {
 cleanup () {
   printf "=========================================================================\n"
   printf "Cleaning up:\nremoving local backup file\ntearing down etcd2\n"
-  rm ./$bid.zip
+  rm /tmp/$bid.zip
   kr=$(kill $RESHIFTER_PID)
   etcddown
 }

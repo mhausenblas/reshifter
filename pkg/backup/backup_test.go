@@ -81,12 +81,12 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't create key /that/here: %s", err)
 		return
 	}
-	based, err := Backup(tetcd, "/tmp")
+	based, err := Backup(tetcd, types.DefaultWorkDir)
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 		return
 	}
-	opath, _ := filepath.Abs(filepath.Join("/tmp", based))
+	opath, _ := filepath.Abs(filepath.Join(types.DefaultWorkDir, based))
 	_, err = os.Stat(opath + ".zip")
 	if err != nil {
 		t.Errorf("No archive found: %s", err)
@@ -123,12 +123,12 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 	// }
 	// t.Logf(fmt.Sprintf("GET response: %v", res.Kvs))
 
-	based, err := Backup(tetcd, "/tmp")
+	based, err := Backup(tetcd, types.DefaultWorkDir)
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 		return
 	}
-	opath, _ := filepath.Abs(filepath.Join("/tmp", based))
+	opath, _ := filepath.Abs(filepath.Join(types.DefaultWorkDir, based))
 	_, err = os.Stat(opath + ".zip")
 	if err != nil {
 		t.Errorf("No archive found: %s", err)

@@ -1,6 +1,8 @@
 package types
 
 const (
+	// DefaultWorkDir is the default work directory for backups
+	DefaultWorkDir = "/tmp"
 	// EscapeColon represents the ':' character in an etcd key
 	EscapeColon = "ESC_COLON"
 	// ContentFile is the name of the file an etcd value is stored

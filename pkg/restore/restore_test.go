@@ -6,10 +6,12 @@ import (
 
 	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/backup"
+	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 )
 
 func TestRestore(t *testing.T) {
+	target := types.DefaultWorkDir
 	port := "2379"
 	tetcd := "http://localhost:" + port
 	err := util.Etcd2Up(port)
@@ -29,7 +31,7 @@ func TestRestore(t *testing.T) {
 		t.Errorf("Can't create key /foo: %s", err)
 		return
 	}
-	based, err := backup.Backup(tetcd)
+	based, err := backup.Backup(tetcd, target)
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 	}
@@ -39,7 +41,6 @@ func TestRestore(t *testing.T) {
 		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
 		return
 	}
-	target := "/tmp"
 	afile := based
 	_, err = Restore(afile, target, tetcd)
 	if err != nil {

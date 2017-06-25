@@ -25,12 +25,11 @@ import (
 //		krestored, err := Restore("1498055655", "/tmp", "http://localhost:2379")
 func Restore(afile, target string, endpoint string) (int, error) {
 	numrestored := 0
-	err := unarch(afile+".zip", target)
+	err := unarch(filepath.Join(target, afile)+".zip", target)
 	if err != nil {
 		return numrestored, err
 	}
 	target, _ = filepath.Abs(filepath.Join(target, afile, "/"))
-
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
 		return 0, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)

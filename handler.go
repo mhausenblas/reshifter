@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
@@ -14,7 +16,7 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.45"
+	version := "0.1.46"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -23,7 +25,9 @@ func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 	var breq types.BackupRequest
 	err := decoder.Decode(&breq)
 	if err != nil {
-		http.Error(w, "The backup request is malformed", http.StatusBadRequest)
+		mreq := "The backup request is malformed"
+		http.Error(w, mreq, http.StatusBadRequest)
+		log.Error(mreq)
 		return
 	}
 	log.Infof("Starting backup from %s", breq.Endpoint)
@@ -32,7 +36,7 @@ func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 		Outcome:  operationSuccess,
 		BackupID: "0",
 	}
-	target := "/tmp"
+	target := types.DefaultWorkDir
 	bid, err := backup.Backup(breq.Endpoint, target)
 	if err != nil {
 		bres.Outcome = operationFail
@@ -57,7 +61,14 @@ func backupRetrieveHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(abortreason)
 		return
 	}
-	fmt.Fprintf(w, "Here's the content of backup %s", afile)
+	target := types.DefaultWorkDir
+	c, err := ioutil.ReadFile(filepath.Join(target, afile) + ".zip")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error(err)
+		return
+	}
+	fmt.Fprintf(w, string(c))
 }
 
 // restoreHandler responds to HTTP POST requests such as:
@@ -74,7 +85,7 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The restore request is malformed", http.StatusBadRequest)
 		return
 	}
-	target := "/tmp"
+	target := types.DefaultWorkDir
 	if !util.IsBackupID(rreq.Archive) {
 		abortreason := fmt.Sprintf("Aborting restore: %s is not a valid backup ID", rreq.Archive)
 		http.Error(w, abortreason, http.StatusConflict)
