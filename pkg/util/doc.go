@@ -1,2 +1,2 @@
-// Package util contains various helper functions for etcd.
+// Package util contains various helper functions for ReShifter.
 package util

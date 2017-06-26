@@ -11,6 +11,7 @@ import (
 	"github.com/coreos/etcd/client"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/mhausenblas/reshifter/pkg/discovery"
+	"github.com/mhausenblas/reshifter/pkg/remotes"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 	"github.com/pierrre/archivefile/zip"
@@ -23,8 +24,8 @@ import (
 // point in time the backup operation was started, for example 1498050161.
 // Example:
 //
-//		bID, err := etcd.Backup("http://localhost:2379")
-func Backup(endpoint, target string) (string, error) {
+//		bID, err := etcd.Backup("http://localhost:2379", "/tmp", "play.minio.io:9000", "reshifter-test-cluster")
+func Backup(endpoint, target, remote, bucket string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
 	target, _ = filepath.Abs(filepath.Join(target, based))
 	version, secure, err := discovery.ProbeEtcd(endpoint)
@@ -74,6 +75,12 @@ func Backup(endpoint, target string) (string, error) {
 	_, err = arch(target)
 	if err != nil {
 		return "", err
+	}
+	if remote != "" {
+		err = remotes.StoreInS3(remote, bucket, target, based)
+		if err != nil {
+			return "", err
+		}
 	}
 	return based, nil
 }

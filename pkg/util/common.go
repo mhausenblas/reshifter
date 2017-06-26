@@ -41,6 +41,21 @@ func CACertFromEnv() (string, error) {
 	return cacertfile, nil
 }
 
+// S3CredFromEnv loads S3 access key and secret
+// from the respective environment variable ACCESS_KEY_ID
+// and SECRET_ACCESS_KEY.
+func S3CredFromEnv() (string, string, error) {
+	accesskeyID := os.Getenv("ACCESS_KEY_ID")
+	if accesskeyID == "" {
+		return "", "", fmt.Errorf("Can't find S3 access key: ACCESS_KEY_ID environment variable is not set.")
+	}
+	secretaccessKey := os.Getenv("SECRET_ACCESS_KEY")
+	if secretaccessKey == "" {
+		return "", "", fmt.Errorf("Can't find S3 access key: SECRET_ACCESS_KEY environment variable is not set.")
+	}
+	return accesskeyID, secretaccessKey, nil
+}
+
 // ExternalIP retrieves the public IP of the host
 // ReShifter is running on, adapted from:
 // https://stackoverflow.com/questions/23558425/how-do-i-get-the-local-ip-address-in-go

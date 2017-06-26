@@ -44,7 +44,9 @@ func ProbeEtcd(endpoint string) (string, bool, error) {
 }
 
 // ProbeKubernetesDistro probes an etcd cluster for which Kubernetes
-// distribution is present by scanning the available keys.
+// distribution is present by scanning the available keys. Example:
+//
+//		distro, err := ProbeKubernetesDistro("http://localhost:2379")
 func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 	distro := types.NotADistro
 	version, secure, err := ProbeEtcd(endpoint)

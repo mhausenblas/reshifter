@@ -1,4 +1,4 @@
-memo = "02daf87c1f2ddc4e2e3034ebfaa815969a391bab89c50aced2cae03b8b099b8e"
+memo = "7f2244b9282723fe6b9ff1b33fe060635a671dfad259c85f3a3e59a576543fe6"
 
 [[projects]]
   branch = "master"
@@ -47,6 +47,12 @@ memo = "02daf87c1f2ddc4e2e3034ebfaa815969a391bab89c50aced2cae03b8b099b8e"
   packages = ["pbutil"]
   revision = "3247c84500bff8d9fb6d579d800f20b3e091582c"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/minio/minio-go"
+  packages = [".","pkg/encrypt","pkg/policy","pkg/s3signer","pkg/s3utils","pkg/set"]
+  revision = "2f03abaa07d8bc57faef16cda7655ea62a7e0bed"
+  version = "v2.1.0"
 
 [[projects]]
   branch = "master"

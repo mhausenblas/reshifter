@@ -11,8 +11,10 @@ const (
 	KubernetesPrefix = "/kubernetes.io"
 	// KubernetesPrefixLast represents a stop marker for core Kubernetes
 	KubernetesPrefixLast = "/kubernetes.io/zzzzzzzzzz"
-	// OpenShiftPrefix epresents the etcd key prefix for OpenShift
+	// OpenShiftPrefix represents the etcd key prefix for OpenShift
 	OpenShiftPrefix = "/openshift.io"
+	// ContentTypeZip represents the content type for a ZIP file
+	ContentTypeZip = "application/zip"
 	// NotADistro represents the fact that no Kubernetes distro-related prefixes exit in etcd
 	NotADistro KubernetesDistro = iota
 	// Vanilla represents the vanilla, upstream Kubernetes distribution.
@@ -27,6 +29,8 @@ type KubernetesDistro int
 // BackupRequest represents the request for a backup operation.
 type BackupRequest struct {
 	Endpoint string `json:"endpoint"`
+	Remote   string `json:"remote"`
+	Bucket   string `json:"bucket"`
 }
 
 // BackupResult represents the results of a backup operation.
@@ -39,6 +43,8 @@ type BackupResult struct {
 type RestoreRequest struct {
 	Endpoint string `json:"endpoint"`
 	Archive  string `json:"archive"`
+	Remote   string `json:"remote"`
+	Bucket   string `json:"bucket"`
 }
 
 // RestoreResult represents the results of a restore operation.

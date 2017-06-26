@@ -51,8 +51,11 @@ func TestBackup(t *testing.T) {
 	port := "4001"
 	// testing insecure etcd 2 and 3:
 	tetcd := "http://localhost:" + port
+	// backing up to remote https://play.minio.io:9000:
+	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
+	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
 	etcd2Backup(t, port, tetcd)
-	etcd3Backup(t, port, tetcd)
+	// etcd3Backup(t, port, tetcd)
 	// testing secure etcd 2 and 3:
 	// tetcd := "https://localhost:" + port
 	// TBD
@@ -81,7 +84,7 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't create key /that/here: %s", err)
 		return
 	}
-	based, err := Backup(tetcd, types.DefaultWorkDir)
+	based, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 		return
@@ -123,7 +126,7 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 	// }
 	// t.Logf(fmt.Sprintf("GET response: %v", res.Kvs))
 
-	based, err := Backup(tetcd, types.DefaultWorkDir)
+	based, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 		return
