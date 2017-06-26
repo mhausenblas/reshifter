@@ -46,6 +46,7 @@ func ProbeEtcd(endpoint string) (string, bool, error) {
 // ProbeKubernetesDistro probes an etcd cluster for which Kubernetes
 // distribution is present by scanning the available keys.
 func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
+	distro := types.NotADistro
 	version, secure, err := ProbeEtcd(endpoint)
 	if err != nil {
 		return types.NotADistro, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
@@ -59,13 +60,15 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 		defer func() { _ = c3.Close() }()
 		_, err := c3.Get(context.Background(), types.KubernetesPrefix)
 		if err != nil {
-			return types.NotADistro, nil
+			return distro, nil
 		}
+		distro = types.Vanilla
 		_, err = c3.Get(context.Background(), types.OpenShiftPrefix)
 		if err != nil {
-			return types.Vanilla, nil
+			return distro, nil
 		}
-		return types.OpenShift, nil
+		distro = types.OpenShift
+		return distro, nil
 	}
 	// deal with etcd2 servers:
 	if strings.HasPrefix(version, "2") {
@@ -76,13 +79,15 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 		kapi := client.NewKeysAPI(c2)
 		_, err := kapi.Get(context.Background(), types.KubernetesPrefix, nil)
 		if err != nil {
-			return types.NotADistro, nil
+			return distro, nil
 		}
+		distro = types.Vanilla
 		_, err = kapi.Get(context.Background(), types.OpenShiftPrefix, nil)
 		if err != nil {
-			return types.Vanilla, nil
+			return distro, nil
 		}
-		return types.OpenShift, nil
+		distro = types.OpenShift
+		return distro, nil
 	}
 	return types.NotADistro, fmt.Errorf("Can't determine Kubernetes distro")
 }

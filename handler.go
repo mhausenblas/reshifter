@@ -6,20 +6,72 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/mhausenblas/reshifter/pkg/backup"
+	"github.com/mhausenblas/reshifter/pkg/discovery"
 	"github.com/mhausenblas/reshifter/pkg/restore"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.46"
+	version := "0.1.47"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
+// explorerHandler responds to HTTP GET requests such as:
+//		http GET localhost:8080/v1/explorer?endpoint=http%3A%2F%2Flocalhost%3A2379
+func explorerHandler(w http.ResponseWriter, r *http.Request) {
+	endpoint := r.URL.Query().Get("endpoint")
+	if endpoint == "" || strings.Index(endpoint, "http") != 0 {
+		merr := "The endpoint is malformed"
+		http.Error(w, merr, http.StatusBadRequest)
+		log.Error(merr)
+		return
+	}
+	version, issecure, err := discovery.ProbeEtcd(endpoint)
+	if err != nil {
+		merr := fmt.Sprintf("Can't understand endpoint %s: %s", endpoint, err)
+		http.Error(w, merr, http.StatusBadRequest)
+		log.Error(err)
+		return
+	}
+	distrotype, err := discovery.ProbeKubernetesDistro(endpoint)
+	if err != nil {
+		merr := fmt.Sprintf("Can't determine Kubernetes distro: %s", err)
+		http.Error(w, merr, http.StatusBadRequest)
+		log.Error(err)
+		return
+	}
+	secure := "insecure etcd, no SSL/TLS configured"
+	if issecure {
+		secure = "secure etcd, SSL/TLS configure"
+	}
+	var distro string
+	switch distrotype {
+	case types.Vanilla:
+		distro = "Vanilla Kubernetes"
+	case types.OpenShift:
+		distro = "OpenShift"
+	default:
+		distro = "not a Kubernetes distro"
+	}
+	_ = json.NewEncoder(w).Encode(struct {
+		EtcdVersion  string `json:"etcdversion"`
+		EtcdSecurity string `json:"etcdsec"`
+		K8SDistro    string `json:"k8sdistro"`
+	}{
+		version,
+		secure,
+		distro,
+	})
+}
+
+// backupCreateHandler responds to HTTP POST requests such as:
+//		http GET localhost:8080/v1/backup endpoint=http://localhost:2379
 func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var breq types.BackupRequest
@@ -52,6 +104,8 @@ func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(bres)
 }
 
+// backupRetrieveHandler responds to HTTP GET requests such as:
+//		http GET localhost:8080/v1/backup/1498230556
 func backupRetrieveHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	afile := vars["afile"]

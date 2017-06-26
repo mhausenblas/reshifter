@@ -26,6 +26,7 @@ func main() {
 	log.Printf("Serving API from: %s:%s/reshifter", host, port)
 	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/v1/version", versionHandler)
+	r.HandleFunc("/v1/explorer", explorerHandler)
 	r.HandleFunc("/v1/backup", backupCreateHandler).Methods("POST")
 	r.HandleFunc("/v1/backup/{afile:[0-9]+}", backupRetrieveHandler).Methods("GET")
 	r.HandleFunc("/v1/restore", restoreHandler)
