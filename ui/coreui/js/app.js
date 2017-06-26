@@ -1,8 +1,18 @@
 /*****
 * CONFIGURATION
 */
-    //Main navigation
-    $.navigation = $('nav > ul.nav');
+
+  // In-browser Storage
+  var ibstorage = window.localStorage;
+  var default_ep = '';
+  var default_remote = '';
+
+  // ibstorage.setItem(key, val);
+  // ibstorage.getItem(key);
+  // ibstorage.removeItem(key);
+
+  //Main navigation
+  $.navigation = $('nav > ul.nav');
 
   $.panelIconOpened = 'icon-arrow-up';
   $.panelIconClosed = 'icon-arrow-down';
@@ -28,8 +38,19 @@
 
 $(document).ready(function($){
 
-  // ACTIONS:
+  // Check if we have any defaults:
+  default_ep = ibstorage.getItem('reshifter.info/default-etcd');
+  if (default_ep !== '') {
+    console.info('reshifter.info/default-etcd:'+default_ep)
+    $('#endpoint').val(default_ep);
+  }
+  default_remote = ibstorage.getItem('reshifter.info/default-remote');
+  if (default_remote !== '') {
+    console.info('reshifter.info/default-remote:'+default_remote)
+    $('#backup-result').html('<div>Backing up to: <code>'+ default_remote +'</code></div>');
+  }
 
+  // ACTIONS:
   $('#doexplore').click(function(event) {
     var ep = $('#endpoint').val();
     $.ajax({
@@ -52,6 +73,19 @@ $(document).ready(function($){
     })
   });
 
+  $('#dosaveconfig').click(function(event) {
+    var endpoint = $('#endpoint').val();
+    var remote = $('#remote:checked').val();
+    if (remote === 's3'){
+      remote += ':'+ $('#bucket').val();
+    }
+    ibstorage.setItem('reshifter.info/default-etcd', endpoint);
+    console.info('reshifter.info/default-etcd:'+endpoint)
+    ibstorage.setItem('reshifter.info/default-remote', remote);
+    console.info('reshifter.info/default-remote:'+remote)
+    $('#config-result').html('<h2>Result</h2><div>All settings stored locally.</div>')
+  });
+
   $('#dobackup').click(function(event) {
     var ep = $('#endpoint').val();
     $.ajax({
@@ -59,7 +93,7 @@ $(document).ready(function($){
         url: 'http://localhost:8080/v1/backup',
         dataType: 'json',
         async: false,
-        data: '{"endpoint": "' + ep +'"}',
+        data: '{"endpoint": "' + ep +'", "bucket": "' + default_remote +'" }',
         error: function (d) {
           console.info(d);
           $('#backup-result').html('<h2>Result</h2>')

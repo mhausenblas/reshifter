@@ -52,25 +52,25 @@
             <legend>Default etcd</legend>
             <form>
               <div class="form-group">
-                <label for="endpoint">The default etcd endpoint to use:</label>
+                <label for="endpoint">If no etcd endpoint is provided use this.</label>
                 <input class="form-control" id="endpoint" value="http://localhost:2379">
               </div>
             </form>
             <legend>Output of backup</legend>
               <div class="form-check">
                 <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="optionsRadios" id="tofile" value="tofile" checked>
+                  <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="download" checked>
                   Download as ZIP file
                 </label>
               </div>
               <div class="form-check">
                 <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="optionsRadios" id="toaws" value="toaws">
-                  Upload to AWS S3 bucket using: TBD
+                  <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="s3">
+                  Upload to AWS S3 bucket <input class="form-control" id="bucket" value="mycluster">
                 </label>
               </div>
           </fieldset>
-        <div style="pointer: pointer;" class="btn btn-primary" id="doexplore">Auto Config</div>
+        <div style="pointer: pointer;" class="btn btn-primary" id="doexplore">Check!</div>
         <div style="pointer: pointer;" class="btn btn-primary" id="dosaveconfig">Save Config</div>
       </form>
       <div style="margin-top: 50px;" id="config-result"></div>
