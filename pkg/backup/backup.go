@@ -59,7 +59,6 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		}
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
-
 		err = visit2(kapi, "/", func(path string, val string) error {
 			_, err = store(target, path, val)
 			if err != nil {
@@ -115,7 +114,7 @@ func visit2(kapi client.KeysAPI, path string, fn types.Reap) error {
 // on the keys.
 func visit3(c3 *clientv3.Client, path string, fn types.Reap) error {
 	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Processing %s", path))
-	res, err := c3.Get(context.Background(), types.KubernetesPrefix+"*", clientv3.WithRange(types.KubernetesPrefixLast))
+	res, err := c3.Get(context.Background(), path+"/*", clientv3.WithRange(types.KubernetesPrefixLast))
 	if err != nil {
 		return err
 	}

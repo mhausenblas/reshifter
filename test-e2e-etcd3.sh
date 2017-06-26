@@ -6,6 +6,7 @@ set -o nounset
 set -o pipefail
 
 type docker >/dev/null 2>&1 || { echo >&2 "Need Docker but it's not installed."; exit 1; }
+type etcdctl >/dev/null 2>&1 || { echo >&2 "Need etcdctl but it's not installed."; exit 1; }
 type http >/dev/null 2>&1 || { echo >&2 "Need http command but it's not installed. You can get it from https://httpie.org"; exit 1; }
 type jq >/dev/null 2>&1 || { echo >&2 "Need jq command but it's not installed. You can get it from https://stedolan.github.io/jq/"; exit 1; }
 
@@ -27,14 +28,13 @@ etcddown () {
 }
 
 populate() {
-  curl localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="stuff"
+  etcdctl --endpoints=http://localhost:2379 set /kubernetes.io/namespaces/kube-system "."
 }
 
 populatesecure() {
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/foo -XPUT -d value="bar"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/that/here -XPUT -d value="moar"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/this:also -XPUT -d value="escaped"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/other -XPUT -d value="value"
+  # etcdctl --endpoints=http://localhost:2379 set /kubernetes.io/namespaces/kube-system .
+  # curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/foo -XPUT -d value="bar"
+  echo TBD
 }
 
 doversion() {
@@ -70,9 +70,6 @@ printf "Test plan: etcd3 and secure etcd3, this can take up to 30 seconds!\n"
 
 # main test plan etcd3:
 
-export ETCDCTL_API=3
-alias etcdctl='docker run --rm -it tenstartups/etcdctl --debug --endpoints=http://127.0.0.1:2379'
-
 printf "\n=========================================================================\n"
 printf "Ramping up etcd3 and populating it with a few keys:\n"
 etcd3up
@@ -92,9 +89,6 @@ printf "\nDONE==================================================================
 # sleep 3s
 
 # main test plan etcd3 secure:
-
-# alias etcdctl='docker run --rm -it -v /etc/origin/master/master.etcd-client.crt:/tmp/master.etcd-client.crt -v /etc/origin/master/ca.crt:/tmp/ca.crt -v /etc/origin/master/master.etcd-client.key:/tmp/master.etcd-client.key octoblu/etcdctl -C https://192.168.0.118:4001 --cert-file /tmp/master.etcd-client.crt --ca-file /tmp/ca.crt --key-file /tmp/master.etcd-client.key'
-
 # export RS_ETCD_CLIENT_CERT=$(pwd)/certs/client.pem
 # export RS_ETCD_CLIENT_KEY=$(pwd)/certs/client-key.pem
 # export RS_ETCD_CA_CERT=$(pwd)/certs/ca.pem

@@ -18,7 +18,7 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.49"
+	version := "0.1.54"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -34,7 +34,7 @@ func explorerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	version, issecure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
-		merr := fmt.Sprintf("Can't understand endpoint %s: %s", endpoint, err)
+		merr := fmt.Sprintf("%s", err)
 		http.Error(w, merr, http.StatusBadRequest)
 		log.Error(err)
 		return

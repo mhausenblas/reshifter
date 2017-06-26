@@ -66,6 +66,7 @@ $ go test -v
 For end-to-end tests, run `./test-e2e-etcd*.sh`. Note that full end-to-end tests require the following:
 
 - Docker CE (tested with v1.17)
+- [etcdctl](https://github.com/coreos/etcd/tree/master/etcdctl)
 - [http](https://httpie.org)
 - [jq](https://stedolan.github.io/jq/)
 

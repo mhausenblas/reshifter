@@ -2,14 +2,12 @@ package backup
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/coreos/etcd/client"
-	"github.com/coreos/etcd/clientv3"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 )
@@ -67,7 +65,7 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 	defer func() { _ = util.EtcdDown() }()
 	err := util.Etcd2Up(port)
 	if err != nil {
-		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
+		t.Errorf("Can't launch local etcd2 at %s: %s", tetcd, err)
 		return
 	}
 	c2, err := util.NewClient2(tetcd, false)
@@ -76,14 +74,12 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 		return
 	}
 	kapi := client.NewKeysAPI(c2)
-	err = util.SetKV2(kapi, "/foo", "some")
+	err = util.SetKV2(kapi,
+		types.KubernetesPrefix+"/namespaces/kube-system",
+		"{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}",
+	)
 	if err != nil {
-		t.Errorf("Can't create key /foo: %s", err)
-		return
-	}
-	err = util.SetKV2(kapi, "/that/here", "moar")
-	if err != nil {
-		t.Errorf("Can't create key /that/here: %s", err)
+		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
 		return
 	}
 	based, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
@@ -104,7 +100,7 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 	defer func() { _ = util.EtcdDown() }()
 	err := util.Etcd3Up(port)
 	if err != nil {
-		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
+		t.Errorf("Can't launch local etcd3 at %s: %s", tetcd, err)
 		return
 	}
 	c3, err := util.NewClient3(tetcd, false)
@@ -112,22 +108,14 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
 		return
 	}
-
-	pr, err := c3.Put(context.Background(), types.KubernetesPrefix+"/namespaces/kube-system", "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}")
+	_, err = c3.Put(context.Background(),
+		types.KubernetesPrefix+"/namespaces/kube-system",
+		"{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}",
+	)
 	if err != nil {
 		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
 		return
 	}
-	_ = pr
-	// t.Logf(fmt.Sprintf("PUT response: %v", pr))
-
-	res, err := c3.Get(context.Background(), types.KubernetesPrefix+"/*", clientv3.WithRange(types.KubernetesPrefixLast))
-	if err != nil {
-		t.Errorf("No value retrieved: %s", err)
-		return
-	}
-	t.Logf(fmt.Sprintf("GET response: %v", res.Kvs))
-
 	based, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
