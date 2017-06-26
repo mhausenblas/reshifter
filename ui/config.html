@@ -49,7 +49,14 @@
         </p>
         <form>
           <fieldset class="form-group">
-            <legend>Output of backup:</legend>
+            <legend>Default etcd</legend>
+            <form>
+              <div class="form-group">
+                <label for="endpoint">The default etcd endpoint to use:</label>
+                <input class="form-control" id="endpoint" value="http://localhost:2379">
+              </div>
+            </form>
+            <legend>Output of backup</legend>
               <div class="form-check">
                 <label class="form-check-label">
                   <input type="radio" class="form-check-input" name="optionsRadios" id="tofile" value="tofile" checked>
@@ -59,32 +66,14 @@
               <div class="form-check">
                 <label class="form-check-label">
                   <input type="radio" class="form-check-input" name="optionsRadios" id="toaws" value="toaws">
-                  Upload to AWS S3 with following credentials:
-                </label>
-              </div>
-              <div class="form-group">
-                <label for="awsKeyID">ACCESS_KEY_ID:</label>
-                <input class="form-control" id="awsKeyID" placeholder="">
-              </div>
-              <div class="form-group">
-                <label for="awsSecret">SECRET_ACCESS_KEY:</label>
-                <input class="form-control" id="awsSecret" placeholder="">
-              </div>
-              <div class="form-check">
-                <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="optionsRadios" id="togs" value="togs">
-                  Upload to Google Storage with following credentials:
-                </label>
-              </div>
-              <div class="form-check">
-                <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="optionsRadios" id="tominio" value="tominio">
-                  Upload to Minio instance with following credentials:
+                  Upload to AWS S3 bucket using: TBD
                 </label>
               </div>
           </fieldset>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <div style="pointer: pointer;" class="btn btn-primary" id="doexplore">Auto Config</div>
+        <div style="pointer: pointer;" class="btn btn-primary" id="dosaveconfig">Save Config</div>
       </form>
+      <div style="margin-top: 50px;" id="config-result"></div>
       </div>
     </main>
 

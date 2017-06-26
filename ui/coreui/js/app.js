@@ -30,6 +30,28 @@ $(document).ready(function($){
 
   // ACTIONS:
 
+  $('#doexplore').click(function(event) {
+    var ep = $('#endpoint').val();
+    $.ajax({
+        type: "GET",
+        url: 'http://localhost:8080/v1/explorer?endpoint='+encodeURIComponent(ep),
+        dataType: 'json',
+        async: false,
+        data: '{"endpoint": "' + ep +'"}',
+        error: function (d) {
+          console.info(d);
+          $('#config-result').html('<h2>Result</h2>')
+          $('#config-result').append('<div>There was a problem carrying out the config:<br><code>'+ d.responseText + '</code> </div>')
+        },
+        success: function (d) {
+          console.info(d);
+          $('#config-result').html('<h2>Result</h2>')
+            $('#config-result').append('<div>etcd: <code>v' + d.etcdversion +', ' + d.etcdsec +'</code></div>')
+            $('#config-result').append('<div>Kubernetes: <code>' + d.k8sdistro +'</code></div>')
+        }
+    })
+  });
+
   $('#dobackup').click(function(event) {
     var ep = $('#endpoint').val();
     $.ajax({

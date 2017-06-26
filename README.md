@@ -25,6 +25,7 @@ GET  /v1/version          … list ReShifter status and version
 POST /v1/backup           … start backup
 GET  /v1/backup/$BACKUPID … download backup $BACKUPID
 POST /v1/restore          … start restore
+GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
 ```
 
 ### Status
