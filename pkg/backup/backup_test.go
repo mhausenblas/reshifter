@@ -2,12 +2,14 @@ package backup
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/coreos/etcd/client"
+	"github.com/coreos/etcd/clientv3"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 )
@@ -55,7 +57,7 @@ func TestBackup(t *testing.T) {
 	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
 	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
 	etcd2Backup(t, port, tetcd)
-	// etcd3Backup(t, port, tetcd)
+	etcd3Backup(t, port, tetcd)
 	// testing secure etcd 2 and 3:
 	// tetcd := "https://localhost:" + port
 	// TBD
@@ -111,7 +113,7 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 		return
 	}
 
-	pr, err := c3.Put(context.Background(), types.KubernetesPrefix+"namespaces/kube-system", "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}")
+	pr, err := c3.Put(context.Background(), types.KubernetesPrefix+"/namespaces/kube-system", "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}")
 	if err != nil {
 		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
 		return
@@ -119,12 +121,12 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 	_ = pr
 	// t.Logf(fmt.Sprintf("PUT response: %v", pr))
 
-	// res, err := c3.Get(context.Background(), types.KubernetesPrefix+"*", clientv3.WithRange(types.KubernetesPrefixLast))
-	// if err != nil {
-	// 	t.Errorf("No value retrieved: %s", err)
-	// 	return
-	// }
-	// t.Logf(fmt.Sprintf("GET response: %v", res.Kvs))
+	res, err := c3.Get(context.Background(), types.KubernetesPrefix+"/*", clientv3.WithRange(types.KubernetesPrefixLast))
+	if err != nil {
+		t.Errorf("No value retrieved: %s", err)
+		return
+	}
+	t.Logf(fmt.Sprintf("GET response: %v", res.Kvs))
 
 	based, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {

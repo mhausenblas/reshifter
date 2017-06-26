@@ -10,7 +10,8 @@ type http >/dev/null 2>&1 || { echo >&2 "Need http command but it's not installe
 type jq >/dev/null 2>&1 || { echo >&2 "Need jq command but it's not installed. You can get it from https://stedolan.github.io/jq/"; exit 1; }
 
 etcd3up () {
-  dr=$(docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379)
+  dr=$(docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd \
+  --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380)
   sleep 3s
 }
 
@@ -68,6 +69,10 @@ cleanup () {
 printf "Test plan: etcd3 and secure etcd3, this can take up to 30 seconds!\n"
 
 # main test plan etcd3:
+
+export ETCDCTL_API=3
+alias etcdctl='docker run --rm -it tenstartups/etcdctl --debug --endpoints=http://127.0.0.1:2379'
+
 printf "\n=========================================================================\n"
 printf "Ramping up etcd3 and populating it with a few keys:\n"
 etcd3up
@@ -87,6 +92,9 @@ printf "\nDONE==================================================================
 # sleep 3s
 
 # main test plan etcd3 secure:
+
+# alias etcdctl='docker run --rm -it -v /etc/origin/master/master.etcd-client.crt:/tmp/master.etcd-client.crt -v /etc/origin/master/ca.crt:/tmp/ca.crt -v /etc/origin/master/master.etcd-client.key:/tmp/master.etcd-client.key octoblu/etcdctl -C https://192.168.0.118:4001 --cert-file /tmp/master.etcd-client.crt --ca-file /tmp/ca.crt --key-file /tmp/master.etcd-client.key'
+
 # export RS_ETCD_CLIENT_CERT=$(pwd)/certs/client.pem
 # export RS_ETCD_CLIENT_KEY=$(pwd)/certs/client-key.pem
 # export RS_ETCD_CA_CERT=$(pwd)/certs/ca.pem
