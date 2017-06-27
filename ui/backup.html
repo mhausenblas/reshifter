@@ -26,6 +26,9 @@
       <nav class="sidebar-nav">
         <ul class="nav">
           <li class="nav-item">
+            <a class="nav-link" href="./"><i class="icon-home"></i></a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="config.html"><i class="icon-settings"> </i> Configuration</a>
           </li>
           <li class="nav-item">
@@ -45,7 +48,7 @@
         <form>
           <div class="form-group">
             <label for="endpoint">Make a backup from Kubernetes cluster with following etcd endpoint:</label>
-            <input class="form-control" id="endpoint" value="">
+            <input class="form-control" id="endpoint" value="http://localhost:2379">
           </div>
           <div style="pointer: pointer;" class="btn btn-primary" id="dobackup">Start!</div>
         </form>

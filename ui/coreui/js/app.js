@@ -4,8 +4,8 @@
 
   // In-browser Storage
   var ibstorage = window.localStorage;
-  var default_ep = '';
-  var default_remote = '';
+  var default_ep = 'http://localhost:2379';
+  var default_remote = 's3 play.minio.io:9000 reshifter-xxx';
 
   // ibstorage.setItem(key, val);
   // ibstorage.getItem(key);
@@ -34,9 +34,9 @@
 
 
 function initRestore(){
-  var sepidx = default_remote.indexOf(' ')
-  var remote = ''
-  var bucket =''
+  var sepidx = default_remote.indexOf(' ');
+  var remote = '';
+  var bucket ='';
   if (sepidx != -1){
     remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
     bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
@@ -68,8 +68,10 @@ $(document).ready(function($){
   if (default_remote !== '') {
     console.info('reshifter.info/default-remote:'+default_remote)
     var sepidx = default_remote.indexOf(' ')
+    var bucket = default_remote.substring(default_remote.lastIndexOf(' ')+1)
     if (sepidx != -1){
       $("#remote[value=s3]").prop('checked', true);
+      $('#bucket').val(bucket);
     } else {
       $('#remote').val(default_remote)
     }
