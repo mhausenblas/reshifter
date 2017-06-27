@@ -38,7 +38,7 @@
 
 $(document).ready(function($){
 
-  // Check if we have any defaults:
+  // Check if we have any defaults and set UI elements accordingly:
   default_ep = ibstorage.getItem('reshifter.info/default-etcd');
   if (default_ep !== '') {
     console.info('reshifter.info/default-etcd:'+default_ep)
@@ -47,7 +47,19 @@ $(document).ready(function($){
   default_remote = ibstorage.getItem('reshifter.info/default-remote');
   if (default_remote !== '') {
     console.info('reshifter.info/default-remote:'+default_remote)
+    var sepidx = default_remote.indexOf(' ')
+    if (sepidx != -1){
+      $("#remote[value=s3]").prop('checked', true);
+    } else {
+      $('#remote').val(default_remote)
+    }
     $('#backup-result').html('<div>Backing up to: <code>'+ default_remote +'</code></div>');
+  }
+
+  last_backup_id = ibstorage.getItem('reshifter.info/last-backup-id')
+  if (last_backup_id !== '') {
+    console.info('reshifter.info/last-backup-id:'+last_backup_id)
+    $('#backupid').val(last_backup_id)
   }
 
   // ACTIONS:
@@ -75,25 +87,38 @@ $(document).ready(function($){
 
   $('#dosaveconfig').click(function(event) {
     var endpoint = $('#endpoint').val();
+    var remoteep = $('#remoteep').val();
     var remote = $('#remote:checked').val();
     if (remote === 's3'){
-      remote += ':'+ $('#bucket').val();
+      remote += ' ' + remoteep + ' '+ $('#bucket').val();
     }
     ibstorage.setItem('reshifter.info/default-etcd', endpoint);
     console.info('reshifter.info/default-etcd:'+endpoint)
     ibstorage.setItem('reshifter.info/default-remote', remote);
     console.info('reshifter.info/default-remote:'+remote)
-    $('#config-result').html('<h2>Result</h2><div>All settings stored locally.</div>')
+    $('#config-result').html('<h2>Result</h2><div>All settings stored locally:</div><div><ul>')
+    $('#config-result').append('<li>Default endpoint: <code>' + ibstorage.getItem('reshifter.info/default-etcd') + '</code></li>')
+    $('#config-result').append('<li>Remote target: <code>' + ibstorage.getItem('reshifter.info/default-remote') + '</code></li>')
+    $('#config-result').append('</ul></div>')
   });
 
   $('#dobackup').click(function(event) {
     var ep = $('#endpoint').val();
+    var sepidx = default_remote.indexOf(' ')
+    var remote = ''
+    var payload = '{"endpoint": "' + ep +'" }'
+    if (sepidx != -1){
+      remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
+      bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+      payload = '{"endpoint": "' + ep +'", "remote": "' + remote +'", "bucket": "' + bucket +'" }',
+      console.info('Backing up to remote [' + remote + '] in bucket [' + bucket + ']')
+    }
     $.ajax({
         type: "POST",
         url: 'http://localhost:8080/v1/backup',
         dataType: 'json',
         async: false,
-        data: '{"endpoint": "' + ep +'", "bucket": "' + default_remote +'" }',
+        data: payload,
         error: function (d) {
           console.info(d);
           $('#backup-result').html('<h2>Result</h2>')
@@ -103,6 +128,7 @@ $(document).ready(function($){
           console.info(d);
           $('#backup-result').html('<h2>Result</h2>')
           if(d.outcome == 'success'){
+            ibstorage.setItem('reshifter.info/last-backup-id', d.backupid)
             $('#backup-result').append('<div>The backup with ID <code>' + d.backupid +'</code> is now available <a href="/v1/backup/'+ d.backupid + '">here</a> for download.</div>')
           } else{
             $('#backup-result').append('<div>There was a problem carrying out the backup:<br><pre>'+ d + '"</pre> </div>')
@@ -114,12 +140,22 @@ $(document).ready(function($){
   $('#dorestore').click(function(event) {
     var ep = $('#endpoint').val();
     var bid = $('#backupid').val();
+    var sepidx = default_remote.indexOf(' ')
+    var remote = ''
+    var payload = '{ "endpoint": "' + ep + '", "backupid": "' + bid +'" }'
+    if (sepidx != -1){
+      remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
+      bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+      payload = '{"endpoint": "' + ep + '", "backupid": "' + bid + '", "remote": "' + remote +'", "bucket": "' + bucket +'" }',
+      console.info('Backing up to remote [' + remote + '] in bucket [' + bucket + ']')
+    }
+
     $.ajax({
         type: "POST",
         url: 'http://localhost:8080/v1/restore',
         dataType: 'json',
         async: false,
-        data: '{ "endpoint": "' + ep +'", "archive": "' + bid +'" }',
+        data: payload,
         error: function (d) {
           console.info(d);
           $('#restore-result').html('<h2>Result</h2>')

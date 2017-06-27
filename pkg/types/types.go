@@ -42,7 +42,7 @@ type BackupResult struct {
 // RestoreRequest represents the request for a restore operation.
 type RestoreRequest struct {
 	Endpoint string `json:"endpoint"`
-	Archive  string `json:"archive"`
+	BackupID string `json:"backupid"`
 	Remote   string `json:"remote"`
 	Bucket   string `json:"bucket"`
 }

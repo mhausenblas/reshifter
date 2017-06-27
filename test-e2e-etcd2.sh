@@ -53,7 +53,7 @@ dorestore() {
   printf "\n=========================================================================\n"
   printf "Performing restore operation:\n"
   todaybucket=reshifter-test-$(date "+%Y-%m-%d")
-  http POST localhost:8080/v1/restore endpoint=$1 archive=$bid remote=play.minio.io:9000 bucket=$todaybucket
+  http POST localhost:8080/v1/restore endpoint=$1 backupid=$bid remote=play.minio.io:9000 bucket=$todaybucket
 }
 
 cleanup () {
@@ -67,6 +67,10 @@ cleanup () {
 ###############################################################################
 # MAIN
 printf "Test plan: etcd2 and secure etcd2, this can take up to 30 seconds!\n"
+
+# using the Minio play backend:
+export ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F
+export SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
 
 # main test plan etcd2:
 printf "\n=========================================================================\n"

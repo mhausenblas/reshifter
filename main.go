@@ -23,7 +23,7 @@ func main() {
 	}
 	r := mux.NewRouter()
 	r.PathPrefix("/reshifter/").Handler(http.StripPrefix("/reshifter/", http.FileServer(http.Dir("ui"))))
-	log.Printf("Serving API from: %s:%s/reshifter", host, port)
+	log.Printf("Serving UI from: %s:%s/reshifter/", host, port)
 	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/v1/version", versionHandler)
 	r.HandleFunc("/v1/explorer", explorerHandler)

@@ -57,7 +57,7 @@ dorestore() {
   printf "\n=========================================================================\n"
   printf "Performing restore operation:\n"
   todaybucket=reshifter-test-$(date "+%Y-%m-%d")
-  http POST localhost:8080/v1/restore endpoint=$1 archive=$bid remote=play.minio.io:9000 bucket=$todaybucket
+  http POST localhost:8080/v1/restore endpoint=$1 backupid=$bid remote=play.minio.io:9000 bucket=$todaybucket
 }
 
 cleanup () {
@@ -74,6 +74,9 @@ printf "Test plan: etcd3 and secure etcd3, this can take up to 30 seconds!\n"
 
 # make sure that etcd is using the v3 API:
 export ETCDCTL_API=3
+# using the Minio play backend:
+export ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F
+export SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
 
 # main test plan etcd3:
 printf "\n=========================================================================\n"

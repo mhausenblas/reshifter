@@ -18,7 +18,7 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.57"
+	version := "0.2.0"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -140,26 +140,26 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	target := types.DefaultWorkDir
-	if !util.IsBackupID(rreq.Archive) {
-		abortreason := fmt.Sprintf("Aborting restore: %s is not a valid backup ID", rreq.Archive)
+	if !util.IsBackupID(rreq.BackupID) {
+		abortreason := fmt.Sprintf("Aborting restore: %s is not a valid backup ID", rreq.BackupID)
 		http.Error(w, abortreason, http.StatusConflict)
 		log.Error(abortreason)
 		return
 	}
-	log.Infof("Starting restore to %s from backup %s", rreq.Endpoint, rreq.Archive)
+	log.Infof("Starting restore to %s from backup %s", rreq.Endpoint, rreq.BackupID)
 	w.Header().Set("Content-Type", "application/json")
 	rr := types.RestoreResult{
 		Outcome:      operationSuccess,
 		KeysRestored: 0,
 	}
-	krestored, err := restore.Restore(rreq.Endpoint, rreq.Archive, target, rreq.Remote, rreq.Bucket)
+	krestored, err := restore.Restore(rreq.Endpoint, rreq.BackupID, target, rreq.Remote, rreq.Bucket)
 	if err != nil {
 		rr.Outcome = operationFail
 		log.Error(err)
 	}
 	rr.KeysRestored = krestored
 	keysRestored.Add(float64(krestored))
-	log.Infof("Completed restore from %s to %s: %v", rreq.Archive, rreq.Endpoint, rr)
+	log.Infof("Completed restore from %s to %s: %v", rreq.BackupID, rreq.Endpoint, rr)
 	if rr.Outcome == "fail" {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
