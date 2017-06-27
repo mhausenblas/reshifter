@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/coreos/etcd/client"
@@ -57,26 +58,45 @@ func TestBackup(t *testing.T) {
 	etcd2Backup(t, port, tetcd)
 	etcd3Backup(t, port, tetcd)
 	// testing secure etcd 2 and 3:
-	// tetcd := "https://localhost:" + port
-	// TBD
+	tetcd = "https://localhost:" + port
+	etcd2Backup(t, port, tetcd)
+	etcd3Backup(t, port, tetcd)
 }
 
 func etcd2Backup(t *testing.T, port, tetcd string) {
 	defer func() { _ = util.EtcdDown() }()
-	err := util.Etcd2Up(port)
-	if err != nil {
-		t.Errorf("Can't launch local etcd2 at %s: %s", tetcd, err)
+	secure := false
+	switch {
+	case strings.Index(tetcd, "https") == 0:
+		err := util.Etcd2SecureUp(port)
+		secure = true
+		_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
+		_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
+		_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(util.Certsdir(), "ca.pem"))
+		if err != nil {
+			t.Errorf("Can't launch secure etcd2 at %s: %s", tetcd, err)
+			return
+		}
+	case strings.Index(tetcd, "http") == 0:
+		err := util.Etcd2Up(port)
+		if err != nil {
+			t.Errorf("Can't launch insecure etcd2 at %s: %s", tetcd, err)
+			return
+		}
+	default:
+		t.Errorf("That's not a valid etcd2 endpoint: %s", tetcd)
 		return
 	}
-	c2, err := util.NewClient2(tetcd, false)
+	c2, err := util.NewClient2(tetcd, secure)
 	if err != nil {
 		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
 		return
 	}
 	kapi := client.NewKeysAPI(c2)
-	err = util.SetKV2(kapi,
+	_, err = kapi.Set(context.Background(),
 		types.KubernetesPrefix+"/namespaces/kube-system",
 		"{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}",
+		&client.SetOptions{Dir: false, PrevExist: client.PrevNoExist},
 	)
 	if err != nil {
 		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
@@ -98,12 +118,30 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 
 func etcd3Backup(t *testing.T, port, tetcd string) {
 	defer func() { _ = util.EtcdDown() }()
-	err := util.Etcd3Up(port)
-	if err != nil {
-		t.Errorf("Can't launch local etcd3 at %s: %s", tetcd, err)
+	_ = os.Setenv("ETCDCTL_API", "3")
+	secure := false
+	switch {
+	case strings.Index(tetcd, "https") == 0:
+		err := util.Etcd3SecureUp(port)
+		secure = true
+		_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
+		_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
+		_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(util.Certsdir(), "ca.pem"))
+		if err != nil {
+			t.Errorf("Can't launch secure etcd3 at %s: %s", tetcd, err)
+			return
+		}
+	case strings.Index(tetcd, "http") == 0:
+		err := util.Etcd3Up(port)
+		if err != nil {
+			t.Errorf("Can't launch insecure etcd3 at %s: %s", tetcd, err)
+			return
+		}
+	default:
+		t.Errorf("That's not a valid etcd2 endpoint: %s", tetcd)
 		return
 	}
-	c3, err := util.NewClient3(tetcd, false)
+	c3, err := util.NewClient3(tetcd, secure)
 	if err != nil {
 		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
 		return
