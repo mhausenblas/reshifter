@@ -28,7 +28,7 @@ etcddown () {
 }
 
 populate() {
-  etcdctl --endpoints=http://localhost:2379 set /kubernetes.io/namespaces/kube-system "."
+  etcdctl --endpoints=http://localhost:2379 put /kubernetes.io/namespaces/kube-system "."
 }
 
 populatesecure() {
@@ -67,9 +67,9 @@ cleanup () {
 ###############################################################################
 # MAIN
 printf "Test plan: etcd3 and secure etcd3, this can take up to 30 seconds!\n"
+export ETCDCTL_API=3
 
 # main test plan etcd3:
-
 printf "\n=========================================================================\n"
 printf "Ramping up etcd3 and populating it with a few keys:\n"
 etcd3up
