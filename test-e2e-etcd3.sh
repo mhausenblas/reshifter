@@ -30,7 +30,7 @@ etcddown () {
 populate() {
   etcdctl --endpoints=http://localhost:2379 put /kubernetes.io ""
   etcdctl --endpoints=http://localhost:2379 put /kubernetes.io/namespaces/kube-system "."
-  etcdctl --endpoints=http://localhost:2379 put /openshift.io ""
+  etcdctl --endpoints=http://localhost:2379 put /openshift.io "."
 }
 
 populatesecure() {
@@ -48,14 +48,16 @@ doversion() {
 dobackup() {
   printf "=========================================================================\n"
   printf "Performing backup operation:\n"
-  bid=$(http POST localhost:8080/v1/backup endpoint=$1 | jq -r .backupid)
+  todaybucket=reshifter-test-$(date "+%Y-%m-%d")
+  bid=$(http POST localhost:8080/v1/backup endpoint=$1 remote=play.minio.io:9000 bucket=$todaybucket | jq -r .backupid)
   printf "got backup ID %s\n" $bid
 }
 
 dorestore() {
   printf "\n=========================================================================\n"
   printf "Performing restore operation:\n"
-  http POST localhost:8080/v1/restore endpoint=$1 archive=$bid
+  todaybucket=reshifter-test-$(date "+%Y-%m-%d")
+  http POST localhost:8080/v1/restore endpoint=$1 archive=$bid remote=play.minio.io:9000 bucket=$todaybucket
 }
 
 cleanup () {

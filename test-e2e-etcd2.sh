@@ -26,17 +26,13 @@ etcddown () {
 }
 
 populate() {
-  curl localhost:2379/v2/keys/foo -XPUT -d value="bar"
-  curl localhost:2379/v2/keys/that/here -XPUT -d value="moar"
-  curl localhost:2379/v2/keys/this:also -XPUT -d value="escaped"
-  curl localhost:2379/v2/keys/other -XPUT -d value="value"
+  curl http://localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="."
+  curl http://localhost:2379/v2/keys/openshift.io -XPUT -d value="."
 }
 
 populatesecure() {
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/foo -XPUT -d value="bar"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/that/here -XPUT -d value="moar"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/this:also -XPUT -d value="escaped"
-  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/other -XPUT -d value="value"
+  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="."
+  curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/openshift.io -XPUT -d value="."
 }
 
 doversion() {
@@ -48,21 +44,23 @@ doversion() {
 dobackup() {
   printf "=========================================================================\n"
   printf "Performing backup operation:\n"
-  bid=$(http POST localhost:8080/v1/backup endpoint=$1 | jq -r .backupid)
+  todaybucket=reshifter-test-$(date "+%Y-%m-%d")
+  bid=$(http POST localhost:8080/v1/backup endpoint=$1 remote=play.minio.io:9000 bucket=$todaybucket | jq -r .backupid)
   printf "got backup ID %s\n" $bid
 }
 
 dorestore() {
   printf "\n=========================================================================\n"
   printf "Performing restore operation:\n"
-  http POST localhost:8080/v1/restore endpoint=$1 archive=$bid
+  todaybucket=reshifter-test-$(date "+%Y-%m-%d")
+  http POST localhost:8080/v1/restore endpoint=$1 archive=$bid remote=play.minio.io:9000 bucket=$todaybucket
 }
 
 cleanup () {
   printf "=========================================================================\n"
   printf "Cleaning up:\nremoving local backup file\ntearing down etcd2\n"
   rm /tmp/$bid.zip
-  kr=$(kill $RESHIFTER_PID)
+  pkill -f reshifter
   etcddown
 }
 
