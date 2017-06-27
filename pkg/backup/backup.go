@@ -114,11 +114,12 @@ func visit2(kapi client.KeysAPI, path string, fn types.Reap) error {
 // on the keys.
 func visit3(c3 *clientv3.Client, path string, fn types.Reap) error {
 	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Processing %s", path))
-	res, err := c3.Get(context.Background(), path+"/*", clientv3.WithRange(types.KubernetesPrefixLast))
+	// res, err := c3.Get(context.Background(), path+"/*", clientv3.WithRange(types.KubernetesPrefixLast))
+	res, err := c3.Get(context.Background(), "/kubernetes.io/namespaces/kube-system")
 	if err != nil {
 		return err
 	}
-	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Got %v", res.Kvs))
+	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Got %v", res))
 	for _, ev := range res.Kvs {
 		log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("key: %s, value: %s", ev.Key, ev.Value))
 		err = fn(string(ev.Key), string(ev.Value))

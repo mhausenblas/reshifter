@@ -11,7 +11,7 @@ type http >/dev/null 2>&1 || { echo >&2 "Need http command but it's not installe
 type jq >/dev/null 2>&1 || { echo >&2 "Need jq command but it's not installed. You can get it from https://stedolan.github.io/jq/"; exit 1; }
 
 etcd3up () {
-  dr=$(docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd \
+  dr=$(docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 --env ETCD_DEBUG quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd  \
   --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380)
   sleep 3s
 }
@@ -74,6 +74,7 @@ printf "\n======================================================================
 printf "Ramping up etcd3 and populating it with a few keys:\n"
 etcd3up
 populate
+sleep 2
 printf "\n=========================================================================\n"
 printf "Launching ReShifter in the background:\n"
 DEBUG=true reshifter &
