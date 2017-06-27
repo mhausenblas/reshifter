@@ -1,5 +1,47 @@
 # Development notes
 
+## demo
+
+```
+# Use Minio playground as S3 compatible storage backend:
+cd /Users/mhausenblas/Dropbox/dev/work/src/github.com/mhausenblas/reshifter
+export ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F
+export SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+
+# Launch etcd2:
+docker run --rm -p 2379:2379 \
+           --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 \
+          --advertise-client-urls http://0.0.0.0:2379 \
+          --listen-client-urls http://0.0.0.0:2379
+
+# Launch ReShifter:
+cd /Users/mhausenblas/Dropbox/dev/work/src/github.com/mhausenblas/reshifter
+reshifter
+
+# Populate etcd:
+curl http://localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d \
+         value="{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}"
+
+# Backup via UI:
+# Open http://localhost:8080/reshifter/
+# Config -> Backup
+# Open https://play.minio.io:9000/ and verify with bucket
+
+# Re-start etcd:
+docker kill test-etcd
+docker run --rm -p 2379:2379 \
+           --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 \
+          --advertise-client-urls http://0.0.0.0:2379 \
+          --listen-client-urls http://0.0.0.0:2379
+
+# Restore via UI:
+# Open http://localhost:8080/reshifter/
+# Restore
+
+# Query etcd to verify restore:
+http http://localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system
+```
+
 ## gRPC debugging
 
 When doing a:

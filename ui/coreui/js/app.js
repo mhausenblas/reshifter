@@ -32,6 +32,26 @@
 
 'use strict';
 
+
+function initRestore(){
+  var sepidx = default_remote.indexOf(' ')
+  var remote = ''
+  var bucket =''
+  if (sepidx != -1){
+    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
+    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+  }
+  $('#endpoint').val(default_ep);
+  last_backup_id = ibstorage.getItem('reshifter.info/last-backup-id')
+  if (last_backup_id !== '') {
+    console.info('using last-backup-id:'+last_backup_id)
+    $('#backupid').val(last_backup_id)
+  }
+  $('#restore-result').html('<div>Restoring from remote <code>'+ remote +'</code>, from bucket <code>' + bucket + '</code></div>');
+  console.info('restoring from remote [' + remote + '] from bucket [' + bucket + ']')
+}
+
+
 /****
 * MAIN NAVIGATION
 */
@@ -56,11 +76,7 @@ $(document).ready(function($){
     $('#backup-result').html('<div>Backing up to: <code>'+ default_remote +'</code></div>');
   }
 
-  last_backup_id = ibstorage.getItem('reshifter.info/last-backup-id')
-  if (last_backup_id !== '') {
-    console.info('reshifter.info/last-backup-id:'+last_backup_id)
-    $('#backupid').val(last_backup_id)
-  }
+  initRestore()
 
   // ACTIONS:
   $('#doexplore').click(function(event) {
@@ -79,8 +95,8 @@ $(document).ready(function($){
         success: function (d) {
           console.info(d);
           $('#config-result').html('<h2>Result</h2>')
-            $('#config-result').append('<div>etcd: <code>v' + d.etcdversion +', ' + d.etcdsec +'</code></div>')
-            $('#config-result').append('<div>Kubernetes: <code>' + d.k8sdistro +'</code></div>')
+          $('#config-result').append('<div>etcd: <code>v' + d.etcdversion +', ' + d.etcdsec +'</code></div>')
+          $('#config-result').append('<div>Kubernetes: <code>' + d.k8sdistro +'</code></div>')
         }
     })
   });
@@ -146,8 +162,7 @@ $(document).ready(function($){
     if (sepidx != -1){
       remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
       bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
-      payload = '{"endpoint": "' + ep + '", "backupid": "' + bid + '", "remote": "' + remote +'", "bucket": "' + bucket +'" }',
-      console.info('Backing up to remote [' + remote + '] in bucket [' + bucket + ']')
+      payload = '{"endpoint": "' + ep + '", "backupid": "' + bid + '", "remote": "' + remote +'", "bucket": "' + bucket +'" }'
     }
 
     $.ajax({
@@ -165,7 +180,7 @@ $(document).ready(function($){
           console.info(d);
           $('#restore-result').html('<h2>Result</h2>')
           if(d.outcome == 'success'){
-            $('#restore-result').append('<div>Restored ' + d.keysrestored + ' keys from backup with ID <code>' + bid +'</code> to <code>'+ ep + '</code>.</div>')
+            $('#restore-result').append('<div>Restored ' + d.keysrestored + ' keys from backup with ID <code>' + bid +'</code> to <code>'+ ep + '</code></div>')
           } else{
             $('#restore-result').append('<div>There was a problem carrying out the restore:<br><pre>'+ d + '</pre> </div>')
           }

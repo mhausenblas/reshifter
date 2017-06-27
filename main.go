@@ -22,7 +22,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 	r := mux.NewRouter()
-	r.PathPrefix("/reshifter/").Handler(http.StripPrefix("/reshifter/", http.FileServer(http.Dir("ui"))))
+	r.PathPrefix("/reshifter").Handler(http.StripPrefix("/reshifter", http.FileServer(http.Dir("ui"))))
 	log.Printf("Serving UI from: %s:%s/reshifter/", host, port)
 	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/v1/version", versionHandler)
@@ -34,7 +34,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler: r,
-		Addr:    "0.0.0.0:" + port,
+		Addr:    "127.0.0.1:" + port,
 	}
 	log.Fatal(srv.ListenAndServe())
 }
