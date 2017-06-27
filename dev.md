@@ -16,7 +16,7 @@ docker run --rm -p 2379:2379 \
 
 # Launch ReShifter:
 cd /Users/mhausenblas/Dropbox/dev/work/src/github.com/mhausenblas/reshifter
-reshifter
+DEBUG=true reshifter
 
 # Populate etcd:
 curl http://localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d \
