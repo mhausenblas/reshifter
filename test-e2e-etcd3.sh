@@ -13,14 +13,14 @@ type jq >/dev/null 2>&1 || { echo >&2 "Need jq command but it's not installed. Y
 etcd3up () {
   dr=$(docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 --env ETCD_DEBUG quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd  \
   --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380)
-  sleep 3s
+  sleep 2s
 }
 
 etcd3secureup () {
   dr=$(docker run --rm -d -v $(pwd)/certs/:/etc/ssl/certs -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd \
   --ca-file /etc/ssl/certs/ca.pem --cert-file /etc/ssl/certs/server.pem --key-file /etc/ssl/certs/server-key.pem \
   --advertise-client-urls https://0.0.0.0:2379 --listen-client-urls https://0.0.0.0:2379)
-  sleep 3s
+  sleep 2s
 }
 
 etcddown () {
@@ -28,7 +28,9 @@ etcddown () {
 }
 
 populate() {
+  etcdctl --endpoints=http://localhost:2379 put /kubernetes.io ""
   etcdctl --endpoints=http://localhost:2379 put /kubernetes.io/namespaces/kube-system "."
+  etcdctl --endpoints=http://localhost:2379 put /openshift.io ""
 }
 
 populatesecure() {
@@ -67,6 +69,8 @@ cleanup () {
 ###############################################################################
 # MAIN
 printf "Test plan: etcd3 and secure etcd3, this can take up to 30 seconds!\n"
+
+# make sure that etcd is using the v3 API:
 export ETCDCTL_API=3
 
 # main test plan etcd3:
@@ -74,11 +78,10 @@ printf "\n======================================================================
 printf "Ramping up etcd3 and populating it with a few keys:\n"
 etcd3up
 populate
-sleep 2
 printf "\n=========================================================================\n"
 printf "Launching ReShifter in the background:\n"
 DEBUG=true reshifter &
-sleep 3s
+sleep 2s
 doversion
 dobackup http://localhost:2379
 # etcddown
@@ -87,7 +90,7 @@ dobackup http://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"
 
-# sleep 3s
+# sleep 2s
 
 # main test plan etcd3 secure:
 # export RS_ETCD_CLIENT_CERT=$(pwd)/certs/client.pem
@@ -101,7 +104,7 @@ printf "\nDONE==================================================================
 # printf "Launching ReShifter in the background:\n"
 # reshifter &
 # RESHIFTER_PID=$!
-# sleep 3s
+# sleep 2s
 # doversion
 # dobackup https://localhost:2379
 # etcddown

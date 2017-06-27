@@ -32,13 +32,13 @@ GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
 ### Status
 
 - [x] support insecure and secure etcd v2
+- [ ] support insecure and secure etcd v3
 - [x] create backup, stored in local filesystem
 - [x] restore backup from local filesystem
 - [x] download backup
 - [x] offer a simple UI
-- [ ] upload backup in S3
-- [ ] restore backup from S3
-- [ ] support insecure and secure etcd v3
+- [x] back up to S3
+- [ ] restore from S3
 - [ ] deployment
 
 
@@ -59,7 +59,7 @@ We are using Go [dep](https://github.com/golang/dep) for dependency management.
 In general, for unit tests we use the `go test` command, for example
 
 ```
-$ cd pkg/etcd/
+$ cd pkg/backup/
 $ go test -v
 ```
 
