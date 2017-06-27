@@ -38,9 +38,10 @@ GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
 - [x] download backup
 - [x] offer a simple UI
 - [x] back up to S3
-- [ ] restore from S3
-- [ ] deployment
-
+- [x] restore from S3
+- [ ] run as scheduled job
+- [ ] deployment for Kubernetes
+- [ ] deployment for OpenShift (templates)
 
 ### Monitoring
 
