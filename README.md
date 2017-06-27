@@ -31,14 +31,14 @@ GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
 
 ### Status
 
-- [x] support insecure and secure etcd v2
-- [ ] support insecure and secure etcd v3
+- [x] support insecure and secure (SSL/TLS) etcd v2
+- [x] support insecure and secure (SSL/TLS) etcd v3
 - [x] create backup, stored in local filesystem
 - [x] restore backup from local filesystem
-- [x] download backup
-- [x] offer a simple UI
-- [x] back up to S3
-- [x] restore from S3
+- [x] download backup via API
+- [x] offer a simple Web UI
+- [x] back up to S3 compatible storage
+- [x] restore from S3 compatible storage
 - [ ] run as scheduled job
 - [ ] deployment for Kubernetes
 - [ ] deployment for OpenShift (templates)
