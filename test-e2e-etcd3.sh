@@ -20,7 +20,7 @@ etcd3secureup () {
   dr=$(docker run --rm -d -v $(pwd)/certs/:/etc/ssl/certs -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd \
   --ca-file /etc/ssl/certs/ca.pem --cert-file /etc/ssl/certs/server.pem --key-file /etc/ssl/certs/server-key.pem \
   --advertise-client-urls https://0.0.0.0:2379 --listen-client-urls https://0.0.0.0:2379)
-  sleep 1s
+  sleep 2s
 }
 
 etcddown () {
@@ -34,9 +34,9 @@ populate() {
 }
 
 populatesecure() {
-  # etcdctl --endpoints=http://localhost:2379 set /kubernetes.io/namespaces/kube-system .
-  # curl --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.p12 --pass reshifter -L https://localhost:2379/v2/keys/foo -XPUT -d value="bar"
-  echo TBD
+  etcdctl --endpoints=https://localhost:2379 --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.pem --key $(pwd)/certs/client-key.pem put /kubernetes.io ""
+  etcdctl --endpoints=https://localhost:2379 --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.pem --key $(pwd)/certs/client-key.pem put /kubernetes.io/namespaces/kube-system "."
+  etcdctl --endpoints=https://localhost:2379 --cacert $(pwd)/certs/ca.pem --cert $(pwd)/certs/client.pem --key $(pwd)/certs/client-key.pem put /openshift.io "."
 }
 
 doversion() {
@@ -90,25 +90,25 @@ dorestore http://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"
 
-# sleep 2s
+sleep 2s
 
 # main test plan etcd3 secure:
-# export RS_ETCD_CLIENT_CERT=$(pwd)/certs/client.pem
-# export RS_ETCD_CLIENT_KEY=$(pwd)/certs/client-key.pem
-# export RS_ETCD_CA_CERT=$(pwd)/certs/ca.pem
-# printf "\n=========================================================================\n"
-# printf "Ramping up secure etcd3 and populating it with a few keys:\n"
-# etcd3secureup
-# populatesecure
-# printf "\n=========================================================================\n"
-# printf "Launching ReShifter in the background:\n"
-# reshifter &
-# RESHIFTER_PID=$!
-# sleep 2s
-# doversion
-# dobackup https://localhost:2379
-# etcddown
-# etcd3secureup
-# dorestore https://localhost:2379
-# cleanup
-# printf "\nDONE=====================================================================\n"
+export RS_ETCD_CLIENT_CERT=$(pwd)/certs/client.pem
+export RS_ETCD_CLIENT_KEY=$(pwd)/certs/client-key.pem
+export RS_ETCD_CA_CERT=$(pwd)/certs/ca.pem
+printf "\n=========================================================================\n"
+printf "Ramping up secure etcd3 and populating it with a few keys:\n"
+etcd3secureup
+populatesecure
+printf "\n=========================================================================\n"
+printf "Launching ReShifter in the background:\n"
+reshifter &
+RESHIFTER_PID=$!
+sleep 2s
+doversion
+dobackup https://localhost:2379
+etcddown
+etcd3secureup
+dorestore https://localhost:2379
+cleanup
+printf "\nDONE=====================================================================\n"

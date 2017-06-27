@@ -138,7 +138,7 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 			return
 		}
 	default:
-		t.Errorf("That's not a valid etcd2 endpoint: %s", tetcd)
+		t.Errorf("That's not a valid etcd3 endpoint: %s", tetcd)
 		return
 	}
 	c3, err := util.NewClient3(tetcd, secure)

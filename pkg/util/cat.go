@@ -5,10 +5,62 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
 // Functions that provide container-assisted testing (CAT)
+
+// LaunchEtcd2 launches etcd in v2 on port, either in secure
+// or in insecure mode, depending on the scheme used in tetcd.
+func LaunchEtcd2(tetcd, port string) (bool, error) {
+	secure := false
+	switch {
+	case strings.Index(tetcd, "https") == 0:
+		err := Etcd2SecureUp(port)
+		secure = true
+		_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(Certsdir(), "client.pem"))
+		_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(Certsdir(), "client-key.pem"))
+		_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(Certsdir(), "ca.pem"))
+		if err != nil {
+			return secure, fmt.Errorf("Can't launch secure etcd2 at %s: %s", tetcd, err)
+		}
+	case strings.Index(tetcd, "http") == 0:
+		err := Etcd2Up(port)
+		if err != nil {
+			return secure, fmt.Errorf("Can't launch insecure etcd2 at %s: %s", tetcd, err)
+		}
+	default:
+		return secure, fmt.Errorf("That's not a valid etcd2 endpoint: %s", tetcd)
+	}
+	return secure, nil
+}
+
+// LaunchEtcd3 launches etcd in v3 on port, either in secure
+// or in insecure mode, depending on the scheme used in tetcd.
+func LaunchEtcd3(tetcd, port string) (bool, error) {
+	secure := false
+	switch {
+	case strings.Index(tetcd, "https") == 0:
+		err := Etcd3SecureUp(port)
+		secure = true
+		_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(Certsdir(), "client.pem"))
+		_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(Certsdir(), "client-key.pem"))
+		_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(Certsdir(), "ca.pem"))
+		if err != nil {
+			return secure, fmt.Errorf("Can't launch secure etcd2 at %s: %s", tetcd, err)
+		}
+	case strings.Index(tetcd, "http") == 0:
+		err := Etcd3Up(port)
+		if err != nil {
+			return secure, fmt.Errorf("Can't launch insecure etcd3 at %s: %s", tetcd, err)
+		}
+	default:
+		return secure, fmt.Errorf("That's not a valid etcd3 endpoint: %s", tetcd)
+
+	}
+	return secure, nil
+}
 
 // Etcd2Up launches an etcd2 server on port.
 func Etcd2Up(port string) error {

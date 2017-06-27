@@ -21,18 +21,19 @@ func TestRestore(t *testing.T) {
 	etcd2Restore(t, port, tetcd)
 	etcd3Restore(t, port, tetcd)
 	// testing secure etcd 2 and 3:
-	// tetcd := "https://localhost:" + port
-	// TBD
+	tetcd = "https://localhost:" + port
+	etcd2Restore(t, port, tetcd)
+	etcd3Restore(t, port, tetcd)
 }
 
 func etcd2Restore(t *testing.T, port, tetcd string) {
 	target := types.DefaultWorkDir
-	err := util.Etcd2Up(port)
+	secure, err := util.LaunchEtcd2(tetcd, port)
 	if err != nil {
-		t.Errorf("Can't launch local etcd2 at %s: %s", tetcd, err)
+		t.Errorf("%s", err)
 		return
 	}
-	c2, err := util.NewClient2(tetcd, false)
+	c2, err := util.NewClient2(tetcd, secure)
 	if err != nil {
 		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
 		return
@@ -51,7 +52,11 @@ func etcd2Restore(t *testing.T, port, tetcd string) {
 		t.Errorf("Error during backup: %s", err)
 	}
 	_ = util.EtcdDown()
-	err = util.Etcd2Up(port)
+	_, err = util.LaunchEtcd2(tetcd, port)
+	if err != nil {
+		t.Errorf("%s", err)
+		return
+	}
 	if err != nil {
 		t.Errorf("Can't launch local etcd2 at %s: %s", tetcd, err)
 		return
@@ -66,13 +71,14 @@ func etcd2Restore(t *testing.T, port, tetcd string) {
 }
 
 func etcd3Restore(t *testing.T, port, tetcd string) {
+	_ = os.Setenv("ETCDCTL_API", "3")
 	target := types.DefaultWorkDir
-	err := util.Etcd3Up(port)
+	secure, err := util.LaunchEtcd3(tetcd, port)
 	if err != nil {
-		t.Errorf("Can't launch local etcd3 at %s: %s", tetcd, err)
+		t.Errorf("%s", err)
 		return
 	}
-	c3, err := util.NewClient3(tetcd, false)
+	c3, err := util.NewClient3(tetcd, secure)
 	if err != nil {
 		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
 		return
@@ -90,7 +96,11 @@ func etcd3Restore(t *testing.T, port, tetcd string) {
 		t.Errorf("Error during backup: %s", err)
 	}
 	_ = util.EtcdDown()
-	err = util.Etcd3Up(port)
+	_, err = util.LaunchEtcd3(tetcd, port)
+	if err != nil {
+		t.Errorf("%s", err)
+		return
+	}
 	if err != nil {
 		t.Errorf("Can't launch local etcd3 at %s: %s", tetcd, err)
 		return
