@@ -1,6 +1,7 @@
 package restore
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -11,12 +12,24 @@ import (
 )
 
 func TestRestore(t *testing.T) {
-	target := types.DefaultWorkDir
-	port := "2379"
+	port := "4001"
+	// testing insecure etcd 2 and 3:
 	tetcd := "http://localhost:" + port
+	// backing up to remote https://play.minio.io:9000:
+	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
+	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
+	etcd2Restore(t, port, tetcd)
+	etcd3Restore(t, port, tetcd)
+	// testing secure etcd 2 and 3:
+	// tetcd := "https://localhost:" + port
+	// TBD
+}
+
+func etcd2Restore(t *testing.T, port, tetcd string) {
+	target := types.DefaultWorkDir
 	err := util.Etcd2Up(port)
 	if err != nil {
-		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
+		t.Errorf("Can't launch local etcd2 at %s: %s", tetcd, err)
 		return
 	}
 	c2, err := util.NewClient2(tetcd, false)
@@ -25,29 +38,68 @@ func TestRestore(t *testing.T) {
 		return
 	}
 	kapi := client.NewKeysAPI(c2)
-	// create some key-value pairs:
-	err = util.SetKV2(kapi, "/foo", "some")
+	err = util.SetKV2(kapi,
+		types.KubernetesPrefix+"/namespaces/kube-system",
+		"{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}",
+	)
 	if err != nil {
-		t.Errorf("Can't create key /foo: %s", err)
+		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
 		return
 	}
-	based, err := backup.Backup(tetcd, target)
+	backupid, err := backup.Backup(tetcd, target, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 	}
 	_ = util.EtcdDown()
 	err = util.Etcd2Up(port)
 	if err != nil {
-		t.Errorf("Can't launch local etcd at %s: %s", tetcd, err)
+		t.Errorf("Can't launch local etcd2 at %s: %s", tetcd, err)
 		return
 	}
-	afile := based
-	_, err = Restore(afile, target, tetcd)
+	_, err = Restore(tetcd, backupid, target, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during restore: %s", err)
 	}
-
 	// make sure to clean up:
-	_ = os.Remove(based + ".zip")
+	_ = os.Remove(backupid + ".zip")
+	_ = util.EtcdDown()
+}
+
+func etcd3Restore(t *testing.T, port, tetcd string) {
+	target := types.DefaultWorkDir
+	err := util.Etcd3Up(port)
+	if err != nil {
+		t.Errorf("Can't launch local etcd3 at %s: %s", tetcd, err)
+		return
+	}
+	c3, err := util.NewClient3(tetcd, false)
+	if err != nil {
+		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
+		return
+	}
+	_, err = c3.Put(context.Background(),
+		types.KubernetesPrefix+"/namespaces/kube-system",
+		"{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}",
+	)
+	if err != nil {
+		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
+		return
+	}
+	backupid, err := backup.Backup(tetcd, target, "play.minio.io:9000", "reshifter-test-cluster")
+	if err != nil {
+		t.Errorf("Error during backup: %s", err)
+	}
+	_ = util.EtcdDown()
+	err = util.Etcd3Up(port)
+	if err != nil {
+		t.Errorf("Can't launch local etcd3 at %s: %s", tetcd, err)
+		return
+	}
+	_, err = Restore(tetcd, backupid, target, "play.minio.io:9000", "reshifter-test-cluster")
+	if err != nil {
+		t.Errorf("Error during restore: %s", err)
+	}
+	// make sure to clean up:
+	_ = os.Remove(backupid + ".zip")
 	_ = util.EtcdDown()
 }

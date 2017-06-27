@@ -13,14 +13,14 @@ type jq >/dev/null 2>&1 || { echo >&2 "Need jq command but it's not installed. Y
 etcd3up () {
   dr=$(docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 --env ETCD_DEBUG quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd  \
   --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380)
-  sleep 2s
+  sleep 1s
 }
 
 etcd3secureup () {
   dr=$(docker run --rm -d -v $(pwd)/certs/:/etc/ssl/certs -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd \
   --ca-file /etc/ssl/certs/ca.pem --cert-file /etc/ssl/certs/server.pem --key-file /etc/ssl/certs/server-key.pem \
   --advertise-client-urls https://0.0.0.0:2379 --listen-client-urls https://0.0.0.0:2379)
-  sleep 2s
+  sleep 1s
 }
 
 etcddown () {
@@ -61,7 +61,7 @@ dorestore() {
 cleanup () {
   printf "=========================================================================\n"
   printf "Cleaning up:\nremoving local backup file\ntearing down etcd3\n"
-  rm ./$bid.zip
+  rm /tmp/$bid.zip
   pkill -f reshifter
   etcddown
 }
@@ -84,9 +84,9 @@ DEBUG=true reshifter &
 sleep 2s
 doversion
 dobackup http://localhost:2379
-# etcddown
-# etcd3up
-# dorestore http://localhost:2379
+etcddown
+etcd3up
+dorestore http://localhost:2379
 cleanup
 printf "\nDONE=====================================================================\n"
 

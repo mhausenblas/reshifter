@@ -22,20 +22,54 @@ import (
 // content of the sub-directories. On success returns the number of keys restored.
 // Example:
 //
-//		krestored, err := Restore("1498055655", "/tmp", "http://localhost:2379")
-func Restore(afile, target string, endpoint string) (int, error) {
+//		krestored, err := Restore("http://localhost:2379", "1498055655", "/tmp", "play.minio.io:9000", "reshifter-test-cluster")
+func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
 	numrestored := 0
-	err := unarch(filepath.Join(target, afile)+".zip", target)
+	err := unarch(filepath.Join(target, backupid)+".zip", target)
 	if err != nil {
 		return numrestored, err
 	}
-	target, _ = filepath.Abs(filepath.Join(target, afile, "/"))
+	target, _ = filepath.Abs(filepath.Join(target, backupid, "/"))
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
 		return 0, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
 	}
 	if strings.HasPrefix(version, "3") {
-		return 0, fmt.Errorf("Endpoint version %s.x not supported", version)
+		c3, cerr := util.NewClient3(endpoint, secure)
+		if cerr != nil {
+			return 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
+		}
+		defer func() { _ = c3.Close() }()
+		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Got etcd3 cluster with %v", c3.Endpoints()))
+
+		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Operating in target: %s", target))
+		err = filepath.Walk(target, func(path string, f os.FileInfo, e error) error {
+			log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Looking at path: %s, f: %v, err: %v", path, f.Name(), e))
+			key, _ := filepath.Rel(target, path)
+			key = "/" + strings.Replace(key, types.EscapeColon, ":", -1)
+			if f.Name() == types.ContentFile {
+				key = filepath.Dir(key)
+				c, cerr := ioutil.ReadFile(path)
+				if cerr != nil {
+					log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't read content file %s: %s", path, cerr))
+					return nil
+				}
+				_, err = c3.Put(context.Background(), key, string(c))
+
+				if err != nil {
+					log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't restore key %s: %s", key, err))
+					return nil
+				}
+				log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Restored key %s from %s", key, path))
+				numrestored++
+				return nil
+			}
+			return nil
+		})
+		if err != nil {
+			return 0, fmt.Errorf("Can't walk directory %s: %s", target, err)
+		}
+
 	}
 	if strings.HasPrefix(version, "2") {
 		c2, err := util.NewClient2(endpoint, secure)
@@ -44,6 +78,7 @@ func Restore(afile, target string, endpoint string) (int, error) {
 			return numrestored, fmt.Errorf("Can't connect to etcd: %s", err)
 		}
 		kapi := client.NewKeysAPI(c2)
+		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
 		log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Operating in target: %s", target))
 		err = filepath.Walk(target, func(path string, f os.FileInfo, e error) error {
 			log.WithFields(log.Fields{"func": "Restore"}).Debug(fmt.Sprintf("Looking at path: %s, f: %v, err: %v", path, f.Name(), e))
@@ -68,7 +103,7 @@ func Restore(afile, target string, endpoint string) (int, error) {
 			return nil
 		})
 		if err != nil {
-			return 0, fmt.Errorf("Can't traverse directory %s: %s", target, err)
+			return 0, fmt.Errorf("Can't walk directory %s: %s", target, err)
 		}
 	}
 	return numrestored, nil

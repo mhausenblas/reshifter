@@ -18,7 +18,7 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.1.55"
+	version := "0.1.56"
 	fmt.Fprintf(w, "ReShifter in version %s", version)
 }
 
@@ -152,7 +152,7 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		Outcome:      operationSuccess,
 		KeysRestored: 0,
 	}
-	krestored, err := restore.Restore(rreq.Archive, target, rreq.Endpoint)
+	krestored, err := restore.Restore(rreq.Endpoint, rreq.Archive, target, rreq.Remote, rreq.Bucket)
 	if err != nil {
 		rr.Outcome = operationFail
 		log.Error(err)

@@ -82,12 +82,12 @@ func etcd2Backup(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
 		return
 	}
-	based, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
+	backupid, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 		return
 	}
-	opath, _ := filepath.Abs(filepath.Join(types.DefaultWorkDir, based))
+	opath, _ := filepath.Abs(filepath.Join(types.DefaultWorkDir, backupid))
 	_, err = os.Stat(opath + ".zip")
 	if err != nil {
 		t.Errorf("No archive found: %s", err)
@@ -116,17 +116,16 @@ func etcd3Backup(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't create key %snamespaces/kube-system: %s", types.KubernetesPrefix, err)
 		return
 	}
-	based, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
+	backupid, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
 		return
 	}
-	opath, _ := filepath.Abs(filepath.Join(types.DefaultWorkDir, based))
+	opath, _ := filepath.Abs(filepath.Join(types.DefaultWorkDir, backupid))
 	_, err = os.Stat(opath + ".zip")
 	if err != nil {
 		t.Errorf("No archive found: %s", err)
 	}
 	// make sure to clean up:
 	_ = os.Remove(opath + ".zip")
-
 }
