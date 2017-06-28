@@ -51,14 +51,14 @@ func TestStore(t *testing.T) {
 func TestBackup(t *testing.T) {
 	port := "4001"
 	// testing insecure etcd 2 and 3:
-	tetcd := "http://localhost:" + port
+	tetcd := "http://127.0.0.1:" + port
 	// backing up to remote https://play.minio.io:9000:
 	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
 	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
 	etcd2Backup(t, port, tetcd)
 	etcd3Backup(t, port, tetcd)
 	// testing secure etcd 2 and 3:
-	tetcd = "https://localhost:" + port
+	tetcd = "https://127.0.0.1:" + port
 	etcd2Backup(t, port, tetcd)
 	etcd3Backup(t, port, tetcd)
 }

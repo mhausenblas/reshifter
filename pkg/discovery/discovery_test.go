@@ -46,11 +46,11 @@ func TestProbeEtcd(t *testing.T) {
 	for _, tt := range probetests {
 		testEtcdX(t, tt.launchfunc, tt.scheme, tt.port, tt.version, tt.secure)
 	}
-	_, _, err := ProbeEtcd("localhost")
+	_, _, err := ProbeEtcd("127.0.0.1")
 	if err == nil {
 		t.Error(err)
 	}
-	_, _, err = ProbeEtcd("localhost:2379")
+	_, _, err = ProbeEtcd("127.0.0.1:2379")
 	if err == nil {
 		t.Error(err)
 	}
@@ -60,7 +60,7 @@ func testEtcdX(t *testing.T, etcdLaunchFunc func(string) error, scheme string, p
 	defer func() {
 		_ = util.EtcdDown()
 	}()
-	tetcd := "localhost:" + port
+	tetcd := "127.0.0.1:" + port
 	err := etcdLaunchFunc(port)
 	if err != nil {
 		t.Errorf("Can't launch etcd at %s: %s", tetcd, err)
@@ -87,7 +87,7 @@ func testK8SX(t *testing.T, keys []string, version string, secure bool, distro t
 	defer func() {
 		_ = util.EtcdDown()
 	}()
-	tetcd := "http://localhost:4001"
+	tetcd := "http://127.0.0.1:4001"
 	err := util.Etcd2Up("4001")
 	if err != nil {
 		t.Errorf("Can't launch etcd at %s: %s", tetcd, err)
