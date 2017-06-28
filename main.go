@@ -32,7 +32,7 @@ func main() {
 	log.Printf("Serving API from: %s:%s/v1", host, port)
 	// r.PathPrefix("/reshifter/").Handler(http.StripPrefix("/reshifter/", http.FileServer(http.Dir("ui"))))
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./ui/")))
-	log.Printf("Serving UI from: %s:%s/reshifter/", host, port)
+	log.Printf("Serving UI from: %s:%s/", host, port)
 	http.Handle("/", r)
 	srv := &http.Server{
 		Handler: r,

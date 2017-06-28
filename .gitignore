@@ -1,6 +1,7 @@
 .DS_Store
 vendor/
 *.zip
+app.yaml
 
 # Binaries for programs and plugins
 *.exe
