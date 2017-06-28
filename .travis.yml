@@ -15,6 +15,8 @@ env:
     - secure:   "HRsmZOHRtQPBWxxDnZk1OKpIKNU8TXt05v2uzmLby/tW0LvDtdZuCIw1+FT8/fAxAQKRNLbFbA3B3SY0AQgvDor/lxHXjV9H/915H8983onI5T+OJIMgXg4vENjqS5DhmNKP0CDBjz02/yXk9ykiUZEyr3FgQCv/ZCs2h7cC1yGLgj2VQz3UB0we7v23xv7Cd3hQIHw2TEr09b4rBtyz6zxNLFCwB0lgLD6N/IKuahD+IoUfVLk8x8SM79wIn/jKlbr9MuZxUDaqFKlJCamJOQTcHzOrxbuq96Ig+haPNWcIsKnEa6WK1L3bGJPXYSjcuvjgmn3tW8mT5X3YVqlmQGkWcISQdP1tWIcI4qV1/GrV+TL1tT33Tnzt7S68WH+bZpXbZhwEiFJKR3zhZdZ9+7qSIj9XFByMebqur8Js3nO0lXzpX92pNUJmsWY/ivvlAKAnynMUUSOSRQzTSYr638fkxhl9XwICu9YmUWcHzQSo8op57M8tScalphavxzCTdslVQVXvRnWG+ZUBCkjhqvwF2udR1oZ0MMNy2JsoDI7GE1tVLJCsUEex0eyXIDyo/OnFsgu03LB2TzuxIO9YhQXUtc/sPzOqY6OmcTvd1VSDd8+gnlfHDWti2GPam8xO4OOmhZ/JNB1n6EDddITlhLl4GYS0rwNfKyGCx6Bmcm8="
 
 after_success:
+  - go get github.com/golang/dep/cmd/dep
+  - dep ensure
   - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
   - export REPO=mhausenblas/reshifter
