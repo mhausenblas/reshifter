@@ -1,0 +1,106 @@
+---
+kind:                    Template
+apiVersion:              v1
+metadata:
+  name:                  reshifter
+  annotations:
+    description:         A cluster admin backup and restore tool for Kubernetes and OpenShift
+    tags:                admin,kubernetes,backup,restore
+    iconClass:           icon-golang
+labels:
+  template:              reshifter
+objects:
+- kind:                  Service
+  apiVersion:            v1
+  metadata:
+    name:                reshifter-svc
+  spec:
+    ports:
+    - name:              web
+      port:              8080
+      targetPort:        8080
+    selector:
+      name:              reshifter
+- kind:                  Route
+  apiVersion:            v1
+  metadata:
+    name:                reshifter
+  spec:
+    host:                "${APPLICATION_DOMAIN}"
+    to:
+      kind:              Service
+      name:              reshifter
+- kind:                  ImageStream
+  apiVersion:            v1
+  metadata:
+    name:                reshifter
+- kind:                  BuildConfig
+  apiVersion:            v1
+  metadata:
+    name:                reshifter
+  spec:
+    source:
+      type:              Git
+      git:
+        uri:             "${SOURCE_REPOSITORY_URL}"
+        ref:             "${SOURCE_REPOSITORY_REF}"
+      contextDir:        "${CONTEXT_DIR}"
+    strategy:
+      type:              Docker
+    output:
+      to:
+        kind:            ImageStreamTag
+        name:            reshifter:latest
+    triggers:
+    - type:              ConfigChange
+    - type:              GitHub
+      github:
+        secret:          "${GITHUB_WEBHOOK_SECRET}"
+    postCommit:
+      script:            go test -v ./...
+- kind:                  DeploymentConfig
+  apiVersion:            v1
+  metadata:
+    name:                reshifter
+  spec:
+    strategy:
+      type:              Recreate
+    triggers:
+    - type:              ImageChange
+      imageChangeParams:
+        automatic:       true
+        containerNames:
+        - reshifter
+        from:
+          kind:          ImageStreamTag
+          name:          reshifter:latest
+    - type:              ConfigChange
+    replicas:            1
+    selector:
+      name:              reshifter
+    template:
+      metadata:
+        name:            reshifter
+        labels:
+          name:          reshifter
+      spec:
+        containers:
+        - name:          reshifter
+          image:         reshifter
+          ports:
+          - containerPort: 8080
+parameters:
+- name:                  SOURCE_REPOSITORY_URL
+  description:           URL of the repository with your application source code
+  value:                 https://github.com/mhausenblas/reshifter.git
+- name:                  SOURCE_REPOSITORY_REF
+  description:           A branch name, tag or other ref of your repository if you are not using the default branch
+- name:                  CONTEXT_DIR
+  description:           A relative path to your project if it is not in the root of your repository
+- name:                  APPLICATION_DOMAIN
+  description:           The exposed hostname that will route to the Beego service
+  value:                 reshifter.openshiftapps.com
+- name:                  GITHUB_WEBHOOK_SECRET
+  description:           Github trigger secret.  A difficult to guess string encoded as part of the webhook URL (not encrypted)
+  generate:              expression
+  from:                  "[a-zA-Z0-9]{40}"
