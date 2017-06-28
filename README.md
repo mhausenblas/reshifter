@@ -34,7 +34,7 @@ TBD.
 ### HTTP API
 
 ```
-GET  /reshifter           … the ReShifter Web UI
+GET  /                    … the ReShifter Web UI
 GET  /metrics             … Prometheus metrics
 GET  /v1/version          … list ReShifter status and version
 POST /v1/backup           … start backup
@@ -42,10 +42,6 @@ GET  /v1/backup/$BACKUPID … download backup $BACKUPID
 POST /v1/restore          … start restore
 GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
 ```
-
-### Monitoring
-
-Prometheus metrics are available via `/metrics`.
 
 ## Extending it
 
