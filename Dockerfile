@@ -7,6 +7,6 @@ RUN mkdir /app
 COPY ui/* /app/ui/
 WORKDIR /app
 RUN curl -s -L https://github.com/mhausenblas/reshifter/releases/download/v0.2-alpha/reshifter -o reshifter
-USER nobody
+RUN chmod +x reshifter
 EXPOSE 8080
 CMD ["/app/reshifter"]
