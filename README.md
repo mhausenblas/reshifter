@@ -9,17 +9,29 @@ A cluster admin backup and restore tool for Kubernetes distros such as OpenShift
 
 Supported:
 
-- Cluster: Kubernetes 1.5
-- Command line client: Linux, macOS
+- Cluster: Kubernetes 1.5 compatible distros
 - App: modern browsers
+
+### Status
+
+See [Trello board](https://trello.com/b/iOrEdJQ3/reshifter).
 
 ## Using it
 
-### Deployment
+### Deploy it on OpenShift
 
-TBD
+Note: requires an OpenShift 1.5 cluster and [oc](https://github.com/openshift/origin/releases/tag/v1.5.1) installed, locally.
 
-### API
+```
+$ make init
+$ make publish
+```
+
+### Deploy on vanilla Kubernetes
+
+TBD.
+
+### HTTP API
 
 ```
 GET  /reshifter           … the ReShifter Web UI
@@ -30,10 +42,6 @@ GET  /v1/backup/$BACKUPID … download backup $BACKUPID
 POST /v1/restore          … start restore
 GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
 ```
-
-### Status
-
-See [Trello board](https://trello.com/b/iOrEdJQ3/reshifter).
 
 ### Monitoring
 
