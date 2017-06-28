@@ -3,6 +3,7 @@ LABEL version="0.2" \
       description="Kubernetes admin tool for backup and restoring clusters" \
       maintainer="michael.hausenblas@gmail.com"
 
+USER nobody
 RUN mkdir /app
 COPY ui/* /app/ui/
 WORKDIR /app

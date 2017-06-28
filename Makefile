@@ -21,9 +21,8 @@ build :
 	@oc logs -f bc/$(app_name)
 
 publish :
-	@oc expose dc $(app_name) --port=$(public_port)
 	@oc expose svc/$(app_name)
 
 destroy :
 	@rm app.yaml
-	@oc delete project $(project_name)
+	@oc delete project reshifter
