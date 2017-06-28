@@ -12,6 +12,11 @@ hub :
 	# rm reshifter
 
 init :
+	@oc create serviceaccount router -n reshifter
+	@oc adm policy add-scc-to-user privileged system:serviceaccount:reshifter:router
+	@oc adm policy add-scc-to-user privileged -z router
+	@oc adm policy add-scc-to-user hostnetwork -z router
+	@oc adm policy add-cluster-role-to-user system:router system:serviceaccount:default:router
 	@oc new-project reshifter
 	@oc new-app --strategy=docker --name='$(app_name)' . --output yaml > app.yaml
 	@oc apply -f app.yaml
@@ -21,7 +26,7 @@ build :
 	@oc logs -f bc/$(app_name)
 
 publish :
-	@oc expose svc/$(app_name)
+	@oc expose svc/$(app_name) --path /reshifter/
 
 destroy :
 	@rm app.yaml
