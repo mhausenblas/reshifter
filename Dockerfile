@@ -5,7 +5,7 @@ LABEL version="0.2" \
 
 COPY ui/* /app/ui/
 WORKDIR /app
-RUN curl -s -L https://github.com/mhausenblas/reshifter/releases/download/v0.2-alpha/reshifter -o reshifter && \
+RUN curl -s -L https://github.com/mhausenblas/reshifter/releases/download/v0.2.3-alpha/reshifter -o reshifter && \
     chmod +x reshifter
 EXPOSE 8080
 CMD ["/app/reshifter"]
