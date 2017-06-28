@@ -8,6 +8,8 @@ language:       go
 go:
   - '1.8'
 
+group:          deprecated-2017Q2
+
 env:
   global:
     - secure:   "WiAhUlBppmJ6HEwhr/twFaxvSylv8SJGTDfrYfZMT0nmpGWP6CQdenyUOsv1MJbWdUM5eS6V0Nst0jc4lVNXwrMJpw0ydtAIETP9mZcnMPW1IG/XcAbugofDshZd28+/pbjbRP4Qh3gITI2EDxLOAnh6FiSrTIjNalPzrHdDRVL2t0K99ZsZGbz5BlRIzfDsF39jZBxGnWJGIlfPh/FWsBKmI3z5ripWCEdwE5UJUeE628EL1tvnIGfXjNNWLd+DKGsdTcVsemge6UTslhmKdoVQjWuOkNiJTo77fod+Pkx1F9aU7rjiNgifwizVYB1Z4CxmvwSRDEIkNcAju5vX+2c6NI1cVK+SRiXoLalNBDNd3KEOws3VNNpLjIcP7YkbKY5dXf8cFFCAV3brPWm1bK/DnxyvR494Psr7rUZmV6tMBLaKQzPUw4pF6WGS7tt9s3ApvR2ZZ8b57gsPiRl+tVIvhjXO3gyf7vmBl8YgHgyjnG4h7+GGHlcbNhMNH6vjJHUDJmGXOyvGjKH280eLCgsI1BqaZYZe6H/0NRd4iFPU6/mUTCRbgmwHQHIKLwcKduCJVIElji9ZWUJq+c3ojBOCf8UQpMN7i226hxqK6tYEe5q+Jm0svduJCyxGAvVw9+afSMw6UMp/jb/CiN3KrAVQI8UIuk/M6ZJ+FxStLYQ="
