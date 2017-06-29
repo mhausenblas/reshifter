@@ -1,5 +1,16 @@
 # Development notes
 
+## local development
+
+```
+# launch ReShifter:
+docker run --rm -p 8080:8080 quay.io/mhausenblas/reshifter:0.2.4
+
+# launch test etcd, note: use the result of the last command as the endpoint in the UI/API:
+docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379
+docker inspect test-etcd | jq -r '.[0].NetworkSettings.IPAddress'
+```
+
 ## demo
 
 ```
