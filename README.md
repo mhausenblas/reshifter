@@ -120,6 +120,20 @@ If you don't have `dep` installed yet, do `go get -u github.com/golang/dep/cmd/d
 $ dep ensure
 ```
 
+### Builds and releases
+
+Following [semantic versioning](http://semver.org/), the canonical ReShifter release version is defined in one place only,
+in the [Makefile](Makefile). This version is then used in the Go code, in the Docker image as a tag and for all downstream
+deployments.
+
+A new release (Linux binary on GitHub and image on quay.io) is cut using the following process:
+
+```
+$ make release
+```
+
+Above builds a container image locally and pushes it to quay.io. Followed by an, ATM manual, release on GitHub, using the `reshifter` binary.
+
 ### Unit tests
 
 In general, for unit tests we use the `go test` command, for example:

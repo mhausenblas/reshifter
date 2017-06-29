@@ -2,19 +2,21 @@ reshifter_version := 0.2.4
 git_version := `git rev-parse HEAD`
 app_name := reshifter-app
 
-.PHONY: gbuild cbuild cpush registry init build publish destroy
+.PHONY: gbuild cbuild cpush release init build publish destroy
 
 gbuild :
 	@GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
 
 cbuild :
 	@docker build -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
-	@rm reshifter
 
 cpush :
 	@docker push quay.io/mhausenblas/reshifter:$(reshifter_version)
 
-registry : gbuild cbuild cpush
+release : gbuild cbuild cpush
+
+clean :
+	@rm reshifter
 
 init :
 	@oc new-project reshifter
