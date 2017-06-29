@@ -137,10 +137,14 @@ deployments.
 A new release (Linux binary on GitHub and image on quay.io) is cut using the following process:
 
 ```
-$ make release
-```
+# 1. Generate the binary:
+$ make gbuild
 
-Above builds a container image locally and pushes it to quay.io. Followed by an, ATM manual, release on GitHub, using the `reshifter` binary.
+# 2. Release on GitHub, using $reshifter_version
+
+# 3. Build a container image locally and pushes it to quay.io:
+$ make crelease
+```
 
 ### Vendoring
 

@@ -8,12 +8,12 @@ gbuild :
 	@GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
 
 cbuild :
-	@docker build -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
+	@docker build --build-arg release_version=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
 
 cpush :
 	@docker push quay.io/mhausenblas/reshifter:$(reshifter_version)
 
-release : gbuild cbuild cpush
+crelease : cbuild cpush
 
 clean :
 	@rm reshifter
