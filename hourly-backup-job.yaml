@@ -1,0 +1,20 @@
+apiVersion:              batch/v2alpha1
+kind:                    CronJob
+metadata:
+  name:                  hourly-backup
+spec:
+  schedule:              "0 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name:        counter
+            image:       centos:7
+            command:
+              - "bin/bash"
+              - "-c"
+              - "sudo yum install -y python-pip"
+              - "sudo pip install httpie"
+              - "http POST reshifter:8080/v1/backup endpoint=test-etcd remote=play.minio.io:9000 bucket=reshifter-xxx"
+          restartPolicy: OnFailure
