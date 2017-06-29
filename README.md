@@ -12,7 +12,7 @@ Supported:
 - Cluster: Kubernetes 1.5 compatible distros
 - App: modern browsers
 
-### Status
+### Status and roadmap
 
 See [Trello board](https://trello.com/b/iOrEdJQ3/reshifter).
 
@@ -27,7 +27,7 @@ $ make init
 $ make publish
 ```
 
-### Deploy on vanilla Kubernetes
+### Deploy it on vanilla Kubernetes
 
 TBD.
 
@@ -43,35 +43,23 @@ POST /v1/restore          … start restore
 GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
 ```
 
-## Extending it
 
-To extend ReShifter or fixing issues, please consider the following.
+## Testbed
 
-### Vendoring
+There are three types of integration/perf/scale tests in ReShifter, all available in [testbed](testbed/):
 
-We are using Go [dep](https://github.com/golang/dep) for dependency management.
-If you don't have `dep` installed yet, do `go get -u github.com/golang/dep/cmd/dep` now and then:
+- end-to-end tests
+- synthetic tests
+- tests based on cluster dumps
 
-```
-$ dep ensure
-```
+### End-to-end tests
 
-### Testing
-
-There are two types of tests in ReShifter:
-
-- The [testbed](testbed/), like end-to-end testing, synth tests and cluster dumps
-- Unit tests, in Go
-
-#### Testbed
-
-For **end-to-end tests** do the following. Note that each might take up to 30s and that you MUST execute them from within the `testbed/` directory:
+For end-to-end tests do the following. Note that each might take up to 30s and that you MUST execute them from within the `testbed/` directory:
 
 ```
 $ cd testbed/
 $ e2e-etcd2.sh
 $ e2e-etcd3.sh
-
 ```
 
 The end-to-end tests have the following dependencies:
@@ -95,13 +83,35 @@ Legend:
 
 See also the notes on [setting up etcd in a secure way](testbed/certs/README.md) for more details on how to change or extend these tests.
 
-For **synth tests**, execute `testbed/gen-synth-testbed.sh`, which creates a number of Kubernetes objects and requires access to a Kubernetes cluster.
+### Synthetic tests
 
-#### Unit tests
+For synth tests, execute `testbed/gen-synth-testbed.sh`, which creates a number of Kubernetes objects and requires access to a Kubernetes cluster.
 
-In general, for unit tests we use the `go test` command, for example
+### Cluster dumps
+
+TBD.
+
+
+## Extending it
+
+To extend ReShifter or fix issues, please consider the following.
+
+### Vendoring
+
+We are using Go [dep](https://github.com/golang/dep) for dependency management.
+If you don't have `dep` installed yet, do `go get -u github.com/golang/dep/cmd/dep` now and then:
+
+```
+$ dep ensure
+```
+
+### Unit tests
+
+In general, for unit tests we use the `go test` command, for example:
 
 ```
 $ cd pkg/backup/
 $ go test -v
 ```
+
+Please do make sure all unit tests pass before sending in a PR.
