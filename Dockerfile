@@ -10,4 +10,5 @@ WORKDIR /app
 RUN curl -s -L 'https://github.com/mhausenblas/reshifter/releases/download/v'$rversion'-alpha/reshifter' -o reshifter && \
     chmod +x reshifter
 EXPOSE 8080
+USER 1001
 CMD ["/app/reshifter"]

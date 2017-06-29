@@ -4,10 +4,11 @@
 
 ```
 # launch ReShifter:
-docker run --rm -p 8080:8080 quay.io/mhausenblas/reshifter:0.2.4
+docker run --rm -e "ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F" -e "SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" --name reshifter -p 8080:8080 quay.io/mhausenblas/reshifter:0.2.4
 
 # launch test etcd, note: use the result of the last command as the endpoint in the UI/API:
-docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379
+docker run --rm -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379
+curl http://localhost:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="."
 docker inspect test-etcd | jq -r '.[0].NetworkSettings.IPAddress'
 ```
 
