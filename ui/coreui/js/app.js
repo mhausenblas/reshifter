@@ -4,12 +4,8 @@
 
   // In-browser Storage
   var ibstorage = window.localStorage;
-  var default_ep = 'http://localhost:2379';
-  var default_remote = 's3 play.minio.io:9000 reshifter-xxx';
-
-  // ibstorage.setItem(key, val);
-  // ibstorage.getItem(key);
-  // ibstorage.removeItem(key);
+  var default_ep = '';
+  var default_remote = '';
 
   //Main navigation
   $.navigation = $('nav > ul.nav');
@@ -31,6 +27,18 @@
   $.grayLightest =  '#f8f9fa';
 
 'use strict';
+
+function setDefaults(){
+  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
+  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+
+  if (default_ep == null) {
+    ibstorage.setItem('reshifter.info/default-etcd', 'http://localhost:2379');
+  }
+  if (default_remote == null) {
+    ibstorage.setItem('reshifter.info/default-remote', 's3 play.minio.io:9000 reshifter-xxx');
+  }
+}
 
 
 function initRestore(){
@@ -58,6 +66,8 @@ function initRestore(){
 
 $(document).ready(function($){
 
+  setDefaults()
+
   // Check if we have any defaults and set UI elements accordingly:
   default_ep = ibstorage.getItem('reshifter.info/default-etcd');
   if (default_ep !== '') {
@@ -66,19 +76,22 @@ $(document).ready(function($){
   }
   default_remote = ibstorage.getItem('reshifter.info/default-remote');
   if (default_remote !== '') {
-    console.info('reshifter.info/default-remote:'+default_remote)
-    var sepidx = default_remote.indexOf(' ')
-    var bucket = default_remote.substring(default_remote.lastIndexOf(' ')+1)
+    console.info('reshifter.info/default-remote:'+default_remote);
+    var sepidx = default_remote.indexOf(' ');
+    var remote = '';
+    var bucket = '';
     if (sepidx != -1){
+      bucket = default_remote.substring(default_remote.lastIndexOf(' ')+1);
+      remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
       $("#remote[value=s3]").prop('checked', true);
       $('#bucket').val(bucket);
     } else {
-      $('#remote').val(default_remote)
+      $('#remote').val(default_remote);
     }
-    $('#backup-result').html('<div>Backing up to: <code>'+ default_remote +'</code></div>');
+    $('#backup-result').html('<div>Backing up to: <code>'+ remote +'</code>, into bucket <code>' + bucket + '</code></div>');
   }
 
-  initRestore()
+  initRestore();
 
   // ACTIONS:
   $('#doexplore').click(function(event) {
