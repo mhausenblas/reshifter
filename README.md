@@ -13,18 +13,19 @@ Supported:
 - Cluster: Kubernetes 1.5 compatible distros
 - App: modern browsers
 
-Index:
+***Index:***
 
 - [Using it](#using-it)
+  - [Deploy it locally](#deploy-it-locally)
   - [Deploy it on OpenShift](#deploy-it-on-openshift)
   - [Deploy it on vanilla Kubernetes](#deploy-it-on-vanilla-kubernetes)
-  - [HTTP API](#http-api)
 - [Testbed](#testbed)
   - [End-to-end tests](#end-to-end-tests)
   - [Synthetic tests](#synthetic-tests)
   - [Cluster dumps](#cluster-dumps)
 - [Extending it](#extending-it)
   - [Vendoring](#vendoring)
+  - [Builds and releases](#builds-and-releases)
   - [Unit tests](#unit-tests)
 
 ### Status and roadmap
@@ -32,6 +33,35 @@ Index:
 See [Trello board](https://trello.com/b/iOrEdJQ3/reshifter).
 
 ## Using it
+
+### Deploy it locally
+
+If you want to use the ReShifter app, that is the Web UI, you need to use the Docker image since it bundles the static assets such as HTML, CSS, and JS and the Go binary.
+For example, to launch the ReShifter app locally, do:
+
+```
+$ docker run --rm -p 8080:8080 quay.io/mhausenblas/reshifter:0.2.4
+```
+
+If you want to use the ReShifter API, for example as a head-less service, you can simply use the binary, no other dependencies required:
+
+```
+$ curl -s -L https://github.com/mhausenblas/reshifter/releases/download/v0.2.4-alpha/reshifter -o reshifter
+$ chmod +x reshifter
+$ ./reshifter
+```
+
+The ReShifter HTTP API exposes the following endpoints:
+
+```
+GET  /                    … the ReShifter Web UI
+GET  /metrics             … Prometheus metrics
+GET  /v1/version          … list ReShifter status and version
+POST /v1/backup           … start backup
+GET  /v1/backup/$BACKUPID … download backup $BACKUPID
+POST /v1/restore          … start restore
+GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
+```
 
 ### Deploy it on OpenShift
 
@@ -45,19 +75,6 @@ $ make publish
 ### Deploy it on vanilla Kubernetes
 
 TBD.
-
-### HTTP API
-
-```
-GET  /                    … the ReShifter Web UI
-GET  /metrics             … Prometheus metrics
-GET  /v1/version          … list ReShifter status and version
-POST /v1/backup           … start backup
-GET  /v1/backup/$BACKUPID … download backup $BACKUPID
-POST /v1/restore          … start restore
-GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
-```
-
 
 ## Testbed
 
@@ -111,15 +128,6 @@ TBD.
 
 To extend ReShifter or fix issues, please consider the following.
 
-### Vendoring
-
-We are using Go [dep](https://github.com/golang/dep) for dependency management.
-If you don't have `dep` installed yet, do `go get -u github.com/golang/dep/cmd/dep` now and then:
-
-```
-$ dep ensure
-```
-
 ### Builds and releases
 
 Following [semantic versioning](http://semver.org/), the canonical ReShifter release version is defined in one place only,
@@ -133,6 +141,15 @@ $ make release
 ```
 
 Above builds a container image locally and pushes it to quay.io. Followed by an, ATM manual, release on GitHub, using the `reshifter` binary.
+
+### Vendoring
+
+We are using Go [dep](https://github.com/golang/dep) for dependency management.
+If you don't have `dep` installed yet, do `go get -u github.com/golang/dep/cmd/dep` now and then:
+
+```
+$ dep ensure
+```
 
 ### Unit tests
 
