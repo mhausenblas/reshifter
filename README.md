@@ -12,6 +12,20 @@ Supported:
 - Cluster: Kubernetes 1.5 compatible distros
 - App: modern browsers
 
+Index:
+
+- [Using it](#using-it)
+  - [Deploy it on OpenShift](#deploy-it-on-openshift)
+  - [Deploy it on vanilla Kubernetes](#deploy-it-on-vanilla-kubernetes)
+  - [HTTP API](#http-api)
+- [Testbed](#testbed)
+  - [End-to-end tests](#end-to-end-tests)
+  - [Synthetic tests](#synthetic-tests)
+  - [Cluster dumps](#cluster-dumps)
+- [Extending it](#extending-it)
+  - [Vendoring](#vendoring)
+  - [Unit tests](#unit-tests)
+
 ### Status and roadmap
 
 See [Trello board](https://trello.com/b/iOrEdJQ3/reshifter).
