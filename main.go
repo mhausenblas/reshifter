@@ -22,7 +22,6 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 	r := mux.NewRouter()
-	// ServeStatic(r, "/ui/")
 	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/v1/version", versionHandler)
 	r.HandleFunc("/v1/explorer", explorerHandler)
@@ -30,7 +29,6 @@ func main() {
 	r.HandleFunc("/v1/backup/{afile:[0-9]+}", backupRetrieveHandler).Methods("GET")
 	r.HandleFunc("/v1/restore", restoreHandler)
 	log.Printf("Serving API from: %s:%s/v1", host, port)
-	// r.PathPrefix("/reshifter/").Handler(http.StripPrefix("/reshifter/", http.FileServer(http.Dir("ui"))))
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./ui/")))
 	log.Printf("Serving UI from: %s:%s/", host, port)
 	http.Handle("/", r)

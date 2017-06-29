@@ -18,8 +18,7 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	version := "0.2.3"
-	fmt.Fprintf(w, "ReShifter in version %s", version)
+	fmt.Fprintf(w, "ReShifter in version %s", releaseVersion)
 }
 
 // explorerHandler responds to HTTP GET requests such as:

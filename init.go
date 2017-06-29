@@ -10,8 +10,9 @@ const (
 )
 
 var (
-	backupTotal  *prometheus.CounterVec
-	keysRestored prometheus.Counter
+	releaseVersion string
+	backupTotal    *prometheus.CounterVec
+	keysRestored   prometheus.Counter
 )
 
 func init() {
