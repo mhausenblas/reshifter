@@ -50,24 +50,38 @@ To extend ReShifter or fixing issues, please consider the following.
 ### Vendoring
 
 We are using Go [dep](https://github.com/golang/dep) for dependency management.
+If you don't have `dep` installed yet, do `go get -u github.com/golang/dep/cmd/dep` now and then:
+
+```
+$ dep ensure
+```
 
 ### Testing
 
-In general, for unit tests we use the `go test` command, for example
+There are two types of tests in ReShifter:
+
+- The [testbed](testbed/), like end-to-end testing, synth tests and cluster dumps
+- Unit tests, in Go
+
+#### Testbed
+
+For **end-to-end tests** do the following. Note that each might take up to 30s and that you MUST execute them from within the `testbed/` directory:
 
 ```
-$ cd pkg/backup/
-$ go test -v
+$ cd testbed/
+$ e2e-etcd2.sh
+$ e2e-etcd3.sh
+
 ```
 
-For end-to-end tests, run `./test-e2e-etcd*.sh`. Note that full end-to-end tests require the following:
+The end-to-end tests have the following dependencies:
 
 - Docker CE (tested with v1.17)
 - [etcdctl](https://github.com/coreos/etcd/tree/master/etcdctl)
 - [http](https://httpie.org)
 - [jq](https://stedolan.github.io/jq/)
 
-The test matrix is as follows:
+The end-to-end test matrix is as follows:
 
 |version   | insecure  | secure       |
 | --------:| --------- | ------------ |
@@ -79,4 +93,15 @@ Legend:
 - `*` … based on the etcd2 [security flags](https://coreos.com/etcd/docs/latest/v2/configuration.html#security-flags) and the etcd2 [security model](https://coreos.com/etcd/docs/latest/v2/security.html)
 - `**` … based on the etcd3 [security flags](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#security-flags) and the etcd3 [security model](https://coreos.com/etcd/docs/latest/op-guide/security.html)
 
-See also the notes on [setting up etcd in a secure way](testbed/certs/README.md).
+See also the notes on [setting up etcd in a secure way](testbed/certs/README.md) for more details on how to change or extend these tests.
+
+For **synth tests**, execute `testbed/gen-synth-testbed.sh`, which creates a number of Kubernetes objects and requires access to a Kubernetes cluster.
+
+#### Unit tests
+
+In general, for unit tests we use the `go test` command, for example
+
+```
+$ cd pkg/backup/
+$ go test -v
+```
