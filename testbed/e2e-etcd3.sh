@@ -85,7 +85,7 @@ etcd3up
 populate
 printf "\n=========================================================================\n"
 printf "Launching ReShifter in the background:\n"
-DEBUG=true reshifter &
+reshifter &
 sleep 2s
 doversion
 dobackup http://localhost:2379

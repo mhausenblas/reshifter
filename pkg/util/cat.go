@@ -149,7 +149,7 @@ func EtcdDown() error {
 // where the pre-generated certs and keys are.
 func Certsdir() string {
 	base, _ := os.Getwd()
-	certsrel := filepath.Join(base, "../../certs")
+	certsrel := filepath.Join(base, "../../testbed/certs")
 	certs, _ := filepath.Abs(certsrel)
 	return certs
 }
