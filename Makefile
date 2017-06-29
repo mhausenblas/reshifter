@@ -8,7 +8,7 @@ gbuild :
 
 hub :
 	@docker build -t mhausenblas/reshifter:$(git_version) .
-	# docker push docker.io/mhausenblas/reshifter:$(git_version)
+	@docker push quay.io/mhausenblas/reshifter:$(git_version)
 	# rm reshifter
 
 init :
