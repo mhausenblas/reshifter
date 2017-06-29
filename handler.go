@@ -107,15 +107,15 @@ func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 //		http GET localhost:8080/v1/backup/1498230556
 func backupRetrieveHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	afile := vars["afile"]
-	if !util.IsBackupID(afile) {
-		abortreason := fmt.Sprintf("Aborting backup retrieve: %s is not a valid backup ID", afile)
+	backupid := vars["backupid"]
+	if !util.IsBackupID(backupid) {
+		abortreason := fmt.Sprintf("Aborting backup retrieve: %s is not a valid backup ID", backupid)
 		http.Error(w, abortreason, http.StatusConflict)
 		log.Error(abortreason)
 		return
 	}
 	target := types.DefaultWorkDir
-	c, err := ioutil.ReadFile(filepath.Join(target, afile) + ".zip")
+	c, err := ioutil.ReadFile(filepath.Join(target, backupid) + ".zip")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)

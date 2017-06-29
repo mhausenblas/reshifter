@@ -26,7 +26,7 @@ func main() {
 	r.HandleFunc("/v1/version", versionHandler)
 	r.HandleFunc("/v1/explorer", explorerHandler)
 	r.HandleFunc("/v1/backup", backupCreateHandler).Methods("POST")
-	r.HandleFunc("/v1/backup/{afile:[0-9]+}", backupRetrieveHandler).Methods("GET")
+	r.HandleFunc("/v1/backup/{backupid:[0-9]+}", backupRetrieveHandler).Methods("GET")
 	r.HandleFunc("/v1/restore", restoreHandler)
 	log.Printf("Serving API from: %s:%s/v1", host, port)
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./ui/")))

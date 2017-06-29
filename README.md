@@ -51,17 +51,7 @@ $ chmod +x reshifter
 $ ./reshifter
 ```
 
-The ReShifter HTTP API exposes the following endpoints:
-
-```
-GET  /                    … the ReShifter Web UI
-GET  /metrics             … Prometheus metrics
-GET  /v1/version          … list ReShifter status and version
-POST /v1/backup           … start backup
-GET  /v1/backup/$BACKUPID … download backup $BACKUPID
-POST /v1/restore          … start restore
-GET  /v1/explorer         … auto-discovery of etcd and Kubernetes
-```
+The ReShifter HTTP API is defined in and available via Swagger: [swaggerhub.com/apis/mhausenblas/reshifter/1.0.0](https://swaggerhub.com/apis/mhausenblas/reshifter/1.0.0)
 
 ### Deploy it on OpenShift
 
