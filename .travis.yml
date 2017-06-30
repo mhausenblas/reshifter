@@ -1,26 +1,31 @@
-sudo:            required
+sudo:             required
 
 notifications:
   email:
-    on_success:  always
-    on_failure:  never
+    on_success:   always
+    on_failure:   never
 
-service:         docker
+service:          docker
 
-language:        go
+language:         go
 
 go:
   - 1.8
 
-before_script:
+
+before_install:
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
 
-script:
+install:
   - make gbuild
 
-before_install:  cd testbed
+before_script:
+  - sudo apt-get update && apt-get install -y curl && curl --silent https://bootstrap.pypa.io/get-pip.py | python3 && pip install --upgrade httpie
+apt-get update && apt-get install -y curl && curl --silent https://bootstrap.pypa.io/get-pip.py |python3 && pip install --upgrade httpie
+  - sudo apt-get install jq
+  - cd testbed
 
-install:
+script:
   - ./e2e-etcd2.sh
   - ./e2e-etcd3.sh
