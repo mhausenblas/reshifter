@@ -2,6 +2,7 @@
 vendor/
 *.zip
 app.yaml
+rcli/rcli-*
 
 # Binaries for programs and plugins
 *.exe

@@ -70,7 +70,7 @@ TBD.
 
 ### CLI tool
 
-ReShifter also provides for a CLI tool called `rcli`—get binary releases for Linux and macOS [here](https://github.com/mhausenblas/reshifter/releases/tag/-alpha)—with the following signature:
+ReShifter also provides for a CLI tool called `rcli`—get binary releases for Linux and macOS [here](https://github.com/mhausenblas/reshifter/releases/tag/v0.3.1-alpha)—with the following signature:
 
 ```
 $ rcli -h
