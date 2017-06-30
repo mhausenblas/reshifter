@@ -1,5 +1,12 @@
 sudo:            required
 
+notifications:
+  email:
+    on_success:  always
+    on_failure:  never
+
+service:         docker
+
 language:        go
 
 go:
