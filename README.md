@@ -69,7 +69,7 @@ TBD.
 
 ## Testbed
 
-There are three types of integration/perf/scale tests in ReShifter, all available in [testbed](testbed/):
+There are three types of integration/perf/scale tests in ReShifter, all available in [testbed](https://github.com/mhausenblas/reshifter/tree/master/testbed/):
 
 - end-to-end tests
 - synthetic tests
@@ -104,7 +104,7 @@ Legend:
 - `*` … based on the etcd2 [security flags](https://coreos.com/etcd/docs/latest/v2/configuration.html#security-flags) and the etcd2 [security model](https://coreos.com/etcd/docs/latest/v2/security.html)
 - `**` … based on the etcd3 [security flags](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#security-flags) and the etcd3 [security model](https://coreos.com/etcd/docs/latest/op-guide/security.html)
 
-See also the notes on [setting up etcd in a secure way](testbed/certs/README.md) for more details on how to change or extend these tests.
+See also the notes on [setting up etcd in a secure way](https://github.com/mhausenblas/reshifter/tree/master/testbed/certs/README.md) for more details on how to change or extend these tests.
 
 ### Synthetic tests
 
@@ -122,7 +122,7 @@ To extend ReShifter or fix issues, please consider the following.
 ### Builds and releases
 
 Following [semantic versioning](http://semver.org/), the canonical ReShifter release version is defined in one place only,
-in the [Makefile](Makefile). This version is then used in the Go code, in the Docker image as a tag and for all downstream
+in the [Makefile](https://github.com/mhausenblas/reshifter/blob/master/Makefile). This version is then used in the Go code, in the Docker image as a tag and for all downstream
 deployments.
 
 A new release (Linux binary on GitHub and image on quay.io) is cut using the following process:
