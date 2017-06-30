@@ -1,20 +1,11 @@
-
-[[dependencies]]
-  branch = "master"
+[[constraint]]
   name = "github.com/Sirupsen/logrus"
+  version = "1.0.0"
 
-[[dependencies]]
-  branch = "master"
-  name = "github.com/coreos/etcd"
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  version = "1.4.0"
 
-[[dependencies]]
-  branch = "master"
-  name = "github.com/pierrre/archivefile"
-
-[[dependencies]]
-  branch = "master"
-  name = "github.com/prometheus/client_golang"
-
-[[dependencies]]
-  branch = "master"
-  name = "golang.org/x/net"
+[[constraint]]
+  name = "github.com/minio/minio-go"
+  version = "2.1.0"
