@@ -112,9 +112,9 @@ func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		return
 	}
 	if distro == types.OpenShift {
-		testkey, testval, err := genentry(types.OpenShift)
-		if err != nil {
-			t.Errorf("%s", err)
+		testkey, testval, erro := genentry(types.OpenShift)
+		if erro != nil {
+			t.Errorf("%s", erro)
 			return
 		}
 		log.Infof("K:%s V:%s", testkey, testval)
