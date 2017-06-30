@@ -8,6 +8,8 @@ app.yaml
 *.dll
 *.so
 *.dylib
+rcli/rcli
+reshifter
 
 # Test binary, build with `go test -c`
 *.test

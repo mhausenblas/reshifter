@@ -1,11 +1,13 @@
-reshifter_version := 0.2.4
+reshifter_version := 0.2.5
 git_version := `git rev-parse HEAD`
 app_name := reshifter-app
+main_dir := `pwd`
 
 .PHONY: gbuild cbuild cpush release init build publish destroy
 
 gbuild :
 	@GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
+	@go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli rcli/main.go
 
 ginstall :
 	@GOOS=linux GOARCH=amd64 go install -ldflags "-X main.releaseVersion=$(reshifter_version)" .
