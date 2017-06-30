@@ -1,26 +1,86 @@
-# Development notes
+# Development
 
-## local development
+If you plan to fix bugs or contribute to ReShifter, please consider the following.
+
+## Builds and releases
+
+We're following [semantic versioning](http://semver.org/). The canonical ReShifter release version is defined in one place only,
+in the [Makefile](https://github.com/mhausenblas/reshifter/blob/master/Makefile).
+
+This version is then used in the Go code, in the Docker image as a tag and for all downstream deployments.
+
+A new release (Linux binary on GitHub and image on quay.io) is cut using the following process:
 
 ```
-# launch ReShifter:
-docker run --rm -e "ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F" -e "SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" --name reshifter -p 8080:8080 quay.io/mhausenblas/reshifter:0.3.0
+# 1. Generate the binary:
+$ make gbuild
 
-# launch test etcd, note: use the result of the last command as the endpoint in the UI/API:
-docker run --rm -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379
-export ETCDCTL_API=3
-etcdctl --endpoints=http://127.0.0.1:2379 put /kubernetes.io "."
-etcdctl --endpoints=http://127.0.0.1:2379 put /kubernetes.io/namespaces/kube-system "."
-etcdctl --endpoints=http://127.0.0.1:2379 put /openshift.io "."
+# 2. Release on GitHub, using `v$reshifter_version`
 
-docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 --env ETCD_DEBUG quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd  \
+# 3. Build a container image locally and push it to quay.io:
+$ make crelease
+```
+
+## Vendoring
+
+We are using Go [dep](https://github.com/golang/dep) for dependency management.
+If you don't have `dep` installed yet, do `go get -u github.com/golang/dep/cmd/dep` now and then:
+
+```
+$ dep ensure
+```
+
+## Unit tests
+
+In general, for unit tests we use the `go test` command, for example:
+
+```
+$ cd pkg/backup/
+$ go test -v
+```
+
+Please do make sure all unit tests pass before sending in a PR.
+
+## Local testing
+
+The following shows an example (interactive) session against an etcd3-based Kubernetes control plane.
+
+First, launch ReShifter:
+
+```
+$ docker run --rm -e "ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F" -e "SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" --name reshifter -p 8080:8080 quay.io/mhausenblas/reshifter:0.3.0
+```
+
+Now, launch a local etcd. Note: use the result of `docker inspect test-etcd | jq -r '.[0].NetworkSettings.IPAddress'`
+as the value for the endpoint in the UI/API:
+
+```
+$ docker run --rm -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379
+```
+
+Next we generate some entries in etcd:
+
+```
+$ export ETCDCTL_API=3
+$ etcdctl --endpoints=http://127.0.0.1:2379 put /kubernetes.io "."
+$ etcdctl --endpoints=http://127.0.0.1:2379 put /kubernetes.io/namespaces/kube-system "."
+$ etcdctl --endpoints=http://127.0.0.1:2379 put /openshift.io "."
+```
+
+Now you can use the UI to create a backup and after restarting etcd3 you can restore it again.
+
+Note that if you want to use etc2, do the following:
+
+```
+$ docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 --env ETCD_DEBUG quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd  \
 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380
-curl http://127.0.0.1:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="."
-
-docker inspect test-etcd | jq -r '.[0].NetworkSettings.IPAddress'
+$ curl http://127.0.0.1:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="."
+$ curl http://127.0.0.1:2379/v2/keys/openshift.io -XPUT -d value="."
 ```
 
-## demo
+## Demo
+
+The demo given to the Kubernetes SIG Cluster Lifecycle on 2017-06-27:
 
 ```
 # Use Minio playground as S3 compatible storage backend:
