@@ -1,0 +1,19 @@
+sudo:            required
+
+language:        go
+
+go:
+  - 1.8
+
+install:
+  - go get -u github.com/golang/dep/cmd/dep
+  - dep ensure
+
+script:
+  - make gbuild
+
+before_install:  cd testbed
+
+install:
+  - ./e2e-etcd2.sh
+  - ./e2e-etcd3.sh
