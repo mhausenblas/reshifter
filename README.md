@@ -70,7 +70,7 @@ TBD.
 
 ### CLI tool
 
-ReShifter also provides for a CLI tool called `rcli` with the following signature:
+ReShifter also provides for a CLI tool called `rcli`—get binary releases for Linux and macOS [here](https://github.com/mhausenblas/reshifter/releases/tag/v0.2.5-alpha)—with the following signature:
 
 ```
 $ rcli -h
@@ -87,7 +87,7 @@ Available Commands:
   version     Displays the ReShifter version
 ```
 
-Here's a simple usage example (assuming you've got a Kubernetes cluster with an etcd on `http://localhost:4001` running):
+Here's a simple usage example which assumes that you've got a Kubernetes cluster with an etcd on `http://localhost:4001` running:
 
 ```
 # explore the endpoint, overwrite default:
