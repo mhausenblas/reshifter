@@ -22,7 +22,6 @@ install:
 
 before_script:
   - sudo apt-get update && apt-get install -y curl && curl --silent https://bootstrap.pypa.io/get-pip.py | python3 && pip install --upgrade httpie
-apt-get update && apt-get install -y curl && curl --silent https://bootstrap.pypa.io/get-pip.py |python3 && pip install --upgrade httpie
   - sudo apt-get install jq
   - cd testbed
 
