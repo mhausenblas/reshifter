@@ -1,4 +1,4 @@
-reshifter_version := 0.3.0
+reshifter_version := 0.3.1
 git_version := `git rev-parse HEAD`
 app_name := reshifter-app
 main_dir := `pwd`
