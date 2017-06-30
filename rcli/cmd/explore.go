@@ -27,7 +27,7 @@ import (
 var exploreCmd = &cobra.Command{
 	Use:   "explore",
 	Short: "Probes an etcd endpoint",
-	Long:  `Probes an etc endpoint at path /version to figure which version of etcd it is and in which mode (secure or insecure) it is used`,
+	Long:  `Probes an etc endpoint at path /version to figure which version of etcd it is and in which mode (secure or insecure) it is used as well as if a Kubernetes distro can be detected`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ep := cmd.Flag("endpoint").Value.String()
 		fmt.Printf("Exploring etcd endpoint %s\n", ep)
@@ -37,7 +37,7 @@ var exploreCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(exploreCmd)
-	exploreCmd.Flags().StringP("endpoint", "e", "http://127.0.0.1:2379", "The URL of the etcd to probe.")
+	exploreCmd.Flags().StringP("endpoint", "e", "http://127.0.0.1:2379", "The URL of the etcd to probe")
 }
 
 func doexplore(endpoint string) {
