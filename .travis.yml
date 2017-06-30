@@ -5,7 +5,7 @@ notifications:
     on_success:   always
     on_failure:   never
 
-service:          docker
+services:         docker
 
 language:         go
 
