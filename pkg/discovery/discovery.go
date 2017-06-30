@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
@@ -92,6 +93,83 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 		return distro, nil
 	}
 	return types.NotADistro, fmt.Errorf("Can't determine Kubernetes distro")
+}
+
+// CountKeysFor iterates over well-known keys of a given Kubernetes distro
+// and returns the number of keys in the respective key range/subtree.
+// Example:
+//
+//		numkeys, err := discovery.Walk4Stats("http://localhost:2379", types.OpenShift)
+func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, error) {
+	numkeys := 0
+	version, secure, err := ProbeEtcd(endpoint)
+	if err != nil {
+		return 0, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
+	}
+	// deal with etcd3 servers:
+	if strings.HasPrefix(version, "3") {
+		c3, cerr := util.NewClient3(endpoint, secure)
+		if cerr != nil {
+			return 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
+		}
+		defer func() { _ = c3.Close() }()
+		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
+
+		switch distro {
+		case types.Vanilla:
+			err = Visit3(c3, types.KubernetesPrefix, types.Vanilla, func(path string, val string) error {
+				numkeys++
+				if err != nil {
+					return fmt.Errorf("Can't store backup locally: %s", err)
+				}
+				return nil
+			})
+			if err != nil {
+				return 0, err
+			}
+		case types.OpenShift:
+			err = Visit3(c3, types.OpenShiftPrefix, types.OpenShift, func(path string, val string) error {
+				numkeys++
+				if err != nil {
+					return fmt.Errorf("Can't store backup locally: %s", err)
+				}
+				return nil
+			})
+			if err != nil {
+				return 0, err
+			}
+		}
+
+	}
+	// deal with etcd2 servers:
+	if strings.HasPrefix(version, "2") {
+		c2, cerr := util.NewClient2(endpoint, secure)
+		if cerr != nil {
+			return 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
+		}
+		kapi := client.NewKeysAPI(c2)
+		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
+
+		switch distro {
+		case types.Vanilla:
+			err = Visit2(kapi, types.KubernetesPrefix, func(path string, val string) error {
+				numkeys++
+				return nil
+			})
+			if err != nil {
+				return 0, err
+			}
+		case types.OpenShift:
+			err = Visit2(kapi, types.OpenShiftPrefix, func(path string, val string) error {
+				numkeys++
+				return nil
+			})
+			if err != nil {
+				return 0, err
+			}
+		}
+	}
+	return numkeys, nil
 }
 
 func getVersion(endpoint string) (string, error) {

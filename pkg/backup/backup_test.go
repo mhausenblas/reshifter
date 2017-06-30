@@ -184,7 +184,6 @@ func etcd3Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 	// 	t.Errorf("Can't get etcd key %s: %s", testkey, err)
 	// 	return
 	// }
-	// t.Logf("VAL: %s", val)
 	backupid, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)

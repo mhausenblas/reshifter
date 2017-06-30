@@ -16,13 +16,13 @@ import (
 	"github.com/pierrre/archivefile/zip"
 )
 
-// Restore takes archive file afile (without file extension) and
-// unpacks it into a target directory. It then traverses the target directory
-// in the local filesystem and populates an etcd server at endpoint with the
-// content of the sub-directories. On success returns the number of keys restored.
+// Restore takes a backup ID and unpacks it into the target directory.
+// It then walk the target directory in the local filesystem and populates
+// an etcd server at endpoint with the content of the sub-directories.
+// On success it returns the number of keys restored.
 // Example:
 //
-//		krestored, err := Restore("http://localhost:2379", "1498055655", "/tmp", "play.minio.io:9000", "reshifter-test-cluster")
+//		krestored, err := restore.Restore("http://localhost:2379", "1498055655", "/tmp", "play.minio.io:9000", "reshifter-test-cluster")
 func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
 	numrestored := 0
 	err := unarch(filepath.Join(target, backupid)+".zip", target)

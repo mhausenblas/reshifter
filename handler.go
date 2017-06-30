@@ -21,6 +21,17 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "ReShifter in version %s", releaseVersion)
 }
 
+func keystatsHandler(w http.ResponseWriter, r *http.Request) {
+	k, err := discovery.CountKeysFor("http://127.0.0.1:2379", types.Vanilla)
+	if err != nil {
+		merr := fmt.Sprintf("%s", err)
+		http.Error(w, merr, http.StatusBadRequest)
+		log.Error(err)
+		return
+	}
+	fmt.Fprintf(w, "%d", k)
+}
+
 // explorerHandler responds to HTTP GET requests such as:
 //		http GET localhost:8080/v1/explorer?endpoint=http%3A%2F%2Flocalhost%3A2379
 func explorerHandler(w http.ResponseWriter, r *http.Request) {
