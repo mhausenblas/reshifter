@@ -20,6 +20,7 @@ Supported:
   - [Deploy it locally](#deploy-it-locally)
   - [Deploy it on OpenShift](#deploy-it-on-openshift)
   - [Deploy it on vanilla Kubernetes](#deploy-it-on-vanilla-kubernetes)
+  - [CLI tool](#cli-tool)
 - [Testbed](#testbed)
   - [End-to-end tests](#end-to-end-tests)
   - [Synthetic tests](#synthetic-tests)
@@ -66,6 +67,44 @@ $ make publish
 ### Deploy it on vanilla Kubernetes
 
 TBD.
+
+### CLI tool
+
+ReShifter also provides for a CLI tool called `rcli` with the following signature:
+
+```
+$ rcli -h
+A CLI for ReShifter, supports backing up and restoring Kubernetes clusters.
+
+Usage:
+  rcli [command]
+
+Available Commands:
+  backup      Creates a backup of a Kubernetes cluster
+  explore     Probes an etcd endpoint
+  help        Help about any command
+  restore     Performs a restore of a Kubernetes cluster
+  version     Displays the ReShifter version
+```
+
+Here's a simple usage example (assuming you've got a Kubernetes cluster with an etcd on `http://localhost:4001` running):
+
+```
+# explore the endpoint, overwrite default:
+$ rcli explore -e http://localhost:4001
+
+# back up to Minio playground:
+$ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
+  SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
+  rcli/rcli backup -e http://localhost:4001 -r play.minio.io:9000 -b mh9-test
+
+# restart/empty etcd now
+
+# restore from Minio playground, using backup ID 1498815551
+$ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
+  SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
+  rcli/rcli restore -e http://localhost:4001 -r play.minio.io:9000 -b mh9-test -i 1498815551
+```
 
 ## Testbed
 
