@@ -7,6 +7,9 @@ app_name := reshifter-app
 gbuild :
 	@GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
 
+ginstall :
+	@GOOS=linux GOARCH=amd64 go install -ldflags "-X main.releaseVersion=$(reshifter_version)" .
+
 cbuild :
 	@docker build --build-arg rversion=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
 

@@ -18,7 +18,7 @@ before_install:
   - dep ensure
 
 install:
-  - make gbuild
+  - make ginstall
 
 before_script:
   - sudo pip install --upgrade httpie
