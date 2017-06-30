@@ -15,35 +15,59 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
+	log "github.com/Sirupsen/logrus"
+	"github.com/mhausenblas/reshifter/pkg/discovery"
+	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/spf13/cobra"
 )
 
 // exploreCmd represents the explore command
 var exploreCmd = &cobra.Command{
 	Use:   "explore",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Probes an etcd endpoint",
+	Long:  `Probes an etc endpoint at path /version to figure which version of etcd it is and in which mode (secure or insecure) it is used`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("explore called")
+		ep := cmd.Flag("endpoint").Value.String()
+		fmt.Printf("Exploring etcd endpoint %s\n", ep)
+		doexplore(ep)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(exploreCmd)
+	exploreCmd.Flags().StringP("endpoint", "e", "http://127.0.0.1:2379", "The URL of the etcd to probe.")
+}
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// exploreCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// exploreCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func doexplore(endpoint string) {
+	if endpoint == "" || strings.Index(endpoint, "http") != 0 {
+		merr := "The endpoint is malformed"
+		log.Error(merr)
+		return
+	}
+	version, issecure, err := discovery.ProbeEtcd(endpoint)
+	if err != nil {
+		log.Errorf(fmt.Sprintf("%s", err))
+		return
+	}
+	distrotype, err := discovery.ProbeKubernetesDistro(endpoint)
+	if err != nil {
+		log.Errorf(fmt.Sprintf("Can't determine Kubernetes distro: %s", err))
+		return
+	}
+	secure := "insecure etcd, no SSL/TLS configured"
+	if issecure {
+		secure = "secure etcd, SSL/TLS configure"
+	}
+	var distro string
+	switch distrotype {
+	case types.Vanilla:
+		distro = "Vanilla Kubernetes"
+	case types.OpenShift:
+		distro = "OpenShift"
+	default:
+		distro = "no Kubernetes distro found"
+	}
+	fmt.Printf("Version: %s\nSecure: %s\nDistro: %s\n\n", version, secure, distro)
 }
