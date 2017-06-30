@@ -21,8 +21,8 @@ install:
   - make gbuild
 
 before_script:
-  - pip install --upgrade httpie
-  - apt-get install jq
+  - sudo pip install --upgrade httpie
+  - sudo apt-get install jq
   - cd testbed
 
 script:
