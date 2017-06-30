@@ -12,6 +12,7 @@ import (
 	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
+	"github.com/prometheus/common/log"
 )
 
 var (
@@ -99,15 +100,29 @@ func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		return
 	}
 	kapi := client.NewKeysAPI(c2)
-	testkey, testval, err := genentry(distro)
+	testkey, testval, err := genentry(types.Vanilla)
 	if err != nil {
 		t.Errorf("%s", err)
 		return
 	}
+	log.Infof("K:%s V:%s", testkey, testval)
 	_, err = kapi.Set(context.Background(), testkey, testval, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
 	if err != nil {
 		t.Errorf("Can't create etcd entry %s=%s: %s", testkey, testval, err)
 		return
+	}
+	if distro == types.OpenShift {
+		testkey, testval, err := genentry(types.OpenShift)
+		if err != nil {
+			t.Errorf("%s", err)
+			return
+		}
+		log.Infof("K:%s V:%s", testkey, testval)
+		_, err = kapi.Set(context.Background(), testkey, testval, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
+		if err != nil {
+			t.Errorf("Can't create etcd entry %s=%s: %s", testkey, testval, err)
+			return
+		}
 	}
 	backupid, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {

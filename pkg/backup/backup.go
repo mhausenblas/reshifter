@@ -46,7 +46,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		}
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
-		err = visit3(c3, types.KubernetesPrefix, types.OpenShift, func(path string, val string) error {
+		err = visit3(c3, types.KubernetesPrefix, types.Vanilla, func(path string, val string) error {
 			_, err = store(target, path, val)
 			if err != nil {
 				return fmt.Errorf("Can't store backup locally: %s", err)
@@ -77,7 +77,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		}
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
-		err = visit2(kapi, "/", func(path string, val string) error {
+		err = visit2(kapi, types.KubernetesPrefix, func(path string, val string) error {
 			_, err = store(target, path, val)
 			if err != nil {
 				return fmt.Errorf("Can't store backup locally: %s", err)
@@ -86,6 +86,18 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		})
 		if err != nil {
 			return "", err
+		}
+		if distrotype == types.OpenShift {
+			err = visit2(kapi, types.OpenShiftPrefix, func(path string, val string) error {
+				_, err = store(target, path, val)
+				if err != nil {
+					return fmt.Errorf("Can't store backup locally: %s", err)
+				}
+				return nil
+			})
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 	// create ZIP file of the reaped content:
@@ -108,10 +120,10 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 func visit2(kapi client.KeysAPI, path string, fn types.Reap) error {
 	log.WithFields(log.Fields{"func": "backup.visit2"}).Debug(fmt.Sprintf("Processing %s", path))
 	copts := client.GetOptions{
-		Recursive: true,
-		Sort:      false,
-		Quorum:    true,
+		Recursive: false,
+		Quorum:    false,
 	}
+	log.Infof("AT: %s", path)
 	res, err := kapi.Get(context.Background(), path, &copts)
 	if err != nil {
 		return err
