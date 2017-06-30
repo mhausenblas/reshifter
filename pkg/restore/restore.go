@@ -55,7 +55,6 @@ func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
 					return nil
 				}
 				_, err = c3.Put(context.Background(), key, string(c))
-
 				if err != nil {
 					log.WithFields(log.Fields{"func": "Restore"}).Error(fmt.Sprintf("Can't restore key %s: %s", key, err))
 					return nil

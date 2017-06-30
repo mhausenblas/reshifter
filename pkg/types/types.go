@@ -13,6 +13,8 @@ const (
 	KubernetesPrefixLast = "/kubernetes.io/zzzzzzzzzz"
 	// OpenShiftPrefix represents the etcd key prefix for OpenShift
 	OpenShiftPrefix = "/openshift.io"
+	// OpenShiftPrefixLast represents a stop marker for OpenShift
+	OpenShiftPrefixLast = "/openshift.io/zzzzzzzzzz"
 	// ContentTypeZip represents the content type for a ZIP file
 	ContentTypeZip = "application/zip"
 	// NotADistro represents the fact that no Kubernetes distro-related prefixes exit in etcd

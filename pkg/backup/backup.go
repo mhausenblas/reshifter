@@ -32,6 +32,12 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
 	}
+
+	distrotype, err := discovery.ProbeKubernetesDistro(endpoint)
+	if err != nil {
+		return "", fmt.Errorf("Can't determine Kubernetes distro: %s", err)
+	}
+
 	// deal with etcd3 servers:
 	if strings.HasPrefix(version, "3") {
 		c3, cerr := util.NewClient3(endpoint, secure)
@@ -39,8 +45,8 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 			return "", fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
-		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with %v", c3.Endpoints()))
-		err = visit3(c3, types.KubernetesPrefix, func(path string, val string) error {
+		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
+		err = visit3(c3, types.KubernetesPrefix, types.OpenShift, func(path string, val string) error {
 			_, err = store(target, path, val)
 			if err != nil {
 				return fmt.Errorf("Can't store backup locally: %s", err)
@@ -49,6 +55,18 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		})
 		if err != nil {
 			return "", err
+		}
+		if distrotype == types.OpenShift {
+			err = visit3(c3, types.OpenShiftPrefix, types.OpenShift, func(path string, val string) error {
+				_, err = store(target, path, val)
+				if err != nil {
+					return fmt.Errorf("Can't store backup locally: %s", err)
+				}
+				return nil
+			})
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 	// deal with etcd2 servers:
@@ -112,10 +130,17 @@ func visit2(kapi client.KeysAPI, path string, fn types.Reap) error {
 
 // visit3 visits all paths of an etcd3 server and applies the reap function
 // on the keys.
-func visit3(c3 *clientv3.Client, path string, fn types.Reap) error {
+func visit3(c3 *clientv3.Client, path string, distro types.KubernetesDistro, fn types.Reap) error {
 	log.WithFields(log.Fields{"func": "backup.visit3"}).Debug(fmt.Sprintf("Processing %s", path))
-	// res, err := c3.Get(context.Background(), path+"/*", clientv3.WithRange(types.KubernetesPrefixLast))
-	res, err := c3.Get(context.Background(), "/kubernetes.io/namespaces/kube-system")
+	endkey := ""
+	if distro == types.Vanilla {
+		endkey = types.KubernetesPrefixLast
+	}
+	if distro == types.OpenShift {
+		endkey = types.OpenShiftPrefixLast
+	}
+	res, err := c3.Get(context.Background(), path+"/*", clientv3.WithRange(endkey))
+	// res, err := c3.Get(context.Background(), "/kubernetes.io/namespaces/kube-system")
 	if err != nil {
 		return err
 	}
