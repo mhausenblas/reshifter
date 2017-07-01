@@ -105,13 +105,30 @@ $(document).ready(function($){
         error: function (d) {
           console.info(d);
           $('#config-result').html('<h2>Result</h2>')
-          $('#config-result').append('<div>There was a problem carrying out the config:<br><code>'+ d.responseText + '</code> </div>')
+          $('#config-result').append('<div>There was a problem exploring the endpoint:<br><code>'+ d.responseText + '</code> </div>')
         },
         success: function (d) {
           console.info(d);
           $('#config-result').html('<h2>Result</h2>')
           $('#config-result').append('<div>etcd: <code>v' + d.etcdversion +', ' + d.etcdsec +'</code></div>')
           $('#config-result').append('<div>Kubernetes: <code>' + d.k8sdistro +'</code></div>')
+        }
+    })
+    $.ajax({
+        type: "GET",
+        url: 'http://localhost:8080/v1/epstats?endpoint='+encodeURIComponent(ep),
+        dataType: 'json',
+        async: false,
+        data: '{"endpoint": "' + ep +'"}',
+        error: function (d) {
+          console.info(d);
+          $('#config-result').html('<h2>Result</h2>')
+          $('#config-result').append('<div>There was a problem collecting endpoint stats:<br><code>'+ d.responseText + '</code> </div>')
+        },
+        success: function (d) {
+          console.info(d);
+          $('#config-result').append('<div>Number of keys detected: <code>' + d.numkeys +'</code></div>')
+          $('#config-result').append('<div>Total number of bytes to back up: <code>' + d.totalsizevalbytes +'</code></div>')
         }
     })
   });

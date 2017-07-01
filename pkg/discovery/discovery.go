@@ -52,7 +52,7 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 	distro := types.NotADistro
 	version, secure, err := ProbeEtcd(endpoint)
 	if err != nil {
-		return types.NotADistro, fmt.Errorf("%s", endpoint, err)
+		return types.NotADistro, fmt.Errorf("%s", err)
 	}
 	// deal with etcd3 servers:
 	if strings.HasPrefix(version, "3") {

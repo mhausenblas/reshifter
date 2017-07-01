@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,10 +21,10 @@ var (
 		version    string
 		secure     bool
 	}{
-		{util.Etcd2Up, "http", "2379", "2", false},
-		{util.Etcd3Up, "http", "2379", "3", false},
-		{util.Etcd2SecureUp, "https", "2379", "2", true},
-		{util.Etcd3SecureUp, "https", "2379", "3", true},
+		{util.Etcd2Up, "http", "4001", "2", false},
+		{util.Etcd3Up, "http", "4001", "3", false},
+		{util.Etcd2SecureUp, "https", "4001", "2", true},
+		{util.Etcd3SecureUp, "https", "4001", "3", true},
 	}
 	notadistro      = []string{"/something"}
 	vanilladistro   = []string{types.KubernetesPrefix}
@@ -39,6 +40,45 @@ var (
 		{openshiftdistro, "2", false, types.OpenShift},
 	}
 )
+
+func TestCountKeysFor(t *testing.T) {
+	defer func() {
+		_ = util.EtcdDown()
+	}()
+	port := "4001"
+	wantk := 2
+	wants := 11
+	tetcd := "http://127.0.0.1:" + port
+	err := util.Etcd2Up(port)
+	if err != nil {
+		t.Errorf("Can't launch etcd at %s: %s", tetcd, err)
+		return
+	}
+	c2, err := util.NewClient2(tetcd, false)
+	if err != nil {
+		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
+		return
+	}
+	kapi := client.NewKeysAPI(c2)
+	_, err = kapi.Set(context.Background(), types.KubernetesPrefix+"/namespaces/kube-system", ".", &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
+	if err != nil {
+		t.Errorf("Can't create etcd entry: %s", err)
+		return
+	}
+	_, err = kapi.Set(context.Background(), types.KubernetesPrefix+"/namespaces/default", "..........", &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
+	if err != nil {
+		t.Errorf("Can't create etcd entry: %s", err)
+		return
+	}
+	k, s, err := CountKeysFor(tetcd, types.Vanilla)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if k != wantk {
+		t.Errorf("discovery.CountKeysFor(%s) => (%d, %d) want (%d, %d)", tetcd, k, s, wantk, wants)
+	}
+}
 
 func TestProbeEtcd(t *testing.T) {
 	_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))

@@ -41,11 +41,9 @@ func epstatsHandler(w http.ResponseWriter, r *http.Request) {
 	// add 0 to the overall count, and it's still fine:
 	ok, ot, _ := discovery.CountKeysFor("http://127.0.0.1:2379", types.OpenShift)
 	_ = json.NewEncoder(w).Encode(struct {
-		K8SDistro       string `json:"k8sdistro"`
-		NumKeys         int    `json:"numkeys"`
-		TotalSizeValues int    `json:"totalsizevalbytes"`
+		NumKeys         int `json:"numkeys"`
+		TotalSizeValues int `json:"totalsizevalbytes"`
 	}{
-		util.LookupDistro(types.Vanilla),
 		kk + ok,
 		kt + ot,
 	})
