@@ -31,7 +31,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 	target, _ = filepath.Abs(filepath.Join(target, based))
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
-		return "", fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
+		return "", fmt.Errorf("%s", err)
 	}
 	distrotype, err := discovery.ProbeKubernetesDistro(endpoint)
 	if err != nil {

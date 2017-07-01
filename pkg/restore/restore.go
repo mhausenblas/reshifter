@@ -32,7 +32,7 @@ func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
 	target, _ = filepath.Abs(filepath.Join(target, backupid, "/"))
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
-		return 0, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
+		return 0, fmt.Errorf("%s", err)
 	}
 	if strings.HasPrefix(version, "3") {
 		c3, cerr := util.NewClient3(endpoint, secure)

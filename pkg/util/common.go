@@ -6,7 +6,23 @@ import (
 	"net"
 	"os"
 	"regexp"
+
+	"github.com/mhausenblas/reshifter/pkg/types"
 )
+
+// LookupDistro returns a textual description for a Kube distro by type.
+func LookupDistro(distrotype types.KubernetesDistro) string {
+	var distro string
+	switch distrotype {
+	case types.Vanilla:
+		distro = "Vanilla Kubernetes"
+	case types.OpenShift:
+		distro = "OpenShift"
+	default:
+		distro = "not a Kubernetes distro"
+	}
+	return distro
+}
 
 // IsBackupID tests if a string is a valid backup ID.
 // A valid backup ID is a 10 digit integer, representing

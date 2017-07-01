@@ -52,7 +52,7 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 	distro := types.NotADistro
 	version, secure, err := ProbeEtcd(endpoint)
 	if err != nil {
-		return types.NotADistro, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
+		return types.NotADistro, fmt.Errorf("%s", endpoint, err)
 	}
 	// deal with etcd3 servers:
 	if strings.HasPrefix(version, "3") {
@@ -96,87 +96,84 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 }
 
 // CountKeysFor iterates over well-known keys of a given Kubernetes distro
-// and returns the number of keys in the respective key range/subtree.
+// and returns the number of keys and their values total size, in the
+// respective key range/subtree.
 // Example:
 //
-//		numkeys, err := discovery.Walk4Stats("http://localhost:2379", types.OpenShift)
-func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, error) {
+//		numkeys, totalsize, err := discovery.Walk4Stats("http://localhost:2379", types.OpenShift)
+func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, error) {
 	numkeys := 0
+	totalsize := 0
 	version, secure, err := ProbeEtcd(endpoint)
 	if err != nil {
-		return 0, fmt.Errorf("Can't understand endpoint %s: %s", endpoint, err)
+		return 0, 0, fmt.Errorf("%s", err)
 	}
 	// deal with etcd3 servers:
 	if strings.HasPrefix(version, "3") {
 		c3, cerr := util.NewClient3(endpoint, secure)
 		if cerr != nil {
-			return 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
+			return 0, 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
-
 		switch distro {
 		case types.Vanilla:
 			err = Visit3(c3, types.KubernetesPrefix, types.Vanilla, func(path string, val string) error {
 				numkeys++
-				if err != nil {
-					return fmt.Errorf("Can't store backup locally: %s", err)
-				}
+				totalsize += len(val)
 				return nil
 			})
 			if err != nil {
-				return 0, err
+				return 0, 0, err
 			}
 		case types.OpenShift:
 			err = Visit3(c3, types.OpenShiftPrefix, types.OpenShift, func(path string, val string) error {
 				numkeys++
-				if err != nil {
-					return fmt.Errorf("Can't store backup locally: %s", err)
-				}
+				totalsize += len(val)
 				return nil
 			})
 			if err != nil {
-				return 0, err
+				return 0, 0, err
 			}
 		}
-
 	}
 	// deal with etcd2 servers:
 	if strings.HasPrefix(version, "2") {
 		c2, cerr := util.NewClient2(endpoint, secure)
 		if cerr != nil {
-			return 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
+			return 0, 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
-
 		switch distro {
 		case types.Vanilla:
 			err = Visit2(kapi, types.KubernetesPrefix, func(path string, val string) error {
 				numkeys++
+				totalsize += len(val)
 				return nil
 			})
 			if err != nil {
-				return 0, err
+				return 0, 0, err
 			}
 		case types.OpenShift:
 			err = Visit2(kapi, types.OpenShiftPrefix, func(path string, val string) error {
 				numkeys++
+				totalsize += len(val)
 				return nil
 			})
 			if err != nil {
-				return 0, err
+				return 0, 0, err
 			}
 		}
 	}
-	return numkeys, nil
+	return numkeys, totalsize, nil
 }
 
 func getVersion(endpoint string) (string, error) {
 	var etcdr types.EtcdResponse
 	res, err := http.Get(endpoint)
 	if err != nil {
-		return "", fmt.Errorf("Can't query %s endpoint: %s", endpoint, err)
+		return "", fmt.Errorf("%s", err)
 	}
 	err = json.NewDecoder(res.Body).Decode(&etcdr)
 	if err != nil {
@@ -200,7 +197,7 @@ func getVersionSecure(endpoint, clientcert, clientkey string) (string, error) {
 	client := &http.Client{Transport: tr}
 	res, err := client.Get(endpoint)
 	if err != nil {
-		return "", fmt.Errorf("Can't query %s endpoint: %s", endpoint, err)
+		return "", fmt.Errorf("%s", err)
 	}
 	err = json.NewDecoder(res.Body).Decode(&etcdr)
 	if err != nil {

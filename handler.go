@@ -22,14 +22,29 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func keystatsHandler(w http.ResponseWriter, r *http.Request) {
-	k, err := discovery.CountKeysFor("http://127.0.0.1:2379", types.Vanilla)
+	kk, kt, err := discovery.CountKeysFor("http://127.0.0.1:2379", types.Vanilla)
 	if err != nil {
-		merr := fmt.Sprintf("%s", err)
-		http.Error(w, merr, http.StatusBadRequest)
-		log.Error(err)
+		merr := fmt.Sprintf("Having problems calculating stats: %s", err)
+		http.Error(w, merr, http.StatusInternalServerError)
+		log.Error(merr)
 		return
 	}
-	fmt.Fprintf(w, "%d", k)
+	ok, ot, err := discovery.CountKeysFor("http://127.0.0.1:2379", types.OpenShift)
+	if err != nil {
+		merr := fmt.Sprintf("Having problems calculating stats: %s", err)
+		http.Error(w, merr, http.StatusInternalServerError)
+		log.Error(merr)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(struct {
+		K8SDistro       string `json:"k8sdistro"`
+		NumKeys         int    `json:"numkeys"`
+		TotalSizeValues int    `json:"totalsizevalbytes"`
+	}{
+		util.LookupDistro(types.Vanilla),
+		kk + ok,
+		kt + ot,
+	})
 }
 
 // explorerHandler responds to HTTP GET requests such as:
@@ -60,15 +75,6 @@ func explorerHandler(w http.ResponseWriter, r *http.Request) {
 	if issecure {
 		secure = "secure etcd, SSL/TLS configure"
 	}
-	var distro string
-	switch distrotype {
-	case types.Vanilla:
-		distro = "Vanilla Kubernetes"
-	case types.OpenShift:
-		distro = "OpenShift"
-	default:
-		distro = "not a Kubernetes distro"
-	}
 	_ = json.NewEncoder(w).Encode(struct {
 		EtcdVersion  string `json:"etcdversion"`
 		EtcdSecurity string `json:"etcdsec"`
@@ -76,7 +82,7 @@ func explorerHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		version,
 		secure,
-		distro,
+		util.LookupDistro(distrotype),
 	})
 }
 
