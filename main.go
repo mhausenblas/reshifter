@@ -25,7 +25,7 @@ func main() {
 	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/v1/version", versionHandler)
 	r.HandleFunc("/v1/explorer", explorerHandler)
-	r.HandleFunc("/v1/epstats", keystatsHandler)
+	r.HandleFunc("/v1/epstats", epstatsHandler)
 	r.HandleFunc("/v1/backup", backupCreateHandler).Methods("POST")
 	r.HandleFunc("/v1/backup/{backupid:[0-9]+}", backupRetrieveHandler).Methods("GET")
 	r.HandleFunc("/v1/restore", restoreHandler)

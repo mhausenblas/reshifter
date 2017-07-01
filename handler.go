@@ -21,21 +21,25 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "ReShifter in version %s", releaseVersion)
 }
 
-func keystatsHandler(w http.ResponseWriter, r *http.Request) {
-	kk, kt, err := discovery.CountKeysFor("http://127.0.0.1:2379", types.Vanilla)
+func epstatsHandler(w http.ResponseWriter, r *http.Request) {
+	endpoint := r.URL.Query().Get("endpoint")
+	if endpoint == "" || strings.Index(endpoint, "http") != 0 {
+		merr := "The endpoint is malformed"
+		http.Error(w, merr, http.StatusBadRequest)
+		log.Error(merr)
+		return
+	}
+	kk, kt, err := discovery.CountKeysFor(endpoint, types.Vanilla)
 	if err != nil {
 		merr := fmt.Sprintf("Having problems calculating stats: %s", err)
 		http.Error(w, merr, http.StatusInternalServerError)
 		log.Error(merr)
 		return
 	}
-	ok, ot, err := discovery.CountKeysFor("http://127.0.0.1:2379", types.OpenShift)
-	if err != nil {
-		merr := fmt.Sprintf("Having problems calculating stats: %s", err)
-		http.Error(w, merr, http.StatusInternalServerError)
-		log.Error(merr)
-		return
-	}
+	// note: ignoring error here since we're adding up the stats
+	// and if this happens to be a non-OpenShift distro we simply
+	// add 0 to the overall count, and it's still fine:
+	ok, ot, _ := discovery.CountKeysFor("http://127.0.0.1:2379", types.OpenShift)
 	_ = json.NewEncoder(w).Encode(struct {
 		K8SDistro       string `json:"k8sdistro"`
 		NumKeys         int    `json:"numkeys"`
