@@ -29,23 +29,25 @@ func epstatsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(merr)
 		return
 	}
-	kk, kt, err := discovery.CountKeysFor(endpoint, types.Vanilla)
+	vk, vs, err := discovery.CountKeysFor(endpoint, types.Vanilla)
 	if err != nil {
 		merr := fmt.Sprintf("Having problems calculating stats: %s", err)
 		http.Error(w, merr, http.StatusInternalServerError)
 		log.Error(merr)
 		return
 	}
+	log.Debugf("vanilla [keys:%d, size:%d]", vk, vs)
 	// note: ignoring error here since we're adding up the stats
 	// and if this happens to be a non-OpenShift distro we simply
 	// add 0 to the overall count, and it's still fine:
-	ok, ot, _ := discovery.CountKeysFor("http://127.0.0.1:2379", types.OpenShift)
+	osk, oss, _ := discovery.CountKeysFor(endpoint, types.OpenShift)
+	log.Debugf("openshift [keys:%d, size:%d]", osk, oss)
 	_ = json.NewEncoder(w).Encode(struct {
 		NumKeys         int `json:"numkeys"`
 		TotalSizeValues int `json:"totalsizevalbytes"`
 	}{
-		kk + ok,
-		kt + ot,
+		vk + osk,
+		vs + oss,
 	})
 }
 

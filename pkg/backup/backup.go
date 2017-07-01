@@ -44,7 +44,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 			return "", fmt.Errorf("Can't connect to etcd3: %s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
-		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
+		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
 		err = discovery.Visit3(c3, types.KubernetesPrefix, types.Vanilla, func(path string, val string) error {
 			_, err = store(target, path, val)
 			if err != nil {
@@ -75,7 +75,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 			return "", fmt.Errorf("Can't connect to etcd2: %s", cerr)
 		}
 		kapi := client.NewKeysAPI(c2)
-		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
+		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
 		err = discovery.Visit2(kapi, types.KubernetesPrefix, func(path string, val string) error {
 			_, err = store(target, path, val)
 			if err != nil {
@@ -125,7 +125,7 @@ func store(based string, path string, val string) (string, error) {
 	// escape ":" in the path so that we have no issues storing it in the filesystem:
 	fpath, _ := filepath.Abs(filepath.Join(based, strings.Replace(path, ":", types.EscapeColon, -1)))
 	if path == "/" {
-		log.WithFields(log.Fields{"func": "store"}).Debug(fmt.Sprintf("Rewriting root"))
+		log.WithFields(log.Fields{"func": "backup.store"}).Debug(fmt.Sprintf("Rewriting root"))
 		fpath = based
 	}
 	err := os.MkdirAll(fpath, os.ModePerm)
@@ -144,7 +144,7 @@ func store(based string, path string, val string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s", err)
 	}
-	log.WithFields(log.Fields{"func": "store"}).Debug(fmt.Sprintf("Stored %s in %s with %d bytes", path, fpath, nbytes))
+	log.WithFields(log.Fields{"func": "backup.store"}).Debug(fmt.Sprintf("Stored %s in %s with %d bytes", path, fpath, nbytes))
 	return cpath, nil
 }
 
@@ -155,7 +155,7 @@ func arch(based string) (string, error) {
 	}()
 	opath := based + ".zip"
 	err := zip.ArchiveFile(based, opath, func(apath string) {
-		log.WithFields(log.Fields{"func": "arch"}).Debug(fmt.Sprintf("%s", apath))
+		log.WithFields(log.Fields{"func": "backup.arch"}).Debug(fmt.Sprintf("%s", apath))
 	})
 	if err != nil {
 		return "", fmt.Errorf("Can't create archive or no content to back up: %s", err)

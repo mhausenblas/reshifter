@@ -115,7 +115,7 @@ func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, err
 			return 0, 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
-		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
+		log.WithFields(log.Fields{"func": "discovery.CountKeysFor"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
 		switch distro {
 		case types.Vanilla:
 			err = Visit3(c3, types.KubernetesPrefix, types.Vanilla, func(path string, val string) error {
@@ -144,7 +144,7 @@ func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, err
 			return 0, 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		kapi := client.NewKeysAPI(c2)
-		log.WithFields(log.Fields{"func": "Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
+		log.WithFields(log.Fields{"func": "discovery.CountKeysFor"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
 		switch distro {
 		case types.Vanilla:
 			err = Visit2(kapi, types.KubernetesPrefix, func(path string, val string) error {
