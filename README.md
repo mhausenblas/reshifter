@@ -18,7 +18,9 @@ A cluster admin backup and restore tool for Kubernetes distros such as OpenShift
 
 ## Status and roadmap
 
-See [Trello board](https://trello.com/b/iOrEdJQ3/reshifter).
+See the [Trello board](https://trello.com/b/iOrEdJQ3/reshifter) for the current status of the work and roadmap items.
+You can also check out the design philosophy and [architecture](https://github.com/mhausenblas/reshifter/blob/master/architecture.md)
+of ReShifter, if you want to learn more about why it works the way it does.
 
 ## Deploy app locally
 
