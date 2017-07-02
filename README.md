@@ -6,8 +6,7 @@
 
 A cluster admin backup and restore tool for Kubernetes distros such as OpenShift, using etcd to query and manipulate the state of all objects.
 
-[![Screen cast: Introducing ReShifter](images/reshifter-cli.png)](https://www.useloom.com/share/e590aedeb95b441fb23ab4f9e9e80c32 "Introducing ReShifter")  
-
+[![Screen cast: Introducing ReShifter](images/reshifter-demo.png)](https://www.useloom.com/share/e590aedeb95b441fb23ab4f9e9e80c32 "Introducing ReShifter")  
 
 - [Status and roadmap](#status-and-roadmap)
 - [Deploy app locally](#deploy-app-locally)
