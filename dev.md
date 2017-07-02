@@ -55,11 +55,12 @@ Now, launch a local etcd. Note: use the result of `docker inspect test-etcd | jq
 as the value for the endpoint in the UI/API:
 
 ```
-$ docker run --rm -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379
+$ docker run --rm -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd  \
+--advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380
 ```
 
 Next we generate some entries in etcd:
-
+-->
 ```
 $ export ETCDCTL_API=3
 $ etcdctl --endpoints=http://127.0.0.1:2379 put /kubernetes.io "."
@@ -72,8 +73,7 @@ Now you can use the UI to create a backup and after restarting etcd3 you can res
 Note that if you want to use etc2, do the following:
 
 ```
-$ docker run --rm -d -p 2379:2379 --name test-etcd --dns 8.8.8.8 --env ETCD_DEBUG quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd  \
---advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380
+$ docker run --rm -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v2.3.8 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379
 $ curl http://127.0.0.1:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT -d value="."
 $ curl http://127.0.0.1:2379/v2/keys/openshift.io -XPUT -d value="."
 ```
