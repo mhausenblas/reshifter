@@ -20,9 +20,6 @@ import (
 // It then walk the target directory in the local filesystem and populates
 // an etcd server at endpoint with the content of the sub-directories.
 // On success it returns the number of keys restored.
-// Example:
-//
-//		krestored, err := restore.Restore("http://localhost:2379", "1498055655", "/tmp", "play.minio.io:9000", "reshifter-test-cluster")
 func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
 	numrestored := 0
 	err := unarch(filepath.Join(target, backupid)+".zip", target)
