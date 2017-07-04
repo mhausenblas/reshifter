@@ -18,9 +18,7 @@ import (
 
 // ProbeEtcd probes an endpoint at path /version to figure
 // which version of etcd it is and in which mode (secure or insecure)
-// it is used. Example:
-//
-//		version, secure, err := ProbeEtcd("http://localhost:2379")
+// it is used.
 func ProbeEtcd(endpoint string) (string, bool, error) {
 	u, err := url.Parse(endpoint + "/version")
 	if err != nil {
