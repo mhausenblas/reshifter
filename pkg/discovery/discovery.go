@@ -43,9 +43,7 @@ func ProbeEtcd(endpoint string) (string, bool, error) {
 }
 
 // ProbeKubernetesDistro probes an etcd cluster for which Kubernetes
-// distribution is present by scanning the available keys. Example:
-//
-//		distro, err := ProbeKubernetesDistro("http://localhost:2379")
+// distribution is present by scanning the available keys.
 func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 	distro := types.NotADistro
 	version, secure, err := ProbeEtcd(endpoint)
@@ -96,9 +94,6 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 // CountKeysFor iterates over well-known keys of a given Kubernetes distro
 // and returns the number of keys and their values total size, in the
 // respective key range/subtree.
-// Example:
-//
-//		numkeys, totalsize, err := discovery.Walk4Stats("http://localhost:2379", types.OpenShift)
 func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, error) {
 	numkeys := 0
 	totalsize := 0

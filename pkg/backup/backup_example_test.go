@@ -28,8 +28,8 @@ func ExampleBackup() {
 		log.Fatal(err)
 		return
 	}
-	fmt.Printf("The backup completed successfully with ID %s", backupid)
+	fmt.Printf("The backup completed successfully with ID %s\n", backupid)
 
 	// Output:
-	// backupid: "1498847078"
+	// The backup completed successfully with ID 1498847078
 }

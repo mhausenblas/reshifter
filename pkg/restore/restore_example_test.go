@@ -29,8 +29,8 @@ func ExampleRestore() {
 		log.Fatal(err)
 		return
 	}
-	fmt.Printf("The restore completed successfully. Restored %d keys", keysrestored)
+	fmt.Printf("The restore completed successfully. Restored %d keys.\n", keysrestored)
 
 	// Output:
-	// keysrestored: 1042
+	// The restore completed successfully. Restored 1042 keys.
 }
