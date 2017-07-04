@@ -7,7 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// ExampleBackup shows how to back up a Kubernetes cluster
+// Shows how to back up a Kubernetes cluster
 // by specifying the underlying etcd. It assumes that the
 // etcd process is servering on 127.0.0.1:2379.
 func ExampleBackup() {
