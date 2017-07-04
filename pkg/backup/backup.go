@@ -22,10 +22,6 @@ import (
 // point in time the backup operation was started, for example 1498050161.
 // If remote and bucket is provided, the backup will be additional stored
 // in this S3-compatible object store.
-//
-// Example:
-//
-//		bID, err := backup.Backup("http://localhost:2379", "/tmp", "play.minio.io:9000", "reshifter-test-cluster")
 func Backup(endpoint, target, remote, bucket string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
 	target, _ = filepath.Abs(filepath.Join(target, based))
