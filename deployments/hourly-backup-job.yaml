@@ -14,7 +14,7 @@ spec:
             command:
               - "bin/bash"
               - "-c"
-              - "sudo yum install -y python-pip"
-              - "sudo pip install httpie"
-              - "http POST reshifter:8080/v1/backup endpoint=test-etcd remote=play.minio.io:9000 bucket=reshifter-xxx"
+              - "curl localhost:8080/v1/backup"
+              - "-XPOST"
+              - "-d '{ \"endpoint\": \"http://test-etcd:2379\", \"remote\" : \"play.minio.io:9000\", \"bucket\" : \"reshifter-2017\" }'"
           restartPolicy: OnFailure

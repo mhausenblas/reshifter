@@ -1,0 +1,49 @@
+apiVersion:             extensions/v1beta1
+kind:                   Deployment
+metadata:
+  name:                 reshifter-deploy
+spec:
+  replicas:             1
+  template:
+    metadata:
+      labels:
+        app:            reshifter
+    spec:
+      containers:
+      - name:           reshifter-app
+        image:          quay.io/mhausenblas/reshifter:0.3.4
+        ports:
+        - containerPort: 8080
+        env:
+        - name:         ACCESS_KEY_ID
+          value:        "Q3AM3UQ867SPQQA43P2F"
+        - name:         SECRET_ACCESS_KEY
+          value:        "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3T"
+        volumeMounts:
+        - name:         RS_ETCD_CLIENT_CERT
+          mountPath:    "/tmp/etcd.client.cert"
+        - name:         RS_ETCD_CLIENT_KEY
+          mountPath:    "/tmp/etcd.client.key"
+        - name:         RS_ETCD_CA_CERT
+          mountPath:    "/tmp/etcd.ca.cert"
+      volumes:
+        - name:         RS_ETCD_CLIENT_CERT
+          secret:
+            secretName: etcdclientcert
+        - name:         RS_ETCD_CLIENT_KEY
+          secret:
+            secretName: etcdclientkey
+        - name:         RS_ETCD_CA_CERT
+          secret:
+            secretName: etcdcacert
+---
+apiVersion:             v1
+kind:                   Service
+metadata:
+  name:                 reshifter-svc
+spec:
+  ports:
+    - port:             8080
+      targetPort:       8080
+  selector:
+    app:                reshifter
