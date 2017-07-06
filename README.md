@@ -70,23 +70,29 @@ Available Commands:
   explore     Probes an etcd endpoint
   help        Help about any command
   restore     Performs a restore of a Kubernetes cluster
+  stats       Collects stats about Kubernetes-related keys from an etcd endpoint
   version     Displays the ReShifter version
+
+...
 ```
 
 Here's a simple usage example which assumes that you've got a Kubernetes cluster with an etcd on `http://localhost:4001` running:
 
 ```
-# explore the endpoint, overwrite default:
+# explore the endpoint, overwrite default for etcd endpoint:
 $ rcli explore -e http://localhost:4001
 
-# back up to Minio playground:
+# collect stats using default for etcd endpoint:
+$ rcli stats
+
+# back up Kubernetes cluster to Minio playground:
 $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
   SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
   rcli/rcli backup -e http://localhost:4001 -r play.minio.io:9000 -b mh9-test
 
 # restart/empty etcd now
 
-# restore from Minio playground, using backup ID 1498815551
+# restore cluster from Minio playground, using backup ID 1498815551:
 $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
   SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
   rcli/rcli restore -e http://localhost:4001 -r play.minio.io:9000 -b mh9-test -i 1498815551
