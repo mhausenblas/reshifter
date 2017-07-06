@@ -51,16 +51,21 @@ First, launch ReShifter:
 $ docker run --rm -e "ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F" -e "SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" --name reshifter -p 8080:8080 quay.io/mhausenblas/reshifter:0.3.2
 ```
 
-Now, launch a local etcd. Note: use the result of `docker inspect test-etcd | jq -r '.[0].NetworkSettings.IPAddress'`
-as the value for the endpoint in the UI/API:
+Now, launch a local etcd:
 
 ```
 $ docker run --rm -p 2379:2379 --name test-etcd --dns 8.8.8.8 quay.io/coreos/etcd:v3.1.0 /usr/local/bin/etcd  \
 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380
 ```
 
+Note: use the result of the following command as the value for the etcd endpoint in the ReShifter UI/API:
+
+```
+$ docker inspect test-etcd | jq -r '.[0].NetworkSettings.IPAddress'
+```
+
 Next we generate some entries in etcd:
--->
+
 ```
 $ export ETCDCTL_API=3
 $ etcdctl --endpoints=http://127.0.0.1:2379 put /kubernetes.io "."
