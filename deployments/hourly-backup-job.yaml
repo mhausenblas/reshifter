@@ -14,7 +14,7 @@ spec:
             command:
               - "bin/bash"
               - "-c"
-              - "curl localhost:8080/v1/backup"
+              - "curl reshifter:8080/v1/backup"
               - "-XPOST"
-              - "-d '{ \"endpoint\": \"http://test-etcd:2379\", \"remote\" : \"play.minio.io:9000\", \"bucket\" : \"reshifter-2017\" }'"
+              - "-d '{ \"endpoint\": \"http://172.17.0.2:2379\", \"remote\" : \"play.minio.io:9000\", \"bucket\" : \"reshifter-2017\" }'"
           restartPolicy: OnFailure

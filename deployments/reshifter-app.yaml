@@ -1,7 +1,7 @@
 apiVersion:             extensions/v1beta1
 kind:                   Deployment
 metadata:
-  name:                 reshifter-deploy
+  name:                 reshifter
 spec:
   replicas:             1
   template:
@@ -40,7 +40,7 @@ spec:
 apiVersion:             v1
 kind:                   Service
 metadata:
-  name:                 reshifter-svc
+  name:                 reshifter
 spec:
   ports:
     - port:             8080
