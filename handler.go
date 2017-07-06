@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -143,6 +144,33 @@ func backupRetrieveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, string(c))
+}
+
+// backupListHandler responds to HTTP GET requests at:
+//		http GET localhost:8080/v1/backup/all
+func backupListHandler(w http.ResponseWriter, r *http.Request) {
+	var backups []string
+	files, err := ioutil.ReadDir(types.DefaultWorkDir)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error(err)
+		return
+	}
+	for _, file := range files {
+		re := regexp.MustCompile("\\d{10}.zip")
+		fn := file.Name()
+		bid := fn[0 : len(fn)-len(filepath.Ext(fn))]
+		if re.Match([]byte(fn)) {
+			backups = append(backups, bid)
+		}
+	}
+	_ = json.NewEncoder(w).Encode(struct {
+		NumBackups   int      `json:"numbackups"`
+		EtcdSecurity []string `json:"backupids"`
+	}{
+		len(backups),
+		backups,
+	})
 }
 
 // restoreHandler responds to HTTP POST requests such as:
