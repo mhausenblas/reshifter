@@ -78,6 +78,19 @@ $ curl http://127.0.0.1:2379/v2/keys/kubernetes.io/namespaces/kube-system -XPUT 
 $ curl http://127.0.0.1:2379/v2/keys/openshift.io -XPUT -d value="."
 ```
 
+## Scheduled backups
+
+```
+$ kubectl create -f https://raw.githubusercontent.com/mhausenblas/reshifter/master/deployments/hourly-backup-job.yaml
+
+$ kubectl get cronjob
+NAME            SCHEDULE    SUSPEND   ACTIVE    LAST-SCHEDULE
+hourly-backup   0 * * * *   False     0         Thu, 06 Jul 2017 07:00:00 +0100
+
+$ kubectl delete cronjob/hourly-backup
+cronjob "hourly-backup" deleted
+```
+
 ## Demo
 
 The demo given to the Kubernetes SIG Cluster Lifecycle on 2017-06-27:
