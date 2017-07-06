@@ -102,14 +102,19 @@ $ rcli stats
 # back up Kubernetes cluster to Minio playground:
 $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
   SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
-  rcli/rcli backup -e http://localhost:4001 -r play.minio.io:9000 -b mh9-test
+  rcli backup -e http://localhost:4001 \
+              -r play.minio.io:9000 \
+              -b mh9-test
 
-# restart/empty etcd now
+# restart/empty etcd now or launch a new one as a restore target
 
 # restore cluster from Minio playground, using backup ID 1498815551:
 $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
   SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
-  rcli/rcli restore -e http://localhost:4001 -r play.minio.io:9000 -b mh9-test -i 1498815551
+  rcli restore -e http://localhost:4001 \
+               -r play.minio.io:9000 \
+               -b mh9-test \
+               -i 1498815551
 ```
 
 ## Test and development
