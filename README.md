@@ -42,7 +42,10 @@ The ReShifter HTTP API is defined in and available via Swagger: [swaggerhub.com/
 
 ## Deploy app in OpenShift
 
-Note: requires an OpenShift 1.5 cluster and [oc](https://github.com/openshift/origin/releases/tag/v1.5.1) installed, locally.
+To install the ReShifter app on OpenShift, we use a [Makefile](https://github.com/mhausenblas/reshifter/blob/master/Makefile)
+that creates a new project called `reshifter`, launches the app from the Docker image, and finally exposes the service via a route
+so that you can access the app from outside of the cluster. The following requires access to an OpenShift Origin 1.5 (or OpenShift Container Platform 3.5)
+cluster and also the [oc](https://github.com/openshift/origin/releases/tag/v1.5.1) CLI tool locally installed:
 
 ```
 $ make init
@@ -51,7 +54,18 @@ $ make publish
 
 ## Deploy app in Kubernetes
 
-TBD.
+To install the ReShifter app in a portable way, use `kubectl` and the YAML files provided.
+The following requires access to a vanilla Kubernetes 1.5 or above cluster and also the
+[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) CLI tool locally installed:
+
+```
+$ kubectl create -f https://raw.githubusercontent.com/mhausenblas/reshifter/master/deployments/reshifter-app.yaml
+```
+
+Note: the above YAML file defines both a `Deployment` as well as a `Service` object for ReShifter.
+It does, however, not expose the ReShifter service to the outside world. If you want to access the app from outside the cluster,
+you'll have to use Ingress or adapt the [YAML file](https://github.com/mhausenblas/reshifter/blob/master/deployments/reshifter-app.yaml)
+yourself.
 
 ## CLI tool
 
