@@ -24,6 +24,9 @@ import (
 // in this S3-compatible object store.
 func Backup(endpoint, target, remote, bucket string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		os.Mkdir(target, 0700)
+	}
 	target, _ = filepath.Abs(filepath.Join(target, based))
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
@@ -113,6 +116,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 // based is the output directory to use and path can be
 // any valid etcd key (with ':'' characters being escaped automatically).
 func store(based string, path string, val string) (string, error) {
+	log.WithFields(log.Fields{"func": "backup.store"}).Debug(fmt.Sprintf("Trying to store %s with value=%s in %s", path, val, based))
 	// make sure we're dealing with a valid path
 	// that is, non-empty and has to start with /:
 	if path == "" || (strings.Index(path, "/") != 0) {
@@ -149,6 +153,7 @@ func arch(based string) (string, error) {
 	defer func() {
 		_ = os.RemoveAll(based)
 	}()
+	log.WithFields(log.Fields{"func": "backup.arch"}).Debug(fmt.Sprintf("Trying to pack backup into %s.zip", based))
 	opath := based + ".zip"
 	err := zip.ArchiveFile(based, opath, func(apath string) {
 		log.WithFields(log.Fields{"func": "backup.arch"}).Debug(fmt.Sprintf("%s", apath))
