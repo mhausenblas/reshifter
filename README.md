@@ -124,18 +124,18 @@ ReShifter takes throughout the deployments (app, HTTP API, CLI) the following co
 supplied as environment variables. Currently all of them are optional, but may be required depending on the etcd
 setup in use or what you want to achieve, for example, backing up to an S3-compatible storage.
 
-| env var   | meaning  | required  | set for |
-| ---------:| -------- | --------- | ------- |
-| `ACCESS_KEY_ID` | S3 access key ID | no | when backing up to remote S3-compatible storage |
-| `SECRET_ACCESS_KEY` | S3 secret access key |  no | when backing up to remote S3-compatible storage |
-| `RS_ETCD_CLIENT_CERT` | path to etcd client cert file | no | when using a secure etcd |
-| `RS_ETCD_CLIENT_KEY` | path to etcd client key file | no | when using a secure etcd |
-| `RS_ETCD_CA_CERT` | path to etcd CA cert file | no | when using a secure etcd |
+| env var   | meaning  | set for |
+| ---------:| -------- | ------- |
+| `ACCESS_KEY_ID` | S3 access key ID | when backing up to remote S3-compatible storage |
+| `SECRET_ACCESS_KEY` | S3 secret access key | when backing up to remote S3-compatible storage |
+| `RS_ETCD_CLIENT_CERT` | path to etcd client cert file | when using a secure etcd |
+| `RS_ETCD_CLIENT_KEY` | path to etcd client key file | when using a secure etcd |
+| `RS_ETCD_CA_CERT` | path to etcd CA cert file | when using a secure etcd |
 
 Note:
 
 - The `ACCESS_KEY_ID` and `SECRET_ACCESS_KEY` environment variables are understood as of the AWS [guidelines](http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html)
-- The `RS_ETCD_*` environment variables are understood as of the etcd2 [security flags](https://coreos.com/etcd/docs/latest/v2/configuration.html#security-flags) and the etcd2 [security model](https://coreos.com/etcd/docs/latest/v2/security.html) or etcd3 [security flags](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#security-flags)/etcd3 [security flags](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#security-flags)
+- The `RS_ETCD_*` environment variables are understood as of the etcd2 [security flags](https://coreos.com/etcd/docs/latest/v2/configuration.html#security-flags)/etcd3 [security flags](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#security-flags)
 
 ## Test and development
 
