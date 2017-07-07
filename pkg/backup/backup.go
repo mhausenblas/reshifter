@@ -25,7 +25,7 @@ import (
 func Backup(endpoint, target, remote, bucket string) (string, error) {
 	based := fmt.Sprintf("%d", time.Now().Unix())
 	if _, err := os.Stat(target); os.IsNotExist(err) {
-		os.Mkdir(target, 0700)
+		_ = os.Mkdir(target, 0700)
 	}
 	target, _ = filepath.Abs(filepath.Join(target, based))
 	version, secure, err := discovery.ProbeEtcd(endpoint)

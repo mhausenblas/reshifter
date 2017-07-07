@@ -15,16 +15,16 @@ import (
 
 var (
 	probetests = []struct {
-		launchfunc func(string) error
+		launchfunc func(string, string) (bool, error)
 		scheme     string
 		port       string
 		version    string
 		secure     bool
 	}{
-		{util.Etcd2Up, "http", "4001", "2", false},
-		{util.Etcd3Up, "http", "4001", "3", false},
-		{util.Etcd2SecureUp, "https", "4001", "2", true},
-		{util.Etcd3SecureUp, "https", "4001", "3", true},
+		{util.LaunchEtcd2, "http", "4001", "2", false},
+		{util.LaunchEtcd3, "http", "4001", "3", false},
+		{util.LaunchEtcd2, "https", "4001", "2", true},
+		{util.LaunchEtcd3, "https", "4001", "3", true},
 	}
 	notadistro      = []string{"/something"}
 	vanilladistro   = []string{types.KubernetesPrefix}
@@ -49,7 +49,7 @@ func TestCountKeysFor(t *testing.T) {
 	wantk := 2
 	wants := 11
 	tetcd := "http://127.0.0.1:" + port
-	err := util.Etcd2Up(port)
+	_, err := util.LaunchEtcd2(tetcd, port)
 	if err != nil {
 		t.Errorf("Can't launch etcd at %s: %s", tetcd, err)
 		return
@@ -96,14 +96,14 @@ func TestProbeEtcd(t *testing.T) {
 	}
 }
 
-func testEtcdX(t *testing.T, etcdLaunchFunc func(string) error, scheme string, port string, version string, secure bool) {
+func testEtcdX(t *testing.T, etcdLaunchFunc func(string, string) (bool, error), scheme string, port string, version string, secure bool) {
 	defer func() {
 		_ = util.EtcdDown()
 	}()
 	tetcd := "127.0.0.1:" + port
-	err := etcdLaunchFunc(port)
+	_, err := etcdLaunchFunc(tetcd, port)
 	if err != nil {
-		t.Errorf("Can't launch etcd at %s: %s", tetcd, err)
+		t.Errorf("%s", err)
 		return
 	}
 	v, s, err := ProbeEtcd(scheme + "://" + tetcd)
@@ -128,7 +128,7 @@ func testK8SX(t *testing.T, keys []string, version string, secure bool, distro t
 		_ = util.EtcdDown()
 	}()
 	tetcd := "http://127.0.0.1:4001"
-	err := util.Etcd2Up("4001")
+	_, err := util.LaunchEtcd2(tetcd, "4001")
 	if err != nil {
 		t.Errorf("Can't launch etcd at %s: %s", tetcd, err)
 		return

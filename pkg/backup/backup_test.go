@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/coreos/etcd/client"
@@ -72,26 +71,12 @@ func TestBackup(t *testing.T) {
 
 func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro) {
 	defer func() { _ = util.EtcdDown() }()
-	secure := false
-	switch {
-	case strings.Index(tetcd, "https") == 0:
-		err := util.Etcd2SecureUp(port)
-		secure = true
-		_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
-		_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
-		_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(util.Certsdir(), "ca.pem"))
-		if err != nil {
-			t.Errorf("Can't launch secure etcd2 at %s: %s", tetcd, err)
-			return
-		}
-	case strings.Index(tetcd, "http") == 0:
-		err := util.Etcd2Up(port)
-		if err != nil {
-			t.Errorf("Can't launch insecure etcd2 at %s: %s", tetcd, err)
-			return
-		}
-	default:
-		t.Errorf("That's not a valid etcd2 endpoint: %s", tetcd)
+	_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
+	_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
+	_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(util.Certsdir(), "ca.pem"))
+	secure, err := util.LaunchEtcd2(tetcd, port)
+	if err != nil {
+		t.Errorf("%s", err)
 		return
 	}
 	c2, err := util.NewClient2(tetcd, secure)
@@ -141,26 +126,12 @@ func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 func etcd3Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro) {
 	defer func() { _ = util.EtcdDown() }()
 	_ = os.Setenv("ETCDCTL_API", "3")
-	secure := false
-	switch {
-	case strings.Index(tetcd, "https") == 0:
-		err := util.Etcd3SecureUp(port)
-		secure = true
-		_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
-		_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
-		_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(util.Certsdir(), "ca.pem"))
-		if err != nil {
-			t.Errorf("Can't launch secure etcd3 at %s: %s", tetcd, err)
-			return
-		}
-	case strings.Index(tetcd, "http") == 0:
-		err := util.Etcd3Up(port)
-		if err != nil {
-			t.Errorf("Can't launch insecure etcd3 at %s: %s", tetcd, err)
-			return
-		}
-	default:
-		t.Errorf("That's not a valid etcd3 endpoint: %s", tetcd)
+	_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
+	_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
+	_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(util.Certsdir(), "ca.pem"))
+	secure, err := util.LaunchEtcd3(tetcd, port)
+	if err != nil {
+		t.Errorf("%s", err)
 		return
 	}
 	c3, err := util.NewClient3(tetcd, secure)
@@ -173,7 +144,6 @@ func etcd3Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		t.Errorf("%s", err)
 		return
 	}
-
 	_, err = c3.Put(context.Background(), testkey, testval)
 	if err != nil {
 		t.Errorf("Can't create etcd entry %s=%s: %s", testkey, testval, err)

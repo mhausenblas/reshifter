@@ -17,7 +17,7 @@ func LaunchEtcd2(tetcd, port string) (bool, error) {
 	secure := false
 	switch {
 	case strings.Index(tetcd, "https") == 0:
-		err := Etcd2SecureUp(port)
+		err := etcd2SecureUp(port)
 		secure = true
 		_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(Certsdir(), "client.pem"))
 		_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(Certsdir(), "client-key.pem"))
@@ -26,7 +26,7 @@ func LaunchEtcd2(tetcd, port string) (bool, error) {
 			return secure, fmt.Errorf("Can't launch secure etcd2 at %s: %s", tetcd, err)
 		}
 	case strings.Index(tetcd, "http") == 0:
-		err := Etcd2Up(port)
+		err := etcd2Up(port)
 		if err != nil {
 			return secure, fmt.Errorf("Can't launch insecure etcd2 at %s: %s", tetcd, err)
 		}
@@ -42,7 +42,7 @@ func LaunchEtcd3(tetcd, port string) (bool, error) {
 	secure := false
 	switch {
 	case strings.Index(tetcd, "https") == 0:
-		err := Etcd3SecureUp(port)
+		err := etcd3SecureUp(port)
 		secure = true
 		_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(Certsdir(), "client.pem"))
 		_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(Certsdir(), "client-key.pem"))
@@ -51,7 +51,7 @@ func LaunchEtcd3(tetcd, port string) (bool, error) {
 			return secure, fmt.Errorf("Can't launch secure etcd2 at %s: %s", tetcd, err)
 		}
 	case strings.Index(tetcd, "http") == 0:
-		err := Etcd3Up(port)
+		err := etcd3Up(port)
 		if err != nil {
 			return secure, fmt.Errorf("Can't launch insecure etcd3 at %s: %s", tetcd, err)
 		}
@@ -62,10 +62,10 @@ func LaunchEtcd3(tetcd, port string) (bool, error) {
 	return secure, nil
 }
 
-// Etcd2Up launches an etcd2 server on port.
-func Etcd2Up(port string) error {
+// etcd2Up launches an etcd2 server on port.
+func etcd2Up(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8",
+		"-p", port+":"+port, "--name", "test-etcd",
 		"quay.io/coreos/etcd:v2.3.8",
 		"--advertise-client-urls", "http://0.0.0.0:"+port,
 		"--listen-client-urls", "http://0.0.0.0:"+port)
@@ -78,11 +78,11 @@ func Etcd2Up(port string) error {
 	return nil
 }
 
-// Etcd2SecureUp launches a secure etcd2 server on port.
-func Etcd2SecureUp(port string) error {
+// etcd2SecureUp launches a secure etcd2 server on port.
+func etcd2SecureUp(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
 		"-v", Certsdir()+"/:/etc/ssl/certs", "-p", port+":"+port,
-		"--name", "test-etcd", "--dns", "8.8.8.8",
+		"--name", "test-etcd",
 		"quay.io/coreos/etcd:v2.3.8",
 		"--ca-file", "/etc/ssl/certs/ca.pem",
 		"--cert-file", "/etc/ssl/certs/server.pem",
@@ -98,10 +98,10 @@ func Etcd2SecureUp(port string) error {
 	return nil
 }
 
-// Etcd3Up launches an etcd3 server on port.
-func Etcd3Up(port string) error {
+// etcd3Up launches an etcd3 server on port.
+func etcd3Up(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8",
+		"-p", port+":"+port, "--name", "test-etcd",
 		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
 		"--advertise-client-urls", "http://0.0.0.0:"+port,
 		"--listen-client-urls", "http://0.0.0.0:"+port)
@@ -114,11 +114,11 @@ func Etcd3Up(port string) error {
 	return nil
 }
 
-// Etcd3SecureUp launches a secure etcd3 server on port.
-func Etcd3SecureUp(port string) error {
+// etcd3SecureUp launches a secure etcd3 server on port.
+func etcd3SecureUp(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
 		"-v", Certsdir()+"/:/etc/ssl/certs", "-p", port+":"+port,
-		"--name", "test-etcd", "--dns", "8.8.8.8",
+		"--name", "test-etcd",
 		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
 		"--ca-file", "/etc/ssl/certs/ca.pem",
 		"--cert-file", "/etc/ssl/certs/server.pem",
