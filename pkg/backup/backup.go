@@ -2,8 +2,10 @@ package backup
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -92,6 +94,35 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 	}
 
 	return based, nil
+}
+
+// List generates a list of available backup IDs.
+// If remote and bucket is provided, the S3-compatible object store
+// will be queried rather than the local work directory.
+func List(remote, bucket string) ([]string, error) {
+	var backupIDs []string
+
+	if remote == "" {
+		files, err := ioutil.ReadDir(types.DefaultWorkDir)
+		if err != nil {
+			return nil, fmt.Errorf("Can't read backup IDs from local: %s", err)
+		}
+		for _, file := range files {
+			re := regexp.MustCompile("\\d{10}.zip")
+			fn := file.Name()
+			bid := fn[0 : len(fn)-len(filepath.Ext(fn))]
+			if re.Match([]byte(fn)) {
+				backupIDs = append(backupIDs, bid)
+			}
+		}
+		return backupIDs, nil
+	}
+	// we gonna query the remote S3-compatible object store:
+	backupIDs, err := remotes.ListObjectsInS3Bucket(remote, bucket)
+	if err != nil {
+		return nil, fmt.Errorf("Can't read backup IDs from remote: %s", err)
+	}
+	return backupIDs, nil
 }
 
 func pickStrategy() (string, types.Reap) {

@@ -2,10 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
-	"regexp"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -49,18 +46,15 @@ var listBackupCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Lists backups of a Kubernetes cluster",
 	Run: func(cmd *cobra.Command, args []string) {
-		files, err := ioutil.ReadDir(types.DefaultWorkDir)
+		remote := cmd.Flag("remote").Value.String()
+		bucket := cmd.Flag("bucket").Value.String()
+		backupIDs, err := backup.List(remote, bucket)
 		if err != nil {
 			log.Error(err)
 			return
 		}
-		for _, file := range files {
-			re := regexp.MustCompile("\\d{10}.zip")
-			fn := file.Name()
-			bid := fn[0 : len(fn)-len(filepath.Ext(fn))]
-			if re.Match([]byte(fn)) {
-				fmt.Printf("%s\n", bid)
-			}
+		for _, bid := range backupIDs {
+			fmt.Printf("%s\n", bid)
 		}
 	},
 }
@@ -69,9 +63,9 @@ func init() {
 	RootCmd.AddCommand(backupCmd)
 	backupCmd.AddCommand(createBackupCmd)
 	backupCmd.AddCommand(listBackupCmd)
+	backupCmd.PersistentFlags().StringP("remote", "r", "", "Optionally, the S3-compatible storage endpoint")
+	backupCmd.PersistentFlags().StringP("bucket", "b", "", "Optionally, the target bucket in the S3-compatible storage endpoint")
 	createBackupCmd.Flags().StringP("endpoint", "e", "http://127.0.0.1:2379", "The URL of the etcd to use")
 	createBackupCmd.Flags().StringP("target", "t", types.DefaultWorkDir, "Optionally, the target directory for the resulting ZIP file of the backup")
-	createBackupCmd.Flags().StringP("remote", "r", "", "Optionally, the S3-compatible storage endpoint")
-	createBackupCmd.Flags().StringP("bucket", "b", "", "Optionally, the target bucket in the S3-compatible storage endpoint")
 	_ = createBackupCmd.MarkFlagRequired("endpoint")
 }

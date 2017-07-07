@@ -27,17 +27,43 @@ func StoreInS3(s3endpoint, bucket, target, backupid string) error {
 	// if the bucket already exists, we ignore that fact.
 	// Also, the region doesn't matter, it's a global resource.
 	_ = mc.MakeBucket(bucket, "us-east-1")
-	// if err != nil {
-	// 	exists, berr := mc.BucketExists(bucket)
-	// 	if berr == nil && exists {
-	// 		return fmt.Errorf(fmt.Sprintf("Bucket %s already exists", bucket))
-	// 	}
-	// 	return fmt.Errorf(fmt.Sprintf("%s", err))
-	// }
 	nbytes, err := mc.FPutObject(bucket, object, target, types.ContentTypeZip)
 	if err != nil {
 		return fmt.Errorf(fmt.Sprintf("%s", err))
 	}
 	log.WithFields(log.Fields{"func": "remotes.StoreInS3"}).Debug(fmt.Sprintf("Successfully stored %s/%s (%d Bytes) in S3 compatible remote storage %s", bucket, object, nbytes, s3endpoint))
 	return nil
+}
+
+// ListObjectsInS3Bucket lists all backup IDs from a
+// bucket in an S3 compatible storage, using s3endpoint.
+func ListObjectsInS3Bucket(s3endpoint, bucket string) ([]string, error) {
+	if s3endpoint == "" || bucket == "" {
+		return nil, fmt.Errorf("No remote or bucket provided. Aborting …")
+	}
+	accesskey, secret, err := util.S3CredFromEnv()
+	if err != nil {
+		return nil, fmt.Errorf("No S3 credentials found: %s", err)
+	}
+	mc, err := minio.New(s3endpoint, accesskey, secret, true)
+	if err != nil {
+		return nil, fmt.Errorf(fmt.Sprintf("%s ", err))
+	}
+	exists, err := mc.BucketExists(bucket)
+	if err != nil {
+		return nil, fmt.Errorf(fmt.Sprintf("%s ", err))
+	}
+	if !exists {
+		return nil, fmt.Errorf(fmt.Sprintf("Bucket %s does not exist. Aborting …", bucket))
+	}
+	done := make(chan struct{})
+	defer close(done)
+	var backupIDs []string
+	recursive := false
+	for msg := range mc.ListObjects(bucket, "", recursive, done) {
+		fn := msg.Key
+		bid := fn[0 : len(fn)-len(".zip")]
+		backupIDs = append(backupIDs, bid)
+	}
+	return backupIDs, nil
 }
