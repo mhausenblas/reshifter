@@ -26,7 +26,7 @@
       <nav class="sidebar-nav">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="./"><i class="icon-home"></i></a>
+            <a class="nav-link" href="./"><i class="icon-home"> </i> ReShifter</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="config.html"><i class="icon-settings"> </i> Configuration</a>
@@ -46,13 +46,23 @@
       <div id="config" class="container-fluid">
       <h3 class="display-3">ReShifter</h3>
         <p class="lead">
-          … a cluster admin backup and restore tool for Kubernetes and OpenShift.
+          … a cluster admin backup and restore tool for Kubernetes.
+        </p>
+        <p class="lead">
+          ReShifter is a tool and a library for Kubernetes cluster backups. You can use it as a Web app (what you're looking at),
+          you can use it as a CLI tool, <code>rcli</code> you can download from the <a href="https://github.com/mhausenblas/reshifter/releases" target="_new">releases</a>
+          page, or you can you it in your own Go codebase as a <a href="https://godoc.org/github.com/mhausenblas/reshifter" target="_new">library</a>.
         </p>
         <p>
-          Start with the configuration, then you can back up and restore your Kubernetes cluster.
+          Start now with <a href="config.html">Configuration</a> where you can set the etcd endpoint of your Kubernetes cluster,
+          define a remote storage location, as well as explore what's in the Kubernetes cluster.
+          Then you can back up and restore your Kubernetes cluster, either via downloading a ZIP archive or by storing it in the
+          remote storage location. ReShifter currently supports S3-compatible remote storage endpoints, incl. Amazon S3, Google Storage,
+          and Minio.
         </p>
         <p>
-          Learn <a href="https://hackernoon.com/introducing-reshifter-for-kubernetes-backup-restore-migration-upgrade-ffaf78da36" target="_new">more</a> about ReShifter.
+          Learn more about the <a href="https://hackernoon.com/introducing-reshifter-for-kubernetes-backup-restore-migration-upgrade-ffaf78da36" target="_new">origins and philosophy</a>
+          of ReShifter, check out the <a href="https://trello.com/b/iOrEdJQ3/reshifter" target="_new">roadmap</a> or let us know about <a href="https://github.com/mhausenblas/reshifter/issues" target="_new">issues</a>.
         </p>
       </div>
     </main>

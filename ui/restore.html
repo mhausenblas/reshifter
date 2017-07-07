@@ -26,7 +26,7 @@
       <nav class="sidebar-nav">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="./"><i class="icon-home"></i></a>
+            <a class="nav-link" href="./"><i class="icon-home"> </i> ReShifter</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="config.html"><i class="icon-settings"> </i> Configuration</a>
@@ -43,23 +43,27 @@
 
     <!-- Main content -->
     <main class="main">
-      <div id="config" class="container-fluid">
-        <h3 class="display-3">Cluster restore</h3>
-        <form>
+      <div class="container-fluid">
+        <h3 class="display-3">Restore</h3>
+        <p class="lead">
+          Restore your Kubernetes cluster using following etcd endpoint.
+        </p>
+        <fieldset class="form-group">
+          <legend>Endpoint</legend>
           <div class="form-group">
-            <label for="endpoint">Restore Kubernetes cluster with following etcd endpoint:</label>
-            <input class="form-control" id="endpoint" value="http://localhost:2379">
+              <p>Use this as default if no etcd endpoint is provided.</p>
+              <input class="form-control" id="endpoint" value="http://localhost:2379">
           </div>
+          <legend>Backup ID</legend>
           <div class="form-group">
-            <label for="endpoint">Using the following backup ID:</label>
-            <input class="form-control" id="backupid" placeholder="1498413955">
+              <p>Using this backup ID to restore Kubernetes cluster from.</p>
+              <input class="form-control" id="backupid" placeholder="1498xxxxxx">
           </div>
-          <div style="pointer: pointer;" class="btn btn-primary" id="dorestore">Start!</div>
-      </form>
-      <div style="margin-top: 50px;" id="restore-result"></div>
+        </fieldset>
+        <div style="pointer: pointer;" class="btn btn-primary" id="dorestore">Start restore</div>
+        <div style="margin-top: 50px;" id="restore-result"></div>
       </div>
     </main>
-
 
   </div>
 

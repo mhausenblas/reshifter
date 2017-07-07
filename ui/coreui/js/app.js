@@ -4,8 +4,6 @@
 
   // In-browser Storage
   var ibstorage = window.localStorage;
-  var default_ep = '';
-  var default_remote = '';
 
   //Main navigation
   $.navigation = $('nav > ul.nav');
@@ -46,6 +44,9 @@ function getVersion(){
 function setDefaults(){
   var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
   var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+  var sepidx = 0;
+  var remote = '';
+  var bucket = '';
 
   if (default_ep == null) {
     ibstorage.setItem('reshifter.info/default-etcd', 'http://localhost:2379');
@@ -53,24 +54,64 @@ function setDefaults(){
   if (default_remote == null) {
     ibstorage.setItem('reshifter.info/default-remote', 's3 play.minio.io:9000 reshifter-xxx');
   }
+  sepidx = default_remote.indexOf(' ');
+  console.info('reshifter.info/default-etcd:'+default_ep)
+  $('#endpoint').val(default_ep);
+
+  console.info('reshifter.info/default-remote:'+default_remote);
+
+  remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
+  if (sepidx == -1){ // download as ZIP file
+    $("#remote[download=s3]").prop('checked', true);
+  } else { // we have a remote configured
+    $("#remote[value=s3]").prop('checked', true);
+    bucket = default_remote.substring(default_remote.lastIndexOf(' ')+1);
+    $('#bucket').val(bucket);
+  }
 }
 
-function initRestore(){
+function initBackup(){
+  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
+  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
   var sepidx = default_remote.indexOf(' ');
   var remote = '';
   var bucket ='';
-  if (sepidx != -1){
+
+  $('#endpoint').val(default_ep);
+
+  if (sepidx == -1){ // download as ZIP file
+    console.info('User will download ZIP file')
+  } else { // we have a remote configured
     remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
     bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+    $('#backup-result').html('<div>Backing up to: <code>'+ remote +'</code>, into bucket <code>' + bucket + '</code></div>');
+    console.info('Backing up to [' + remote + '] into bucket [' + bucket + ']')
   }
+}
+
+function initRestore(){
+  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
+  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+  var sepidx = default_remote.indexOf(' ');
+  var remote = '';
+  var bucket ='';
+
   $('#endpoint').val(default_ep);
+
+  if (sepidx == -1){ // upload from local storage
+    console.info('User will use ZIP file from local storage')
+  } else { // we have a remote configured
+    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
+    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+    $('#restore-result').html('<div>Restoring from remote <code>'+ remote +'</code>, from bucket <code>' + bucket + '</code></div>');
+    console.info('Restoring from remote [' + remote + '] from bucket [' + bucket + ']')
+  }
+
   last_backup_id = ibstorage.getItem('reshifter.info/last-backup-id')
   if (last_backup_id !== '') {
-    console.info('using last-backup-id:'+last_backup_id)
+    console.info('Using last backup ID: '+last_backup_id)
     $('#backupid').val(last_backup_id)
   }
-  $('#restore-result').html('<div>Restoring from remote <code>'+ remote +'</code>, from bucket <code>' + bucket + '</code></div>');
-  console.info('restoring from remote [' + remote + '] from bucket [' + bucket + ']')
 }
 
 
@@ -81,30 +122,7 @@ function initRestore(){
 $(document).ready(function($){
   getVersion()
   setDefaults()
-
-  // Check if we have any defaults and set UI elements accordingly:
-  default_ep = ibstorage.getItem('reshifter.info/default-etcd');
-  if (default_ep !== '') {
-    console.info('reshifter.info/default-etcd:'+default_ep)
-    $('#endpoint').val(default_ep);
-  }
-  default_remote = ibstorage.getItem('reshifter.info/default-remote');
-  if (default_remote !== '') {
-    console.info('reshifter.info/default-remote:'+default_remote);
-    var sepidx = default_remote.indexOf(' ');
-    var remote = '';
-    var bucket = '';
-    if (sepidx != -1){
-      bucket = default_remote.substring(default_remote.lastIndexOf(' ')+1);
-      remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
-      $("#remote[value=s3]").prop('checked', true);
-      $('#bucket').val(bucket);
-    } else {
-      $('#remote').val(default_remote);
-    }
-    $('#backup-result').html('<div>Backing up to: <code>'+ remote +'</code>, into bucket <code>' + bucket + '</code></div>');
-  }
-
+  initBackup();
   initRestore();
 
   // ACTIONS:
@@ -159,8 +177,8 @@ $(document).ready(function($){
     ibstorage.setItem('reshifter.info/default-remote', remote);
     console.info('reshifter.info/default-remote:'+remote)
     $('#config-result').html('<h2>Result</h2><div>All settings stored locally:</div><div><ul>')
-    $('#config-result').append('<li>Default endpoint: <code>' + ibstorage.getItem('reshifter.info/default-etcd') + '</code></li>')
-    $('#config-result').append('<li>Remote target: <code>' + ibstorage.getItem('reshifter.info/default-remote') + '</code></li>')
+    $('#config-result').append('<li>Using etcd endpoint: <code>' + ibstorage.getItem('reshifter.info/default-etcd') + '</code></li>')
+    $('#config-result').append('<li>Using backup target: <code>' + ibstorage.getItem('reshifter.info/default-remote') + '</code></li>')
     $('#config-result').append('</ul></div>')
   });
 

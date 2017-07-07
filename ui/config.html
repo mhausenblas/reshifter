@@ -26,7 +26,7 @@
       <nav class="sidebar-nav">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="./"><i class="icon-home"></i></a>
+            <a class="nav-link" href="./"><i class="icon-home"> </i> ReShifter</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="config.html"><i class="icon-settings"> </i> Configuration</a>
@@ -43,46 +43,38 @@
 
     <!-- Main content -->
     <main class="main">
-      <div id="config" class="container-fluid">
+      <div class="container-fluid">
         <h3 class="display-3">Configuration</h3>
         <p class="lead">
-          The configuration settings here are stored in your browser, i.e. locally only.
-          This means that while they survive re-starts, they are not available across
-          different machines, only to you on this machine.
+          The configuration settings are stored in your browser. This means that while they survive browser re-starts,
+          they are not available across different machines, only to you in this browser.
         </p>
-        <form>
-          <fieldset class="form-group">
-            <legend>Default etcd</legend>
-            <form>
-              <div class="form-group">
-                <p>If no etcd endpoint is provided use this.</p>
-                <input class="form-control" id="endpoint" value="http://localhost:2379">
-              </div>
-            </form>
-            <legend>Default behaviour for backup</legend>
-              <div class="form-check">
-                <p>Use this setting for storing the resulting backup.</p>
-                <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="download" checked>
-                  Download as ZIP file
-                </label>
-              </div>
-              <div class="form-check">
-                <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="s3">
-                  S3 compatible remote</br>
-                  Endpoint: <input class="form-control" id="remoteep" value="play.minio.io:9000">
-                  Bucket <input class="form-control" id="bucket" value="reshifter-xxx">
-                </label>
-              </div>
-          </fieldset>
-        <div style="pointer: pointer;" class="btn btn-primary" id="doexplore">Check!</div>
-        <div style="pointer: pointer;" class="btn btn-primary" id="dosaveconfig">Save Config</div>
-      </form>
-      <div style="margin-top: 50px;" id="config-result"></div>
+
+        <fieldset class="form-group">
+          <legend>Default etcd endpoint</legend>
+          <div class="form-group">
+            <p>Use this as default if no etcd endpoint is provided.</p>
+            <input class="form-control" id="endpoint" value="http://localhost:2379">
+          </div>
+          <legend>Backup target</legend>
+          <div class="form-check">
+            <p>Use this setting for storing the resulting backup. Either download as ZIP file or store in an S3-compatible remote storage.</p>
+            <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="download"> Download as ZIP file only
+          </div>
+          <div class="form-check">
+            <p>Use S3-compatible remote storage:</p>
+            <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="s3">
+            <div class="form-group">
+              S3 URL: <input class="form-control" id="remoteep" value="play.minio.io:9000">
+              bucket: <input class="form-control" id="bucket" value="reshifter-xxx">
+            </div>
+          </div>
+        </fieldset>
+        <div style="pointer: pointer;" class="btn btn-primary" id="doexplore">Explore etcd</div>
+        <div style="pointer: pointer;" class="btn btn-primary" id="dosaveconfig">Save configuration</div>
+        <div style="margin-top: 50px;" id="config-result"></div>
       </div>
     </main>
-
 
   </div>
 
