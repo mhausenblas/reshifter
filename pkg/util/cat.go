@@ -74,7 +74,7 @@ func Etcd2Up(port string) error {
 	if err != nil {
 		return err
 	}
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Second * 2)
 	return nil
 }
 
@@ -94,7 +94,7 @@ func Etcd2SecureUp(port string) error {
 	if err != nil {
 		return err
 	}
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Second * 2)
 	return nil
 }
 
@@ -110,7 +110,7 @@ func Etcd3Up(port string) error {
 	if err != nil {
 		return err
 	}
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Second * 2)
 	return nil
 }
 
@@ -130,7 +130,7 @@ func Etcd3SecureUp(port string) error {
 	if err != nil {
 		return err
 	}
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Second * 2)
 	return nil
 }
 
@@ -141,7 +141,7 @@ func EtcdDown() error {
 	if err != nil {
 		return err
 	}
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Second * 2)
 	return nil
 }
 
