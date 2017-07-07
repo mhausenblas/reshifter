@@ -26,18 +26,16 @@ var (
 		{util.LaunchEtcd2, "https", "4001", "2", true},
 		{util.LaunchEtcd3, "https", "4001", "3", true},
 	}
-	notadistro      = []string{"/something"}
-	vanilladistro   = []string{types.KubernetesPrefix}
-	openshiftdistro = []string{types.KubernetesPrefix, types.OpenShiftPrefix}
-	k8stests        = []struct {
+	k8stests = []struct {
 		keys    []string
 		version string
 		secure  bool
 		distro  types.KubernetesDistro
 	}{
-		{notadistro, "2", false, types.NotADistro},
-		{vanilladistro, "2", false, types.Vanilla},
-		{openshiftdistro, "2", false, types.OpenShift},
+		{[]string{""}, "2", false, types.NotADistro},
+		{[]string{"/something"}, "2", false, types.NotADistro},
+		{[]string{types.KubernetesPrefix}, "2", false, types.Vanilla},
+		{[]string{types.KubernetesPrefix, types.OpenShiftPrefix}, "2", false, types.OpenShift},
 	}
 )
 
@@ -130,20 +128,22 @@ func testK8SX(t *testing.T, keys []string, version string, secure bool, distro t
 	tetcd := "http://127.0.0.1:4001"
 	_, err := util.LaunchEtcd2(tetcd, "4001")
 	if err != nil {
-		t.Errorf("Can't launch etcd at %s: %s", tetcd, err)
+		t.Errorf("%s", err)
 		return
 	}
 	c2, err := util.NewClient2(tetcd, false)
 	if err != nil {
-		t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
+		t.Errorf("%s", err)
 		return
 	}
 	kapi := client.NewKeysAPI(c2)
 	for _, key := range keys {
-		err = util.SetKV2(kapi, key, ".")
-		if err != nil {
-			t.Errorf("Can't create key %s: %s", key, err)
-			return
+		if key != "" {
+			err = util.SetKV2(kapi, key, ".")
+			if err != nil {
+				t.Errorf("%s", err)
+				return
+			}
 		}
 	}
 	distrotype, err := ProbeKubernetesDistro(tetcd)

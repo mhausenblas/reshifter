@@ -54,7 +54,7 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 	if strings.HasPrefix(version, "3") {
 		c3, cerr := util.NewClient3(endpoint, secure)
 		if cerr != nil {
-			return types.NotADistro, fmt.Errorf("Can't connect to etcd: %s", cerr)
+			return types.NotADistro, fmt.Errorf("%s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
 		_, err := c3.Get(context.Background(), types.KubernetesPrefix)
@@ -73,7 +73,7 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 	if strings.HasPrefix(version, "2") {
 		c2, cerr := util.NewClient2(endpoint, secure)
 		if cerr != nil {
-			return types.NotADistro, fmt.Errorf("Can't connect to etcd: %s", cerr)
+			return types.NotADistro, fmt.Errorf("%s", cerr)
 		}
 		kapi := client.NewKeysAPI(c2)
 		_, err := kapi.Get(context.Background(), types.KubernetesPrefix, nil)
@@ -105,7 +105,7 @@ func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, err
 	if strings.HasPrefix(version, "3") {
 		c3, cerr := util.NewClient3(endpoint, secure)
 		if cerr != nil {
-			return 0, 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
+			return 0, 0, fmt.Errorf("%s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "discovery.CountKeysFor"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
@@ -134,7 +134,7 @@ func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, err
 	if strings.HasPrefix(version, "2") {
 		c2, cerr := util.NewClient2(endpoint, secure)
 		if cerr != nil {
-			return 0, 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
+			return 0, 0, fmt.Errorf("%s", cerr)
 		}
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "discovery.CountKeysFor"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
