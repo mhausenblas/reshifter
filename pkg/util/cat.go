@@ -141,7 +141,7 @@ func EtcdDown() error {
 	if err != nil {
 		return err
 	}
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * 1)
 	return nil
 }
 

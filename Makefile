@@ -6,8 +6,10 @@ main_dir := `pwd`
 .PHONY: gtest gbuild cbuild cpush release init build publish destroy
 
 gtest :
-	@echo This will take a minute or so to complete ...
-	go test -v -short -run Test* ./pkg/...
+	@echo This will take ca. 3 min to complete so get a cuppa tea for now ...
+	go test -short -run Test* ./pkg/discovery
+	go test -short -run Test* ./pkg/restore
+	go test -short -run Test* ./pkg/backup
 
 gbuild :
 	@GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
