@@ -40,8 +40,9 @@ func Visit2(kapi client.KeysAPI, path, target string, reapfn types.Reap, reapfnN
 		return reapfn(res.Node.Key, string(res.Node.Value), target)
 	case types.ReapFunctionRender:
 		return reapfn(res.Node.Key, string(res.Node.Value), os.Stdout)
+	default:
+		return reapfn(res.Node.Key, string(res.Node.Value), nil)
 	}
-	return nil
 }
 
 // Visit3 visits the given path of an etcd3 server and applies the reap function
@@ -72,6 +73,11 @@ func Visit3(c3 *clientv3.Client, path, target string, distro types.KubernetesDis
 			}
 		case types.ReapFunctionRender:
 			err = reapfn(string(ev.Key), string(ev.Value), os.Stdout)
+			if err != nil {
+				return err
+			}
+		default:
+			err = reapfn(string(ev.Key), string(ev.Value), nil)
 			if err != nil {
 				return err
 			}
