@@ -100,13 +100,13 @@ func testEtcdX(t *testing.T, etcdLaunchFunc func(string, string) (bool, error), 
 	defer func() {
 		_ = util.EtcdDown()
 	}()
-	tetcd := "127.0.0.1:" + port
+	tetcd := scheme + "://127.0.0.1:" + port
 	_, err := etcdLaunchFunc(tetcd, port)
 	if err != nil {
 		t.Errorf("%s", err)
 		return
 	}
-	v, s, err := ProbeEtcd(scheme + "://" + tetcd)
+	v, s, err := ProbeEtcd(tetcd)
 	if err != nil {
 		t.Error(err)
 		return
