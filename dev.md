@@ -35,10 +35,10 @@ $ dep ensure
 
 ## Unit tests
 
-In general, for unit tests we use the `go test` command, from the main directory:
+In general, for unit tests we use the `go test` command, for example:
 
 ```
-$ go test -v -short -run Test* ./pkg/...
+$ go test -v -short -run Test* ./pkg/discovery
 ```
 
 Please do make sure all unit tests pass before sending in a PR. Also, note that we apply [CAT](https://medium.com/@mhausenblas/container-assisted-testing-b76ee74278b7), so in order for the unit tests to run you need to have Docker running.

@@ -6,7 +6,7 @@ main_dir := `pwd`
 .PHONY: gtest gbuild cbuild cpush release init build publish destroy
 
 gtest :
-	@echo This will take ca. 3 min to complete so get a cuppa tea for now ...
+	@echo This will take ca. 2 min to complete so get a cuppa tea for now ...
 	go test -short -run Test* ./pkg/discovery
 	go test -short -run Test* ./pkg/restore
 	go test -short -run Test* ./pkg/backup
