@@ -13,7 +13,6 @@ import (
 	"github.com/mhausenblas/reshifter/pkg/remotes"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
-	"github.com/pierrre/archivefile/zip"
 )
 
 // Backup iterates over well-known Kubernetes (distro) keys in an etcd server
@@ -36,6 +35,9 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Can't determine Kubernetes distro: %s", err)
 	}
+
+	strategyName, strategy := pickStrategy()
+
 	// deal with etcd3 servers:
 	if strings.HasPrefix(version, "3") {
 		c3, cerr := util.NewClient3(endpoint, secure)
@@ -44,24 +46,12 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		}
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
-		err = discovery.Visit3(c3, types.KubernetesPrefix, types.Vanilla, func(path string, val string) error {
-			_, err = store(target, path, val)
-			if err != nil {
-				return fmt.Errorf("Can't store backup locally: %s", err)
-			}
-			return nil
-		})
+		err = discovery.Visit3(c3, types.KubernetesPrefix, target, types.Vanilla, strategy, strategyName)
 		if err != nil {
 			return "", err
 		}
 		if distrotype == types.OpenShift {
-			err = discovery.Visit3(c3, types.OpenShiftPrefix, types.OpenShift, func(path string, val string) error {
-				_, err = store(target, path, val)
-				if err != nil {
-					return fmt.Errorf("Can't store backup locally: %s", err)
-				}
-				return nil
-			})
+			err = discovery.Visit3(c3, types.OpenShiftPrefix, target, types.OpenShift, strategy, strategyName)
 			if err != nil {
 				return "", err
 			}
@@ -75,91 +65,43 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		}
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
-		err = discovery.Visit2(kapi, types.KubernetesPrefix, func(path string, val string) error {
-			_, err = store(target, path, val)
-			if err != nil {
-				return fmt.Errorf("Can't store backup locally: %s", err)
-			}
-			return nil
-		})
+		err = discovery.Visit2(kapi, types.KubernetesPrefix, target, strategy, strategyName)
 		if err != nil {
 			return "", err
 		}
 		if distrotype == types.OpenShift {
-			err = discovery.Visit2(kapi, types.OpenShiftPrefix, func(path string, val string) error {
-				_, err = store(target, path, val)
-				if err != nil {
-					return fmt.Errorf("Can't store backup locally: %s", err)
-				}
-				return nil
-			})
+			err = discovery.Visit2(kapi, types.OpenShiftPrefix, target, strategy, strategyName)
 			if err != nil {
 				return "", err
 			}
 		}
 	}
-	// create ZIP file of the reaped content:
-	_, err = arch(target)
-	if err != nil {
-		return "", err
-	}
-	if remote != "" {
-		err = remotes.StoreInS3(remote, bucket, target, based)
+
+	if strategyName == types.ReapFunctionRaw {
+		// create ZIP file of the reaped content:
+		_, err = arch(target)
 		if err != nil {
 			return "", err
 		}
+		if remote != "" {
+			err = remotes.StoreInS3(remote, bucket, target, based)
+			if err != nil {
+				return "", err
+			}
+		}
 	}
+
 	return based, nil
 }
 
-// store creates a file at based+path with val as its content.
-// based is the output directory to use and path can be
-// any valid etcd key (with ':'' characters being escaped automatically).
-func store(based string, path string, val string) (string, error) {
-	log.WithFields(log.Fields{"func": "backup.store"}).Debug(fmt.Sprintf("Trying to store %s with value=%s in %s", path, val, based))
-	// make sure we're dealing with a valid path
-	// that is, non-empty and has to start with /:
-	if path == "" || (strings.Index(path, "/") != 0) {
-		return "", fmt.Errorf("Path has to be non-empty")
+func pickStrategy() (string, types.Reap) {
+	backupstrategy := os.Getenv("RS_BACKUP_STRATEGY")
+	switch backupstrategy {
+	case "raw":
+		return types.ReapFunctionRaw, raw
+	case "render":
+		return types.ReapFunctionRender, render
+	default:
+		return types.ReapFunctionRaw, raw
 	}
-	// escape ":" in the path so that we have no issues storing it in the filesystem:
-	fpath, _ := filepath.Abs(filepath.Join(based, strings.Replace(path, ":", types.EscapeColon, -1)))
-	if path == "/" {
-		log.WithFields(log.Fields{"func": "backup.store"}).Debug(fmt.Sprintf("Rewriting root"))
-		fpath = based
-	}
-	err := os.MkdirAll(fpath, os.ModePerm)
-	if err != nil {
-		return "", fmt.Errorf("%s", err)
-	}
-	cpath, _ := filepath.Abs(filepath.Join(fpath, types.ContentFile))
-	c, err := os.Create(cpath)
-	if err != nil {
-		return "", fmt.Errorf("%s", err)
-	}
-	defer func() {
-		_ = c.Close()
-	}()
-	nbytes, err := c.WriteString(val)
-	if err != nil {
-		return "", fmt.Errorf("%s", err)
-	}
-	log.WithFields(log.Fields{"func": "backup.store"}).Debug(fmt.Sprintf("Stored %s in %s with %d bytes", path, fpath, nbytes))
-	return cpath, nil
-}
-
-// arch creates a ZIP archive of the content store() has generated
-func arch(based string) (string, error) {
-	defer func() {
-		_ = os.RemoveAll(based)
-	}()
-	log.WithFields(log.Fields{"func": "backup.arch"}).Debug(fmt.Sprintf("Trying to pack backup into %s.zip", based))
-	opath := based + ".zip"
-	err := zip.ArchiveFile(based, opath, func(apath string) {
-		log.WithFields(log.Fields{"func": "backup.arch"}).Debug(fmt.Sprintf("%s", apath))
-	})
-	if err != nil {
-		return "", fmt.Errorf("Can't create archive or no content to back up: %s", err)
-	}
-	return opath, nil
 }

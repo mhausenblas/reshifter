@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"time"
@@ -35,9 +36,11 @@ var createBackupCmd = &cobra.Command{
 		if err != nil {
 			log.Error(err)
 		}
-		fmt.Printf("Successfully created backup: %s/%s.zip\n", target, bid)
-		if remote != "" {
-			fmt.Printf("Pushed to remote %s in bucket %s\n\n", remote, bucket)
+		if os.Getenv("RS_BACKUP_STRATEGY") == types.ReapFunctionRaw {
+			fmt.Printf("Successfully created backup: %s/%s.zip\n", target, bid)
+			if remote != "" {
+				fmt.Printf("Pushed to remote %s in bucket %s\n\n", remote, bucket)
+			}
 		}
 	},
 }
@@ -67,7 +70,7 @@ func init() {
 	backupCmd.AddCommand(createBackupCmd)
 	backupCmd.AddCommand(listBackupCmd)
 	createBackupCmd.Flags().StringP("endpoint", "e", "http://127.0.0.1:2379", "The URL of the etcd to use")
-	createBackupCmd.Flags().StringP("target", "t", "/tmp", "Optionally, the target directory for the resulting ZIP file of the backup")
+	createBackupCmd.Flags().StringP("target", "t", types.DefaultWorkDir, "Optionally, the target directory for the resulting ZIP file of the backup")
 	createBackupCmd.Flags().StringP("remote", "r", "", "Optionally, the S3-compatible storage endpoint")
 	createBackupCmd.Flags().StringP("bucket", "b", "", "Optionally, the target bucket in the S3-compatible storage endpoint")
 	_ = createBackupCmd.MarkFlagRequired("endpoint")

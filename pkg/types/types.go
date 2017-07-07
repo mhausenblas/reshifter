@@ -17,6 +17,10 @@ const (
 	OpenShiftPrefixLast = "/openshift.io/zzzzzzzzzz"
 	// ContentTypeZip represents the content type for a ZIP file
 	ContentTypeZip = "application/zip"
+	// ReapFunctionRaw represents the reap function that dumps the values of all keys to disk.
+	ReapFunctionRaw = "raw"
+	// ReapFunctionRender represents the reap function that dumps the values of all keys to stdout.
+	ReapFunctionRender = "render"
 	// NotADistro represents the fact that no Kubernetes distro-related prefixes exit in etcd
 	NotADistro KubernetesDistro = iota
 	// Vanilla represents the vanilla, upstream Kubernetes distribution.
@@ -67,6 +71,9 @@ type EtcdResponse struct {
 	EtcdClusterVersion string `json:"etcdcluster"`
 }
 
-// Reap function types take a node path and a value as parameters and performs
-// some side effect, such as storing, on the node
-type Reap func(string, string) error
+// Reap function types take a path and a value and perform
+// some action on it, for example, storing it to disk or
+// writing it to stdout. The arg parameter is optional
+// and can be used by the function in a context-dependent way,
+// for example, it can specify a directory to write to.
+type Reap func(path, value string, arg interface{}) error
