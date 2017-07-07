@@ -28,6 +28,21 @@
 
 'use strict';
 
+function getVersion(){
+  $.ajax({
+      type: "GET",
+      url: 'http://localhost:8080/v1/version',
+      async: false,
+      error: function (d) {
+        console.info(d);
+      },
+      success: function (d) {
+        console.info(d);
+        $('.app-footer').html(d)
+      }
+  })
+}
+
 function setDefaults(){
   var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
   var default_remote = ibstorage.getItem('reshifter.info/default-remote');
@@ -39,7 +54,6 @@ function setDefaults(){
     ibstorage.setItem('reshifter.info/default-remote', 's3 play.minio.io:9000 reshifter-xxx');
   }
 }
-
 
 function initRestore(){
   var sepidx = default_remote.indexOf(' ');
@@ -65,7 +79,7 @@ function initRestore(){
 */
 
 $(document).ready(function($){
-
+  getVersion()
   setDefaults()
 
   // Check if we have any defaults and set UI elements accordingly:
