@@ -12,6 +12,9 @@ This version is then used in the Go code, in the Docker image as a tag and for a
 A new release (Linux binary on GitHub and image on quay.io) is cut using the following process:
 
 ```
+# 0. Make sure all tests pass:
+$ make gtest
+
 # 1. Generate the binary:
 $ make gbuild
 
@@ -32,14 +35,13 @@ $ dep ensure
 
 ## Unit tests
 
-In general, for unit tests we use the `go test` command, for example:
+In general, for unit tests we use the `go test` command, from the main directory:
 
 ```
-$ cd pkg/backup/
-$ go test -v
+$ go test -v -short -run Test* ./pkg/...
 ```
 
-Please do make sure all unit tests pass before sending in a PR.
+Please do make sure all unit tests pass before sending in a PR. Also, note that we apply [CAT](https://medium.com/@mhausenblas/container-assisted-testing-b76ee74278b7), so in order for the unit tests to run you need to have Docker running.
 
 ## Local testing
 

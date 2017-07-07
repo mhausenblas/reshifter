@@ -1,3 +1,5 @@
+// +build !example
+
 package discovery
 
 import (

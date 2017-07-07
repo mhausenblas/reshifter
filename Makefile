@@ -3,7 +3,10 @@ git_version := `git rev-parse HEAD`
 app_name := reshifter-app
 main_dir := `pwd`
 
-.PHONY: gbuild cbuild cpush release init build publish destroy
+.PHONY: gtest gbuild cbuild cpush release init build publish destroy
+
+gtest :
+	@go test -v -short -run Test* ./pkg/...
 
 gbuild :
 	@GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
