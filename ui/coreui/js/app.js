@@ -28,6 +28,7 @@ $(document).ready(function($){
   // ACTIONS:
   $('#doexplore').click(function(event) {
     var ep = $('#endpoint').val();
+    $('#config-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "GET",
         url: 'http://localhost:8080/v1/explorer?endpoint='+encodeURIComponent(ep),
@@ -36,14 +37,14 @@ $(document).ready(function($){
         data: '{"endpoint": "' + ep +'"}',
         error: function (d) {
           console.info(d);
-          $('#config-result').html('<h2>Result</h2>')
-          $('#config-result').append('<div>There was a problem exploring the endpoint:<br><code>'+ d.responseText + '</code> </div>')
+          $('#config-result').html('<h2>Result</h2>');
+          $('#config-result').append('<div>There was a problem exploring the endpoint:<div><code>' + d.responseText + '</code></div></div>');
         },
         success: function (d) {
           console.info(d);
-          $('#config-result').html('<h2>Result</h2>')
-          $('#config-result').append('<div>etcd: <code>v' + d.etcdversion +', ' + d.etcdsec +'</code></div>')
-          $('#config-result').append('<div>Kubernetes: <code>' + d.k8sdistro +'</code></div>')
+          $('#config-result').html('<h2>Result</h2>');
+          $('#config-result').append('<div>etcd: <code>v' + d.etcdversion +', ' + d.etcdsec +'</code></div>');
+          $('#config-result').append('<div>distribution: <code>' + d.k8sdistro +'</code></div>');
         }
     })
     $.ajax({
@@ -54,13 +55,16 @@ $(document).ready(function($){
         data: '{"endpoint": "' + ep +'"}',
         error: function (d) {
           console.info(d);
-          $('#config-result').html('<h2>Result</h2>')
-          $('#config-result').append('<div>There was a problem collecting endpoint stats:<br><code>'+ d.responseText + '</code> </div>')
+          $('#config-result').html('<h2>Result</h2>');
+          $('#config-result').append('<div>There was a problem collecting endpoint stats:<br><code>'+ d.responseText + '</code> </div>');
+          $('#config-result').append('<div style="margin-bottom: 50px"></div>');
         },
         success: function (d) {
           console.info(d);
-          $('#config-result').append('<div>Number of keys detected: <code>' + d.numkeys +'</code></div>')
-          $('#config-result').append('<div>Total number of bytes to back up: <code>' + d.totalsizevalbytes +'</code></div>')
+          $('#config-result').append('<div style="margin-top: 20px">Stats for known keys as per Kubernetes distribution:</div>');
+          $('#config-result').append('<div>number of keys: <code>' + d.numkeys +'</code></div>');
+          $('#config-result').append('<div>total number of bytes to back up: <code>' + d.totalsizevalbytes +'</code></div>');
+          $('#config-result').append('<div style="margin-bottom: 50px"></div>');
         }
     })
   });
@@ -73,26 +77,29 @@ $(document).ready(function($){
       remote += ' ' + remoteep + ' '+ $('#bucket').val();
     }
     ibstorage.setItem('reshifter.info/default-etcd', endpoint);
-    console.info('reshifter.info/default-etcd:'+endpoint)
+    console.info('reshifter.info/default-etcd:'+endpoint);
     ibstorage.setItem('reshifter.info/default-remote', remote);
-    console.info('reshifter.info/default-remote:'+remote)
-    $('#config-result').html('<h2>Result</h2><div>All settings stored locally:</div><div><ul>')
-    $('#config-result').append('<li>Using etcd endpoint: <code>' + ibstorage.getItem('reshifter.info/default-etcd') + '</code></li>')
-    $('#config-result').append('<li>Using backup target: <code>' + ibstorage.getItem('reshifter.info/default-remote') + '</code></li>')
-    $('#config-result').append('</ul></div>')
+    console.info('reshifter.info/default-remote:'+remote);
+    $('#config-result').html('<h2>Result</h2><div>All settings stored locally:</div><div><ul>');
+    $('#config-result').append('<li>Using etcd endpoint: <code>' + ibstorage.getItem('reshifter.info/default-etcd') + '</code></li>');
+    $('#config-result').append('<li>Using backup target: <code>' + ibstorage.getItem('reshifter.info/default-remote') + '</code></li>');
+    $('#config-result').append('</ul></div>');
+    $('#config-result').append('<div style="margin-bottom: 50px"></div>');
   });
 
   $('#dobackup').click(function(event) {
     var ep = $('#endpoint').val();
-    var sepidx = default_remote.indexOf(' ')
-    var remote = ''
-    var payload = '{"endpoint": "' + ep +'" }'
+    var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+    var sepidx = default_remote.indexOf(' ');
+    var remote = '';
+    var payload = '{"endpoint": "' + ep +'" }';
     if (sepidx != -1){
-      remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
-      bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+      remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
+      bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1);
       payload = '{"endpoint": "' + ep +'", "remote": "' + remote +'", "bucket": "' + bucket +'" }',
-      console.info('Backing up to remote [' + remote + '] in bucket [' + bucket + ']')
+      console.info('Backing up to remote [' + remote + '] in bucket [' + bucket + ']');
     }
+    $('#backup-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "POST",
         url: 'http://localhost:8080/v1/backup',
@@ -102,7 +109,8 @@ $(document).ready(function($){
         error: function (d) {
           console.info(d);
           $('#backup-result').html('<h2>Result</h2>')
-          $('#backup-result').append('<div>There was a problem carrying out the backup:<br><code>'+ d.responseText + '</code> </div>')
+          $('#backup-result').append('<div>There was a problem carrying out the backup:<div><code>' + d.responseText + '</code></div></div>')
+          $('#backup-result').append('<div style="margin-bottom: 50px"></div>');
         },
         success: function (d) {
           console.info(d);
@@ -111,8 +119,47 @@ $(document).ready(function($){
             ibstorage.setItem('reshifter.info/last-backup-id', d.backupid)
             $('#backup-result').append('<div>The backup with ID <code>' + d.backupid +'</code> is now available <a href="/v1/backup/'+ d.backupid + '">here</a> for download.</div>')
           } else{
-            $('#backup-result').append('<div>There was a problem carrying out the backup:<br><pre>'+ d + '"</pre> </div>')
+            $('#backup-result').append('<div>There was a problem carrying out the backup:<div><code>'+ d + '</code></div></div>')
           }
+          $('#backup-result').append('<div style="margin-bottom: 50px"></div>');
+        }
+    })
+  });
+
+  $('#dolistbackups').click(function(event) {
+    var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+    var sepidx = default_remote.indexOf(' ');
+    var remote = '';
+    var payload = '';
+    if (sepidx != -1){ // we have remote backup selected
+      remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
+      bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1);
+      console.info('Listing backups from remote [' + remote + '] in bucket [' + bucket + ']');
+      payload = '?remote=' + encodeURIComponent(remote) +'&bucket=' + encodeURIComponent(bucket);
+    }
+    $('#restore-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
+    $.ajax({
+        type: "GET",
+        url: 'http://localhost:8080/v1/backup/all'+payload,
+        dataType: 'json',
+        error: function (d) {
+          console.info(d);
+          $('#restore-result').html('<h2>Result</h2>');
+          $('#restore-result').append('<div>There was a problem listing available backups:<div><code>' + d.responseText + '</code></div></div>');
+          $('#restore-result').append('<div style="margin-bottom: 50px"></div>');
+        },
+        success: function (d) {
+          var backups = d.backupids;
+          console.info(d);
+          if (sepidx != -1){ // we have remote backup selected
+            $('#restore-result').html('<h2>Result</h2><div>The following backups are available in the remote storage:</div>');
+          } else {
+            $('#restore-result').html('<h2>Result</h2><div>The following backups are available, locally:</div>');
+          }
+          for (var i = 0; i < backups.length; i++) {
+            $('#restore-result').append('<div style="margin: 10px;"><code>' + backups[i] +'</code></div>');
+          }
+          $('#restore-result').append('<div style="margin-bottom: 50px"></div>');
         }
     })
   });
@@ -120,6 +167,7 @@ $(document).ready(function($){
   $('#dorestore').click(function(event) {
     var ep = $('#endpoint').val();
     var bid = $('#backupid').val();
+    var default_remote = ibstorage.getItem('reshifter.info/default-remote');
     var sepidx = default_remote.indexOf(' ')
     var remote = ''
     var payload = '{ "endpoint": "' + ep + '", "backupid": "' + bid +'" }'
@@ -128,7 +176,7 @@ $(document).ready(function($){
       bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
       payload = '{"endpoint": "' + ep + '", "backupid": "' + bid + '", "remote": "' + remote +'", "bucket": "' + bucket +'" }'
     }
-
+    $('#restore-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "POST",
         url: 'http://localhost:8080/v1/restore',
@@ -137,17 +185,19 @@ $(document).ready(function($){
         data: payload,
         error: function (d) {
           console.info(d);
-          $('#restore-result').html('<h2>Result</h2>')
-          $('#restore-result').append('<div>There was a problem carrying out the restore:<br><code>'+ d.responseText + '</code> </div>')
+          $('#restore-result').html('<h2>Result</h2>');
+          $('#restore-result').append('<div>There was a problem carrying out the restore:<div><code>' + d.responseText + '</code></div></div>');
+          $('#restore-result').append('<div style="margin-bottom: 50px"></div>');
         },
         success: function (d) {
           console.info(d);
-          $('#restore-result').html('<h2>Result</h2>')
+          $('#restore-result').html('<h2>Result</h2>');
           if(d.outcome == 'success'){
-            $('#restore-result').append('<div>Restored ' + d.keysrestored + ' keys from backup with ID <code>' + bid +'</code> to <code>'+ ep + '</code></div>')
+            $('#restore-result').append('<div>Restored ' + d.keysrestored + ' keys from backup with ID <code>' + bid +'</code> to <code>'+ ep + '</code></div>');
           } else{
-            $('#restore-result').append('<div>There was a problem carrying out the restore:<br><pre>'+ d + '</pre> </div>')
+            $('#restore-result').append('<div>There was a problem carrying out the restore:<div><code>' + d + '</code></div></div>');
           }
+          $('#restore-result').append('<div style="margin-bottom: 50px"></div>');
         }
     })
   });
@@ -262,12 +312,12 @@ function initBackup(){
   $('#endpoint').val(default_ep);
 
   if (sepidx == -1){ // download as ZIP file
-    console.info('User will download ZIP file')
+    console.info('User will download ZIP file');
   } else { // we have a remote configured
-    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
-    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
+    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1);
     $('#backup-result').html('<div>Backing up to: <code>'+ remote +'</code>, into bucket <code>' + bucket + '</code></div>');
-    console.info('Backing up to [' + remote + '] into bucket [' + bucket + ']')
+    console.info('Backing up to [' + remote + '] into bucket [' + bucket + ']');
   }
 }
 
@@ -281,18 +331,18 @@ function initRestore(){
   $('#endpoint').val(default_ep);
 
   if (sepidx == -1){ // upload from local storage
-    console.info('User will use ZIP file from local storage')
+    console.info('User will use ZIP file from local storage');
   } else { // we have a remote configured
-    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
-    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
+    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1);
     $('#restore-result').html('<div>Restoring from remote <code>'+ remote +'</code>, from bucket <code>' + bucket + '</code></div>');
-    console.info('Restoring from remote [' + remote + '] from bucket [' + bucket + ']')
+    console.info('Restoring from remote [' + remote + '] from bucket [' + bucket + ']');
   }
 
-  last_backup_id = ibstorage.getItem('reshifter.info/last-backup-id')
+  last_backup_id = ibstorage.getItem('reshifter.info/last-backup-id');
   if (last_backup_id !== '') {
-    console.info('Using last backup ID: '+last_backup_id)
-    $('#backupid').val(last_backup_id)
+    console.info('Using last backup ID: '+last_backup_id);
+    $('#backupid').val(last_backup_id);
   }
 }
 
@@ -301,6 +351,6 @@ function capitalizeFirstLetter(string) {
 }
 
 function init(url) {
-  $('[rel="tooltip"],[data-rel="tooltip"]').tooltip({"placement":"bottom",delay: { show: 400, hide: 200 }});  /* ---------- Popover ---------- */
+  $('[rel="tooltip"],[data-rel="tooltip"]').tooltip({"placement":"bottom",delay: { show: 400, hide: 200 }});
   $('[rel="popover"],[data-rel="popover"],[data-toggle="popover"]').popover();
 }

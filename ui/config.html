@@ -45,11 +45,8 @@
       <main class="main">
          <div id="config" class="container-fluid">
            <h3 class="display-3">Configuration</h3>
-           <p class="lead">
-             The global configuration settings.
-           </p>
            <p>
-             Note that the settings are stored locally, in your browser. This means that while they survive browser re-starts,
+             All settings are stored locally in your browser. This means that while they survive browser re-starts,
              they are not available across different machines, only to you in this browser.
            </p>
            <form>
@@ -57,22 +54,22 @@
                <legend>Default etcd endpoint</legend>
                <form>
                  <div class="form-group">
-                   <p>Use this as default if no etcd endpoint is provided.</p>
+                   <p>Use this as the default for backups and restores.</p>
                    <input class="form-control" id="endpoint" value="http://localhost:2379">
                  </div>
                </form>
                <legend>Backup target</legend>
                  <div class="form-check">
-                   <p>Use this setting for storing the resulting backup. Either download as ZIP file or store in an S3-compatible remote storage.</p>
+                   <p>Use this setting for backup and restore targets. Either download as ZIP file or store in an S3-compatible remote storage.</p>
                    <label class="form-check-label">
                      <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="download" checked>
-                     Download as ZIP file only
+                     Download as ZIP file
                    </label>
                  </div>
                  <div class="form-check">
                    <label class="form-check-label">
                      <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="s3">
-                     S3 compatible remote</br>
+                     Additionally use S3 compatible remote<br><br>
                      URL: <input class="form-control" id="remoteep" value="play.minio.io:9000">
                      Bucket: <input class="form-control" id="bucket" value="reshifter-xxx">
                    </label>
