@@ -17,10 +17,14 @@ import (
 	"github.com/mhausenblas/reshifter/pkg/util"
 )
 
+// versionHandler responds to HTTP GET requests of the form:
+//		http GET localhost:8080/v1/version
 func versionHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "ReShifter in version %s", releaseVersion)
 }
 
+// epstatsHandler responds to HTTP GET requests such as:
+//		http GET localhost:8080/v1/epstats?endpoint=http%3A%2F%2Flocalhost%3A2379
 func epstatsHandler(w http.ResponseWriter, r *http.Request) {
 	endpoint := r.URL.Query().Get("endpoint")
 	if endpoint == "" || strings.Index(endpoint, "http") != 0 {
