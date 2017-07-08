@@ -1,123 +1,23 @@
-/*****
-* CONFIGURATION
-*/
+// In-browser Storage
+var ibstorage = window.localStorage;
 
-  // In-browser Storage
-  var ibstorage = window.localStorage;
-
-  //Main navigation
-  $.navigation = $('nav > ul.nav');
-
-  $.panelIconOpened = 'icon-arrow-up';
-  $.panelIconClosed = 'icon-arrow-down';
-
-  //Default colours
-  $.brandPrimary =  '#20a8d8';
-  $.brandSuccess =  '#4dbd74';
-  $.brandInfo =     '#63c2de';
-  $.brandWarning =  '#f8cb00';
-  $.brandDanger =   '#f86c6b';
-
-  $.grayDark =      '#2a2c36';
-  $.gray =          '#55595c';
-  $.grayLight =     '#818a91';
-  $.grayLighter =   '#d1d4d7';
-  $.grayLightest =  '#f8f9fa';
+//Main navigation
+$.navigation = $('nav > ul.nav');
+$.panelIconOpened = 'icon-arrow-up';
+$.panelIconClosed = 'icon-arrow-down';
+//Default colours
+$.brandPrimary =  '#20a8d8';
+$.brandSuccess =  '#4dbd74';
+$.brandInfo =     '#63c2de';
+$.brandWarning =  '#f8cb00';
+$.brandDanger =   '#f86c6b';
+$.grayDark =      '#2a2c36';
+$.gray =          '#55595c';
+$.grayLight =     '#818a91';
+$.grayLighter =   '#d1d4d7';
+$.grayLightest =  '#f8f9fa';
 
 'use strict';
-
-function getVersion(){
-  $.ajax({
-      type: "GET",
-      url: 'http://localhost:8080/v1/version',
-      async: false,
-      error: function (d) {
-        console.info(d);
-      },
-      success: function (d) {
-        console.info(d);
-        $('.app-footer').html(d)
-      }
-  })
-}
-
-function setDefaults(){
-  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
-  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
-  var sepidx = 0;
-  var remote = '';
-  var bucket = '';
-
-  if (default_ep == null) {
-    ibstorage.setItem('reshifter.info/default-etcd', 'http://localhost:2379');
-  }
-  if (default_remote == null) {
-    ibstorage.setItem('reshifter.info/default-remote', 's3 play.minio.io:9000 reshifter-xxx');
-  }
-  sepidx = default_remote.indexOf(' ');
-  console.info('reshifter.info/default-etcd:'+default_ep)
-  $('#endpoint').val(default_ep);
-
-  console.info('reshifter.info/default-remote:'+default_remote);
-
-  remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
-  if (sepidx == -1){ // download as ZIP file
-    $("#remote[download=s3]").prop('checked', true);
-  } else { // we have a remote configured
-    $("#remote[value=s3]").prop('checked', true);
-    bucket = default_remote.substring(default_remote.lastIndexOf(' ')+1);
-    $('#bucket').val(bucket);
-  }
-}
-
-function initBackup(){
-  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
-  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
-  var sepidx = default_remote.indexOf(' ');
-  var remote = '';
-  var bucket ='';
-
-  $('#endpoint').val(default_ep);
-
-  if (sepidx == -1){ // download as ZIP file
-    console.info('User will download ZIP file')
-  } else { // we have a remote configured
-    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
-    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
-    $('#backup-result').html('<div>Backing up to: <code>'+ remote +'</code>, into bucket <code>' + bucket + '</code></div>');
-    console.info('Backing up to [' + remote + '] into bucket [' + bucket + ']')
-  }
-}
-
-function initRestore(){
-  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
-  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
-  var sepidx = default_remote.indexOf(' ');
-  var remote = '';
-  var bucket ='';
-
-  $('#endpoint').val(default_ep);
-
-  if (sepidx == -1){ // upload from local storage
-    console.info('User will use ZIP file from local storage')
-  } else { // we have a remote configured
-    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
-    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
-    $('#restore-result').html('<div>Restoring from remote <code>'+ remote +'</code>, from bucket <code>' + bucket + '</code></div>');
-    console.info('Restoring from remote [' + remote + '] from bucket [' + bucket + ']')
-  }
-
-  last_backup_id = ibstorage.getItem('reshifter.info/last-backup-id')
-  if (last_backup_id !== '') {
-    console.info('Using last backup ID: '+last_backup_id)
-    $('#backupid').val(last_backup_id)
-  }
-}
-
-
-/****
-* MAIN NAVIGATION
-*/
 
 $(document).ready(function($){
   getVersion()
@@ -252,7 +152,6 @@ $(document).ready(function($){
     })
   });
 
-
   // Add class .active to current link
   $.navigation.find('a').each(function(){
 
@@ -285,9 +184,7 @@ $(document).ready(function($){
 
   });
 
-
   function resizeBroadcast() {
-
     var timesRun = 0;
     var interval = setInterval(function(){
       timesRun += 1;
@@ -298,31 +195,6 @@ $(document).ready(function($){
     }, 62.5);
   }
 
-  /* ---------- Main Menu Open/Close, Min/Full ---------- */
-  $('.navbar-toggler').click(function(){
-
-    if ($(this).hasClass('sidebar-toggler')) {
-      $('body').toggleClass('sidebar-hidden');
-      resizeBroadcast();
-    }
-
-    if ($(this).hasClass('sidebar-minimizer')) {
-      $('body').toggleClass('sidebar-minimized');
-      resizeBroadcast();
-    }
-
-    if ($(this).hasClass('aside-menu-toggler')) {
-      $('body').toggleClass('aside-menu-hidden');
-      resizeBroadcast();
-    }
-
-    if ($(this).hasClass('mobile-sidebar-toggler')) {
-      $('body').toggleClass('sidebar-mobile-show');
-      resizeBroadcast();
-    }
-
-  });
-
   $('.sidebar-close').click(function(){
     $('body').toggleClass('sidebar-opened').parent().toggleClass('sidebar-opened');
   });
@@ -331,42 +203,104 @@ $(document).ready(function($){
   $('a[href="#"][data-top!=true]').click(function(e){
     e.preventDefault();
   });
-
 });
 
-/****
-* CARDS ACTIONS
-*/
 
-$(document).on('click', '.card-actions a', function(e){
-  e.preventDefault();
+// utils
 
-  if ($(this).hasClass('btn-close')) {
-    $(this).parent().parent().parent().fadeOut();
-  } else if ($(this).hasClass('btn-minimize')) {
-    var $target = $(this).parent().parent().next('.card-block');
-    if (!$(this).hasClass('collapsed')) {
-      $('i',$(this)).removeClass($.panelIconOpened).addClass($.panelIconClosed);
-    } else {
-      $('i',$(this)).removeClass($.panelIconClosed).addClass($.panelIconOpened);
-    }
+function getVersion(){
+  $.ajax({
+      type: "GET",
+      url: 'http://localhost:8080/v1/version',
+      async: false,
+      error: function (d) {
+        console.info(d);
+      },
+      success: function (d) {
+        console.info(d);
+        $('.app-footer').html(d)
+      }
+  })
+}
 
-  } else if ($(this).hasClass('btn-setting')) {
-    $('#myModal').modal('show');
+function setDefaults(){
+  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
+  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+  var sepidx = 0;
+  var remote = '';
+  var bucket = '';
+
+  if (default_ep == null) {
+    ibstorage.setItem('reshifter.info/default-etcd', 'http://localhost:2379');
+  }
+  if (default_remote == null) {
+    ibstorage.setItem('reshifter.info/default-remote', 's3 play.minio.io:9000 reshifter-xxx');
+  }
+  sepidx = default_remote.indexOf(' ');
+  console.info('reshifter.info/default-etcd:'+default_ep)
+  $('#endpoint').val(default_ep);
+
+  console.info('reshifter.info/default-remote:'+default_remote);
+
+  remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
+  if (sepidx == -1){ // download as ZIP file
+    $("#remote[download=s3]").prop('checked', true);
+  } else { // we have a remote configured
+    $("#remote[value=s3]").prop('checked', true);
+    bucket = default_remote.substring(default_remote.lastIndexOf(' ')+1);
+    $('#bucket').val(bucket);
+  }
+}
+
+function initBackup(){
+  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
+  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+  var sepidx = default_remote.indexOf(' ');
+  var remote = '';
+  var bucket ='';
+
+  $('#endpoint').val(default_ep);
+
+  if (sepidx == -1){ // download as ZIP file
+    console.info('User will download ZIP file')
+  } else { // we have a remote configured
+    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
+    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+    $('#backup-result').html('<div>Backing up to: <code>'+ remote +'</code>, into bucket <code>' + bucket + '</code></div>');
+    console.info('Backing up to [' + remote + '] into bucket [' + bucket + ']')
+  }
+}
+
+function initRestore(){
+  var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
+  var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+  var sepidx = default_remote.indexOf(' ');
+  var remote = '';
+  var bucket ='';
+
+  $('#endpoint').val(default_ep);
+
+  if (sepidx == -1){ // upload from local storage
+    console.info('User will use ZIP file from local storage')
+  } else { // we have a remote configured
+    remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '))
+    bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1)
+    $('#restore-result').html('<div>Restoring from remote <code>'+ remote +'</code>, from bucket <code>' + bucket + '</code></div>');
+    console.info('Restoring from remote [' + remote + '] from bucket [' + bucket + ']')
   }
 
-});
+  last_backup_id = ibstorage.getItem('reshifter.info/last-backup-id')
+  if (last_backup_id !== '') {
+    console.info('Using last backup ID: '+last_backup_id)
+    $('#backupid').val(last_backup_id)
+  }
+}
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function init(url) {
-
-  /* ---------- Tooltip ---------- */
-  $('[rel="tooltip"],[data-rel="tooltip"]').tooltip({"placement":"bottom",delay: { show: 400, hide: 200 }});
-
-  /* ---------- Popover ---------- */
+  $('[rel="tooltip"],[data-rel="tooltip"]').tooltip({"placement":"bottom",delay: { show: 400, hide: 200 }});  /* ---------- Popover ---------- */
   $('[rel="popover"],[data-rel="popover"],[data-toggle="popover"]').popover();
-
 }
