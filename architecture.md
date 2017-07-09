@@ -2,10 +2,15 @@
 
 ## Architecture
 
+ReShifter's architecture is as follows:
+
 ![ReShifter architecture](images/reshifter-architecture.png)
 
-Above, ReShifter's architecture is depicted. Both the server (exposing a HTTP API) and the CLI are leveraging the
-ReShifter library [github.com/mhausenblas/reshifter/pkg](https://godoc.org/github.com/mhausenblas/reshifter/pkg).
+- You can make backups and restore of a Kubernetes cluster, either by storing the archive (ZIP file with the content of the underlying etcd) locally or in a remote location (S3-compatible object storage).
+- Both the server (exposing a HTTP API) and the CLI tool `rcli`are leveraging the ReShifter library [github.com/mhausenblas/reshifter/pkg](https://godoc.org/github.com/mhausenblas/reshifter/pkg).
+- All you need to supply is access to etcd in the form of a URl such as `http://localhost:2379`. If etcd is used in a secure more you'll need to supply the certs and key. If you want to back up to and restore from the remote storage, you'll additionally need to provide the credentials (access key ID and secret access key) for the S3-compatible object storage endpoint.
+
+## Design considerations
 
 The basic idea of ReShifter is to work against the etcd API. That means, backing up and restoring the state of
 objects in a Kubernetes cluster on the etcd API level: not below as tools like `etcdctl` do it, and also not on a higher
