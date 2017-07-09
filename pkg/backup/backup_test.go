@@ -85,7 +85,7 @@ func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		return
 	}
 	kapi := client.NewKeysAPI(c2)
-	testkey, testval, err := genentry(types.Vanilla)
+	testkey, testval, err := genentry("2", types.Vanilla)
 	if err != nil {
 		t.Errorf("%s", err)
 		return
@@ -97,7 +97,7 @@ func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		return
 	}
 	if distro == types.OpenShift {
-		testkey, testval, erro := genentry(types.OpenShift)
+		testkey, testval, erro := genentry("2", types.OpenShift)
 		if erro != nil {
 			t.Errorf("%s", erro)
 			return
@@ -139,7 +139,7 @@ func etcd3Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
 		return
 	}
-	testkey, testval, err := genentry(distro)
+	testkey, testval, err := genentry("3", distro)
 	if err != nil {
 		t.Errorf("%s", err)
 		return
@@ -168,9 +168,12 @@ func etcd3Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 	_ = os.Remove(opath + ".zip")
 }
 
-func genentry(distro types.KubernetesDistro) (string, string, error) {
+func genentry(etcdversion string, distro types.KubernetesDistro) (string, string, error) {
 	switch distro {
 	case types.Vanilla:
+		if etcdversion == "2" {
+			return types.LegacyKubernetesPrefix + "/namespaces/kube-system", "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}", nil
+		}
 		return types.KubernetesPrefix + "/namespaces/kube-system", "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}", nil
 	case types.OpenShift:
 		return types.OpenShiftPrefix + "/builds", "{\"kind\":\"Build\",\"apiVersion\":\"v1\"}", nil

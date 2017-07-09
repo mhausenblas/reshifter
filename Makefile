@@ -8,8 +8,8 @@ main_dir := `pwd`
 gtest :
 	@echo This will take ca. 3 min to complete so get a cuppa tea for now ...
 	go test -short -run Test* ./pkg/discovery
-	go test -short -run Test* ./pkg/restore
 	go test -short -run Test* ./pkg/backup
+	go test -short -run Test* ./pkg/restore
 
 gbuild :
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .

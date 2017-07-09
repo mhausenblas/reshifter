@@ -142,7 +142,12 @@ func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, err
 		log.WithFields(log.Fields{"func": "discovery.CountKeysFor"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
 		switch distro {
 		case types.Vanilla:
-			err = Visit2(kapi, types.KubernetesPrefix, "", func(path, val string, arg interface{}) error {
+			kprefix := types.LegacyKubernetesPrefix
+			_, gerr := kapi.Get(context.Background(), types.KubernetesPrefix, nil)
+			if gerr == nil { // key found
+				kprefix = types.KubernetesPrefix
+			}
+			err = Visit2(kapi, kprefix, "", func(path, val string, arg interface{}) error {
 				numkeys++
 				totalsize += len(val)
 				return nil
