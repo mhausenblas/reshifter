@@ -1,6 +1,5 @@
 .DS_Store
 vendor/
-*.zip
 app.yaml
 rcli/rcli-*
 
