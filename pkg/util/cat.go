@@ -65,7 +65,7 @@ func LaunchEtcd3(tetcd, port string) (bool, error) {
 // etcd2Up launches an etcd2 server on port.
 func etcd2Up(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"-p", port+":"+port, "--name", "test-etcd",
+		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8",
 		"quay.io/coreos/etcd:v2.3.8",
 		"--advertise-client-urls", "http://0.0.0.0:"+port,
 		"--listen-client-urls", "http://0.0.0.0:"+port)
@@ -82,7 +82,7 @@ func etcd2Up(port string) error {
 func etcd2SecureUp(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
 		"-v", Certsdir()+"/:/etc/ssl/certs", "-p", port+":"+port,
-		"--name", "test-etcd",
+		"--name", "test-etcd", "--dns", "8.8.8.8",
 		"quay.io/coreos/etcd:v2.3.8",
 		"--ca-file", "/etc/ssl/certs/ca.pem",
 		"--cert-file", "/etc/ssl/certs/server.pem",
@@ -101,7 +101,7 @@ func etcd2SecureUp(port string) error {
 // etcd3Up launches an etcd3 server on port.
 func etcd3Up(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
-		"-p", port+":"+port, "--name", "test-etcd",
+		"-p", port+":"+port, "--name", "test-etcd", "--dns", "8.8.8.8",
 		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
 		"--advertise-client-urls", "http://0.0.0.0:"+port,
 		"--listen-client-urls", "http://0.0.0.0:"+port)
@@ -118,7 +118,7 @@ func etcd3Up(port string) error {
 func etcd3SecureUp(port string) error {
 	cmd := exec.Command("docker", "run", "--rm", "-d",
 		"-v", Certsdir()+"/:/etc/ssl/certs", "-p", port+":"+port,
-		"--name", "test-etcd",
+		"--name", "test-etcd", "--dns", "8.8.8.8",
 		"quay.io/coreos/etcd:v3.1.0", "/usr/local/bin/etcd",
 		"--ca-file", "/etc/ssl/certs/ca.pem",
 		"--cert-file", "/etc/ssl/certs/server.pem",

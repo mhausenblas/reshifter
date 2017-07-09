@@ -7,6 +7,8 @@ const (
 	EscapeColon = "ESC_COLON"
 	// ContentFile is the name of the file an etcd value is stored
 	ContentFile = "content"
+	// LegacyKubernetesPrefix represents the etcd legacy key prefix for core Kubernetes
+	LegacyKubernetesPrefix = "/registry"
 	// KubernetesPrefix represents the etcd key prefix for core Kubernetes
 	KubernetesPrefix = "/kubernetes.io"
 	// KubernetesPrefixLast represents a stop marker for core Kubernetes

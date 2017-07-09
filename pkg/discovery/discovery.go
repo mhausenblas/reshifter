@@ -48,13 +48,13 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 	distro := types.NotADistro
 	version, secure, err := ProbeEtcd(endpoint)
 	if err != nil {
-		return types.NotADistro, fmt.Errorf("%s", err)
+		return distro, fmt.Errorf("%s", err)
 	}
 	// deal with etcd3 servers:
 	if strings.HasPrefix(version, "3") {
 		c3, cerr := util.NewClient3(endpoint, secure)
 		if cerr != nil {
-			return types.NotADistro, fmt.Errorf("%s", cerr)
+			return distro, fmt.Errorf("%s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
 		_, err := c3.Get(context.Background(), types.KubernetesPrefix)
@@ -69,26 +69,28 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 		distro = types.OpenShift
 		return distro, nil
 	}
-	// deal with etcd2 servers:
+	// deal with etcd2 servers, need to check both key prefixes
 	if strings.HasPrefix(version, "2") {
 		c2, cerr := util.NewClient2(endpoint, secure)
 		if cerr != nil {
-			return types.NotADistro, fmt.Errorf("%s", cerr)
+			return distro, fmt.Errorf("%s", cerr)
 		}
 		kapi := client.NewKeysAPI(c2)
-		_, err := kapi.Get(context.Background(), types.KubernetesPrefix, nil)
-		if err != nil {
-			return distro, nil
+		_, err := kapi.Get(context.Background(), types.LegacyKubernetesPrefix, nil)
+		if err == nil { // key found
+			distro = types.Vanilla
 		}
-		distro = types.Vanilla
+		_, err = kapi.Get(context.Background(), types.KubernetesPrefix, nil)
+		if err == nil { // key found
+			distro = types.Vanilla
+		}
 		_, err = kapi.Get(context.Background(), types.OpenShiftPrefix, nil)
-		if err != nil {
-			return distro, nil
+		if err == nil { // key found
+			distro = types.OpenShift
 		}
-		distro = types.OpenShift
 		return distro, nil
 	}
-	return types.NotADistro, fmt.Errorf("Can't determine Kubernetes distro")
+	return distro, fmt.Errorf("Not supported etcd version!")
 }
 
 // CountKeysFor iterates over well-known keys of a given Kubernetes distro

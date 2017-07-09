@@ -34,8 +34,9 @@ var (
 	}{
 		{[]string{""}, "2", false, types.NotADistro},
 		{[]string{"/something"}, "2", false, types.NotADistro},
+		{[]string{types.LegacyKubernetesPrefix}, "2", false, types.Vanilla},
 		{[]string{types.KubernetesPrefix}, "2", false, types.Vanilla},
-		{[]string{types.KubernetesPrefix, types.OpenShiftPrefix}, "2", false, types.OpenShift},
+		{[]string{types.LegacyKubernetesPrefix, types.OpenShiftPrefix}, "2", false, types.OpenShift},
 	}
 )
 
@@ -74,7 +75,7 @@ func TestCountKeysFor(t *testing.T) {
 		return
 	}
 	if k != wantk {
-		t.Errorf("discovery.CountKeysFor(%s) => (%d, %d) want (%d, %d)", tetcd, k, s, wantk, wants)
+		t.Errorf("discovery.CountKeysFor(%s) => got (%d, %d) but want (%d, %d)", tetcd, k, s, wantk, wants)
 	}
 }
 
@@ -110,7 +111,7 @@ func testEtcdX(t *testing.T, etcdLaunchFunc func(string, string) (bool, error), 
 		return
 	}
 	if !strings.HasPrefix(v, version) || s != secure {
-		t.Errorf("discovery.ProbeEtcd(%s://%s) => (%s, %t) want (%s.x.x, %t)", scheme, tetcd, v, s, version, secure)
+		t.Errorf("discovery.ProbeEtcd(%s://%s) => got (%s, %t) but want (%s.x.x, %t)", scheme, tetcd, v, s, version, secure)
 	}
 }
 
@@ -152,6 +153,6 @@ func testK8SX(t *testing.T, keys []string, version string, secure bool, distro t
 		return
 	}
 	if distrotype != distro {
-		t.Errorf("discovery.ProbeKubernetesDistro(%s) with keys %s => %v want %v", tetcd, keys, distrotype, distro)
+		t.Errorf("discovery.ProbeKubernetesDistro(%s) with keys %s => got '%s' but want '%s'", tetcd, keys, util.LookupDistro(distrotype), util.LookupDistro(distro))
 	}
 }

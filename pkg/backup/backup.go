@@ -67,6 +67,10 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		}
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
+		err = discovery.Visit2(kapi, types.LegacyKubernetesPrefix, target, strategy, strategyName)
+		if err != nil {
+			return "", err
+		}
 		err = discovery.Visit2(kapi, types.KubernetesPrefix, target, strategy, strategyName)
 		if err != nil {
 			return "", err
