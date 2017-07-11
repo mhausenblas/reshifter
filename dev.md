@@ -77,6 +77,12 @@ $ etcdctl --endpoints=http://127.0.0.1:2379 put /openshift.io "."
 
 Now you can use the UI to create a backup and after restarting etcd3 you can restore it again.
 
+You can also upload an existing backup file via the CLI like this:
+
+```
+$ curl --form 'backupfile=@/tmp/test/149958881.zip' http://localhost:8080/v1/restore/upload
+```
+
 Note that if you want to use etc2, do the following:
 
 ```

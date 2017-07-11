@@ -3,6 +3,8 @@ package types
 const (
 	// DefaultWorkDir is the default work directory for backups
 	DefaultWorkDir = "/tmp/reshifter"
+	// UploadInMemoryBufferSize is the number of bytes in main memory used for uploading backups in the HTTP API handler (currently: 500kBytes)
+	UploadInMemoryBufferSize = (1 << 10) * 500
 	// EscapeColon represents the ':' character in an etcd key
 	EscapeColon = "ESC_COLON"
 	// ContentFile is the name of the file an etcd value is stored

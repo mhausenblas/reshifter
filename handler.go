@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -166,6 +168,58 @@ func backupListHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		len(backupIDs),
 		backupIDs,
+	})
+}
+
+// / restoreUploadHandler responds to HTTP POST requests at:
+//		http POST localhost:8080/v1/restore/upload
+func restoreUploadHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(types.UploadInMemoryBufferSize)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error(err)
+		return
+	}
+	m := r.MultipartForm
+	backupfiles := m.File["backupfile"]
+	var overallwritten int64
+	for _, bf := range backupfiles {
+		fn := bf.Filename
+		bid := fn[0 : len(fn)-len(filepath.Ext(fn))]
+		log.Infof("Verifying backup ID %s and then trying to upload content …", bid)
+		if !util.IsBackupID(bid) {
+			abortreason := fmt.Sprintf("Aborting upload: %s is not a valid backup ID. Must be a Unix timestamp formatted one such as 1499588813.zip …", bid)
+			http.Error(w, abortreason, http.StatusConflict)
+			log.Error(abortreason)
+			return
+		}
+		src, err := bf.Open()
+		defer func() { _ = src.Close() }()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Error(err)
+			return
+		}
+		dst, err := os.Create(filepath.Join(types.DefaultWorkDir, bf.Filename))
+		defer func() { _ = dst.Close() }()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Error(err)
+			return
+		}
+		written, err := io.Copy(dst, src)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Error(err)
+			return
+		}
+		overallwritten += written
+	}
+	log.Infof("Uploading backup file done, written %d bytes", overallwritten)
+	_ = json.NewEncoder(w).Encode(struct {
+		Received int64 `json:"received"`
+	}{
+		overallwritten,
 	})
 }
 

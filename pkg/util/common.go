@@ -26,9 +26,9 @@ func LookupDistro(distrotype types.KubernetesDistro) string {
 
 // IsBackupID tests if a string is a valid backup ID.
 // A valid backup ID is a 10 digit integer, representing
-// a Unix timestamp.
+// a Unix timestamp, for example, 1499588813.
 func IsBackupID(id string) bool {
-	re := regexp.MustCompile("\\d{10}")
+	re := regexp.MustCompile("^\\d{10}$")
 	return re.Match([]byte(id))
 }
 
