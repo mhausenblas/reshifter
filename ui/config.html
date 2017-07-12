@@ -58,18 +58,16 @@
                    <input class="form-control" id="endpoint" value="http://localhost:2379">
                  </div>
                </form>
-               <legend>Backup target</legend>
+               <legend>Target environment</legend>
                  <div class="form-check">
-                   <p>Use this setting for backup and restore targets. Either download as ZIP file or store in an S3-compatible remote storage.</p>
+                   <p>Use this setting for backup and restore targets. You've got two options: 1. work locally—that's the local storage of the container ReShifter is running in and if you want to preserve the data beyond the runtime of the container you'll have to mount that volume to some persistent storage such as NFS or EBS— by downloading and uploading the backups as ZIP file, or 2. store the backups in an S3-compatible remote storage.</p>
                    <label class="form-check-label">
-                     <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="download" checked>
-                     Download as ZIP file
+                     <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="download" checked>&nbsp;Work locally (upload/download ZIP files)
                    </label>
                  </div>
                  <div class="form-check">
                    <label class="form-check-label">
-                     <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="s3">
-                     Additionally use S3 compatible remote<br><br>
+                     <input type="radio" class="form-check-input" name="optionsRadios" id="remote" value="s3">&nbsp;Work with S3-compatible remote storage:<br><br>
                      URL: <input class="form-control" id="remoteep" value="play.minio.io:9000">
                      Bucket: <input class="form-control" id="bucket" value="reshifter-xxx">
                    </label>
@@ -81,12 +79,6 @@
          <div style="margin-top: 50px;" id="config-result"></div>
         </div>
       </main>
-
-
-
-
-
-
   </div>
 
   <footer class="app-footer">
