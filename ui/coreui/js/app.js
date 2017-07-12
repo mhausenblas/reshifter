@@ -202,6 +202,34 @@ $(document).ready(function($){
     })
   });
 
+  $('#doupload').click(function(event) {
+    var bfdata = new FormData($('#bfuploader')[0]);
+    $('#restore-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
+    $.ajax({
+        type: "POST",
+        url: 'http://localhost:8080/v1/restore/upload',
+        data: bfdata,
+        cache: false,
+        contentType: false,
+        processData: false,
+        error: function (d) {
+          console.info(d);
+          $('#restore-result').html('<h2>Result</h2>');
+          $('#restore-result').append('<div>There was a problem uploading the backup file:<div><code>' + d.responseText + '</code></div></div>');
+          $('#restore-result').append('<div style="margin-bottom: 50px"></div>');
+        },
+        success: function (d) {
+          console.info(d);
+          d = $.parseJSON(d);
+          r = d.received;
+          $('#restore-result').html('<h2>Result</h2>');
+          $('#restore-result').append('<div>Received ' +  r + ' bytes in the backup file, now available via local storage for backup.');
+          $('#restore-result').append('<div style="margin-bottom: 50px"></div>');
+        }
+    })
+  });
+
+
   // Add class .active to current link
   $.navigation.find('a').each(function(){
 

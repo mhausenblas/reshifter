@@ -51,21 +51,30 @@
         <fieldset class="form-group">
           <legend>Endpoint</legend>
           <div class="form-group">
-              <p>Use this as default if no etcd endpoint is provided.</p>
-              <input class="form-control" id="endpoint" value="http://localhost:2379">
+            <p>Use this etcd endpoint is to restore Kubernetes cluster.</p>
+            <input class="form-control" id="endpoint" value="http://localhost:2379">
           </div>
           <legend>Backup ID</legend>
           <div class="form-group">
-              <p>Using this backup ID to restore Kubernetes cluster from.</p>
-              <input class="form-control" id="backupid" placeholder="1498xxxxxx">
+            <p>Using this backup ID from local or remote storage to restore Kubernetes cluster.</p>
+            <input class="form-control" id="backupid" placeholder="1498xxxxxx">
+          </div>
+        </fieldset>
+        <fieldset class="form-group">
+          <legend>Backup file</legend>
+          <div class="form-group">
+            <p>Using this backup file to upload from local machine to ReShifter.</p>
+            <form id="bfuploader" enctype="multipart/form-data">
+              <input type="file" name="backupfile" id="backupfile">
+            </form>
           </div>
         </fieldset>
         <div style="cursor: pointer;" class="btn btn-primary" id="dolistbackups">List available backups</div>
-        <div style="cursor: pointer;" class="btn btn-primary" id="dorestore">Start restore</div>
+        <div style="cursor: pointer;" class="btn btn-primary" id="dorestore">Start restore from ID</div>
+        <div style="cursor: pointer;" class="btn btn-primary" id="doupload">Upload backup file</div>
         <div style="margin-top: 50px;" id="restore-result"></div>
       </div>
     </main>
-
   </div>
 
   <footer class="app-footer">

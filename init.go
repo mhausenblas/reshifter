@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+
+	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -34,4 +37,9 @@ func init() {
 		})
 	prometheus.MustRegister(backupTotal)
 	prometheus.MustRegister(keysRestored)
+
+	// make sure that our working directory exists:
+	if _, err := os.Stat(types.DefaultWorkDir); os.IsNotExist(err) {
+		_ = os.MkdirAll(types.DefaultWorkDir, 0777)
+	}
 }

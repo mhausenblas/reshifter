@@ -182,6 +182,13 @@ func restoreUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	m := r.MultipartForm
 	backupfiles := m.File["backupfile"]
+	if len(backupfiles) == 0 {
+		nbfe := fmt.Sprintf("No backup file uploaded. Aborting …")
+		http.Error(w, nbfe, http.StatusInternalServerError)
+		log.Error(nbfe)
+		return
+	}
+	log.Infof("Got %v as backup file", backupfiles)
 	var overallwritten int64
 	for _, bf := range backupfiles {
 		fn := bf.Filename
