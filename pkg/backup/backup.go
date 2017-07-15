@@ -49,7 +49,12 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		}
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
-		err = discovery.Visit3(c3, types.KubernetesPrefix, target, types.Vanilla, strategy, strategyName)
+		kprefix := types.LegacyKubernetesPrefix
+		_, gerr := c3.Get(context.Background(), types.KubernetesPrefix)
+		if gerr == nil { // key found
+			kprefix = types.KubernetesPrefix
+		}
+		err = discovery.Visit3(c3, kprefix, target, types.Vanilla, strategy, strategyName)
 		if err != nil {
 			return "", err
 		}

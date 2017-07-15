@@ -57,16 +57,18 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 			return distro, fmt.Errorf("%s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
-		_, err := c3.Get(context.Background(), types.KubernetesPrefix)
-		if err != nil {
-			return distro, nil
+		_, err := c3.Get(context.Background(), types.LegacyKubernetesPrefix)
+		if err == nil {
+			distro = types.Vanilla
 		}
-		distro = types.Vanilla
+		_, err = c3.Get(context.Background(), types.KubernetesPrefix)
+		if err != nil {
+			distro = types.Vanilla
+		}
 		_, err = c3.Get(context.Background(), types.OpenShiftPrefix)
 		if err != nil {
-			return distro, nil
+			distro = types.OpenShift
 		}
-		distro = types.OpenShift
 		return distro, nil
 	}
 	// deal with etcd2 servers, need to check both key prefixes
@@ -77,15 +79,15 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 		}
 		kapi := client.NewKeysAPI(c2)
 		_, err := kapi.Get(context.Background(), types.LegacyKubernetesPrefix, nil)
-		if err == nil { // key found
+		if err == nil {
 			distro = types.Vanilla
 		}
 		_, err = kapi.Get(context.Background(), types.KubernetesPrefix, nil)
-		if err == nil { // key found
+		if err == nil {
 			distro = types.Vanilla
 		}
 		_, err = kapi.Get(context.Background(), types.OpenShiftPrefix, nil)
-		if err == nil { // key found
+		if err == nil {
 			distro = types.OpenShift
 		}
 		return distro, nil
