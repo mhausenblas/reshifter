@@ -31,14 +31,14 @@ var restoreCmd = &cobra.Command{
 			bucket = "reshifter-" + time.Now().UTC().Format("2006-01-02")
 			fmt.Printf("You didn't tell me which bucket to use, using %s as a fallback\n", bucket)
 		}
-		krestored, err := restore.Restore(ep, bid, target, remote, bucket)
+		krestored, etime, err := restore.Restore(ep, bid, target, remote, bucket)
 		if err != nil {
 			log.Error(err)
 		}
 		if remote != "" {
-			fmt.Printf("Restored from remote %s from bucket %s\n", remote, bucket)
+			fmt.Printf("Using source: remote %s, bucket %s\n", remote, bucket)
 		}
-		fmt.Printf("Successfully restored %d key(s) from %s.zip\n\n", krestored, bid)
+		fmt.Printf("Successfully restored %d key(s) from %s.zip in %d sec\n\n", krestored, bid, etime)
 	},
 }
 
