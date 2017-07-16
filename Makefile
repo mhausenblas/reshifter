@@ -17,7 +17,7 @@ gbuild :
 	go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-macos rcli/main.go
 
 ginstall :
-	@GOOS=linux GOARCH=amd64 go install -ldflags "-X main.releaseVersion=$(reshifter_version)" .
+	@go install -ldflags "-X main.releaseVersion=$(reshifter_version)" .
 
 cbuild :
 	@docker build --build-arg rversion=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
