@@ -149,7 +149,7 @@ func backupRetrieveHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 		return
 	}
-	fmt.Fprintf(w, string(c))
+	fmt.Fprint(w, string(c))
 }
 
 // backupListHandler responds to HTTP GET requests at:
