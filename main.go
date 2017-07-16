@@ -1,8 +1,10 @@
-// ReShifter enables backing up and restoring OpenShift clusters.
-// The ReShifter app launches an API and a UI at port 8080.
-// The API is instrumented, exposing Prometheus metrics.
-// When launching the app with the defaults, the backups are created in the
-// current directory and the temporary work files are placed in the /tmp directory.
+// ReShifter enables backing up and restoring Kubernetes clusters.
+// The ReShifter app launches an API and a UI at port 8080 and uses the
+// ReShifter library to communicate and manipulate etcd. The API is
+// instrumented, exposing Prometheus metrics. When launching the app with
+// the defaults, the backups are created in /tmp/reshifter and via environment
+// variables you can define the etcd certs/keys as well as the S3 backend
+// credentials, see also http://reshifter.info/#configuration for more infos.
 package main
 
 import (
