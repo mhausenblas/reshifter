@@ -26,12 +26,12 @@ func ExampleRestore() {
 
 	// carry out the restore into etcd underlying the Kubernetes cluster
 	// and handle errors as they occur:
-	keysrestored, err := Restore(etcdurl, "1498847078", "/tmp", "play.minio.io:9000", "2017-07-some-bucket")
+	keysrestored, restoretime, err := Restore(etcdurl, "1498847078", "/tmp", "play.minio.io:9000", "2017-07-some-bucket")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	fmt.Printf("The restore completed successfully. Restored %d keys.\n", keysrestored)
+	fmt.Printf("The restore completed successfully. Restored %d keys in %d seconds.\n", keysrestored, restoretime)
 
 	// Output:
 	// The restore completed successfully. Restored 1042 keys.

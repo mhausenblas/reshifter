@@ -61,7 +61,7 @@ func etcd2Restore(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't launch local etcd2 at %s: %s", tetcd, err)
 		return
 	}
-	_, err = Restore(tetcd, backupid, target, "play.minio.io:9000", "reshifter-test-cluster")
+	_, _, err = Restore(tetcd, backupid, target, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during restore: %s", err)
 	}
@@ -105,7 +105,7 @@ func etcd3Restore(t *testing.T, port, tetcd string) {
 		t.Errorf("Can't launch local etcd3 at %s: %s", tetcd, err)
 		return
 	}
-	_, err = Restore(tetcd, backupid, target, "play.minio.io:9000", "reshifter-test-cluster")
+	_, _, err = Restore(tetcd, backupid, target, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during restore: %s", err)
 	}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/etcd/client"
@@ -19,22 +20,24 @@ import (
 // Restore takes a backup ID and unpacks it into the target directory.
 // It then walk the target directory in the local filesystem and populates
 // an etcd server at endpoint with the content of the sub-directories.
-// On success it returns the number of keys restored.
-func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
+// On success it returns the number of keys restored as well as the time
+// it took to restore them.
+func Restore(endpoint, backupid, target, remote, bucket string) (int, time.Duration, error) {
 	numrestored := 0
+	startt := time.Now()
 	err := unarch(filepath.Join(target, backupid)+".zip", target)
 	if err != nil {
-		return numrestored, err
+		return numrestored, time.Duration(0), err
 	}
 	target, _ = filepath.Abs(filepath.Join(target, backupid, "/"))
 	version, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
-		return 0, fmt.Errorf("%s", err)
+		return 0, time.Duration(0), fmt.Errorf("%s", err)
 	}
 	if strings.HasPrefix(version, "3") {
 		c3, cerr := util.NewClient3(endpoint, secure)
 		if cerr != nil {
-			return 0, fmt.Errorf("Can't connect to etcd: %s", cerr)
+			return 0, time.Duration(0), fmt.Errorf("Can't connect to etcd: %s", cerr)
 		}
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "restore.Restore"}).Debug(fmt.Sprintf("Got etcd3 cluster with %v", c3.Endpoints()))
@@ -63,7 +66,7 @@ func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
 			return nil
 		})
 		if err != nil {
-			return 0, fmt.Errorf("Can't walk directory %s: %s", target, err)
+			return 0, time.Duration(0), fmt.Errorf("Can't walk directory %s: %s", target, err)
 		}
 
 	}
@@ -71,7 +74,7 @@ func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
 		c2, err := util.NewClient2(endpoint, secure)
 		if err != nil {
 			log.WithFields(log.Fields{"func": "restore.Restore"}).Error(fmt.Sprintf("Can't connect to etcd: %s", err))
-			return numrestored, fmt.Errorf("Can't connect to etcd: %s", err)
+			return numrestored, time.Duration(0), fmt.Errorf("Can't connect to etcd: %s", err)
 		}
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "restore.Restore"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
@@ -99,10 +102,11 @@ func Restore(endpoint, backupid, target, remote, bucket string) (int, error) {
 			return nil
 		})
 		if err != nil {
-			return 0, fmt.Errorf("Can't walk directory %s: %s", target, err)
+			return 0, time.Duration(0), fmt.Errorf("Can't walk directory %s: %s", target, err)
 		}
 	}
-	return numrestored, nil
+	endt := time.Now()
+	return numrestored, endt.Sub(startt), nil
 }
 
 // unarch takes archive file afile and unpacks it into a target directory.
