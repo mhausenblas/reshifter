@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
@@ -257,7 +256,7 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 	rr := types.RestoreResult{
 		Outcome:      operationSuccess,
 		KeysRestored: 0,
-		ElapsedTime:  time.Duration(0),
+		ElapsedTime:  0,
 	}
 	krestored, etime, err := restore.Restore(rreq.Endpoint, rreq.BackupID, target, rreq.Remote, rreq.Bucket)
 	if err != nil {
@@ -265,7 +264,7 @@ func restoreHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 	}
 	rr.KeysRestored = krestored
-	rr.ElapsedTime = etime
+	rr.ElapsedTime = etime.Seconds()
 	keysRestored.Add(float64(krestored))
 	log.Infof("Completed restore from %s to %s: %v", rreq.BackupID, rreq.Endpoint, rr)
 	if rr.Outcome == "fail" {

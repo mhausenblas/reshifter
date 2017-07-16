@@ -193,7 +193,7 @@ $(document).ready(function($){
           console.info(d);
           $('#restore-result').html('<h2>Result</h2>');
           if(d.outcome == 'success'){
-            $('#restore-result').append('<div>Restored ' + d.keysrestored + ' keys from backup with ID <code>' + bid +'</code> to <code>'+ ep + '</code></div>');
+            $('#restore-result').append('<div>Restored ' + d.keysrestored + ' keys from backup with ID <code>' + bid +'</code> to <code>'+ ep + '</code> in ' + d.elapsedtimeinsec + ' seconds.</div>');
           } else{
             $('#restore-result').append('<div>There was a problem carrying out the restore:<div><code>' + d + '</code></div></div>');
           }

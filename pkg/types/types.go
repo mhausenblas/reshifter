@@ -1,7 +1,5 @@
 package types
 
-import "time"
-
 const (
 	// DefaultWorkDir is the default work directory for backups
 	DefaultWorkDir = "/tmp/reshifter"
@@ -61,9 +59,9 @@ type RestoreRequest struct {
 
 // RestoreResult represents the results of a restore operation.
 type RestoreResult struct {
-	Outcome      string        `json:"outcome"`
-	KeysRestored int           `json:"keysrestored"`
-	ElapsedTime  time.Duration `json:"elapsedtimeinsec"`
+	Outcome      string  `json:"outcome"`
+	KeysRestored int     `json:"keysrestored"`
+	ElapsedTime  float64 `json:"elapsedtimeinsec"`
 }
 
 // EtcdResponse represents the response of an etcd2 server at /version
