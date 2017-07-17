@@ -144,6 +144,7 @@ func etcd3Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		t.Errorf("%s", err)
 		return
 	}
+	log.Infof("K:%s V:%s", testkey, testval)
 	_, err = c3.Put(context.Background(), testkey, testval)
 	if err != nil {
 		t.Errorf("Can't create etcd entry %s=%s: %s", testkey, testval, err)
