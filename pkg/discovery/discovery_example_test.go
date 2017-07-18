@@ -17,12 +17,12 @@ func ExampleProbeEtcd() {
 	etcdurl := "http://127.0.0.1:2379"
 
 	// carry out the probe and handle errors as they occur:
-	version, secure, err := ProbeEtcd(etcdurl)
+	version, apiversion, secure, err := ProbeEtcd(etcdurl)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	fmt.Printf("Discovered etcd in version %s, running in secure mode: %t\n", version, secure)
+	fmt.Printf("Discovered etcd in version %s, using API %s, and running in secure mode: %t\n", version, apiversion, secure)
 
 	// Output:
 	// Discovered etcd in version 3.1.0, running in secure mode: false

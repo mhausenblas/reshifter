@@ -85,11 +85,11 @@ func TestProbeEtcd(t *testing.T) {
 	for _, tt := range probetests {
 		testEtcdX(t, tt.launchfunc, tt.scheme, tt.port, tt.version, tt.secure)
 	}
-	_, _, err := ProbeEtcd("127.0.0.1")
+	_, _, _, err := ProbeEtcd("127.0.0.1")
 	if err == nil {
 		t.Error(err)
 	}
-	_, _, err = ProbeEtcd("127.0.0.1:2379")
+	_, _, _, err = ProbeEtcd("127.0.0.1:2379")
 	if err == nil {
 		t.Error(err)
 	}
@@ -105,7 +105,7 @@ func testEtcdX(t *testing.T, etcdLaunchFunc func(string, string) (bool, error), 
 		t.Errorf("%s", err)
 		return
 	}
-	v, s, err := ProbeEtcd(tetcd)
+	v, _, s, err := ProbeEtcd(tetcd)
 	if err != nil {
 		t.Error(err)
 		return
