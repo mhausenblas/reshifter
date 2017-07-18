@@ -12,6 +12,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/etcd/client"
+	"github.com/coreos/etcd/clientv3"
 	"github.com/mhausenblas/reshifter/pkg/discovery"
 	"github.com/mhausenblas/reshifter/pkg/remotes"
 	"github.com/mhausenblas/reshifter/pkg/types"
@@ -50,16 +51,18 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
 		kprefix := types.LegacyKubernetesPrefix
-		_, gerr := c3.Get(context.Background(), types.KubernetesPrefix)
-		if gerr == nil { // key found
+		klprefix := types.LegacyKubernetesPrefixLast
+		kgv, _ := c3.Get(context.Background(), kprefix+"/*", clientv3.WithRange(klprefix))
+		if kgv.Count == 0 { // legacy key not found, must be new key space
 			kprefix = types.KubernetesPrefix
+			klprefix = types.KubernetesPrefixLast
 		}
-		err = discovery.Visit3(c3, kprefix, target, types.Vanilla, strategy, strategyName)
+		err = discovery.Visit3(c3, target, kprefix, klprefix, strategy, strategyName)
 		if err != nil {
 			return "", err
 		}
 		if distrotype == types.OpenShift {
-			err = discovery.Visit3(c3, types.OpenShiftPrefix, target, types.OpenShift, strategy, strategyName)
+			err = discovery.Visit3(c3, target, types.OpenShiftPrefix, types.OpenShiftPrefixLast, strategy, strategyName)
 			if err != nil {
 				return "", err
 			}
@@ -74,8 +77,8 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
 		kprefix := types.LegacyKubernetesPrefix
-		_, gerr := kapi.Get(context.Background(), types.KubernetesPrefix, nil)
-		if gerr == nil { // key found
+		kgv, _ := kapi.Get(context.Background(), kprefix, nil)
+		if kgv == nil { // legacy key not found, must be new key space
 			kprefix = types.KubernetesPrefix
 		}
 		err = discovery.Visit2(kapi, kprefix, target, strategy, strategyName)

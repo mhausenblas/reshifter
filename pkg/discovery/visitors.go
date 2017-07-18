@@ -47,15 +47,8 @@ func Visit2(kapi client.KeysAPI, path, target string, reapfn types.Reap, reapfnN
 
 // Visit3 visits the given path of an etcd3 server and applies the reap function
 // on the keys in the respective range, depending on the Kubernetes distro.
-func Visit3(c3 *clientv3.Client, path, target string, distro types.KubernetesDistro, reapfn types.Reap, reapfnName string) error {
+func Visit3(c3 *clientv3.Client, target, path, endkey string, reapfn types.Reap, reapfnName string) error {
 	log.WithFields(log.Fields{"func": "discovery.Visit3"}).Debug(fmt.Sprintf("Processing %s", path))
-	endkey := ""
-	if distro == types.Vanilla {
-		endkey = types.KubernetesPrefixLast
-	}
-	if distro == types.OpenShift {
-		endkey = types.OpenShiftPrefixLast
-	}
 	res, err := c3.Get(context.Background(), path+"/*", clientv3.WithRange(endkey))
 	if err != nil {
 		return err

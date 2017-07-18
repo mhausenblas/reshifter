@@ -11,18 +11,29 @@ import (
 	"github.com/mhausenblas/reshifter/pkg/util"
 )
 
-func TestRestore(t *testing.T) {
+func TestRestorev2(t *testing.T) {
 	port := "4001"
-	// testing insecure etcd 2 and 3:
-	tetcd := "http://127.0.0.1:" + port
-	// backing up to remote https://play.minio.io:9000:
+	// restoring from remote https://play.minio.io:9000:
 	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
 	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
+	// testing insecure etcd 2:
+	tetcd := "http://127.0.0.1:" + port
 	etcd2Restore(t, port, tetcd)
-	etcd3Restore(t, port, tetcd)
-	// testing secure etcd 2 and 3:
+	// testing secure etcd 2:
 	tetcd = "https://127.0.0.1:" + port
 	etcd2Restore(t, port, tetcd)
+}
+
+func TestRestorev3(t *testing.T) {
+	port := "4001"
+	// restoring from remote https://play.minio.io:9000:
+	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
+	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
+	// testing insecure etcd 3:
+	tetcd := "http://127.0.0.1:" + port
+	etcd3Restore(t, port, tetcd)
+	// testing secure etcd 3:
+	tetcd = "https://127.0.0.1:" + port
 	etcd3Restore(t, port, tetcd)
 }
 

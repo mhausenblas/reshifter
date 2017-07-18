@@ -69,7 +69,7 @@ func TestCountKeysFor(t *testing.T) {
 		t.Errorf("Can't create etcd entry: %s", err)
 		return
 	}
-	k, s, err := CountKeysFor(tetcd, types.Vanilla)
+	k, s, err := CountKeysFor(tetcd, types.KubernetesPrefix, types.KubernetesPrefixLast)
 	if err != nil {
 		t.Error(err)
 		return

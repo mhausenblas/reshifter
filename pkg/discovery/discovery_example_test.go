@@ -68,7 +68,7 @@ func ExampleCountKeysFor() {
 	etcdurl := "http://127.0.0.1:2379"
 
 	// carry out the stats walk and handle errors as they occur:
-	numkeys, totalsize, err := CountKeysFor(etcdurl, types.Vanilla)
+	numkeys, totalsize, err := CountKeysFor(etcdurl, types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast)
 	if err != nil {
 		log.Fatal(err)
 		return

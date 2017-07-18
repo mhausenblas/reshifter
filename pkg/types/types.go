@@ -11,6 +11,8 @@ const (
 	ContentFile = "content"
 	// LegacyKubernetesPrefix represents the etcd legacy key prefix for core Kubernetes
 	LegacyKubernetesPrefix = "/registry"
+	// LegacyKubernetesPrefixLast represents a stop marker for the etcd legacy key prefix for core Kubernetes
+	LegacyKubernetesPrefixLast = "/registry/zzzzzzzzzz"
 	// KubernetesPrefix represents the etcd key prefix for core Kubernetes
 	KubernetesPrefix = "/kubernetes.io"
 	// KubernetesPrefixLast represents a stop marker for core Kubernetes

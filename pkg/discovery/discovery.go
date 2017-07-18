@@ -98,7 +98,7 @@ func ProbeKubernetesDistro(endpoint string) (types.KubernetesDistro, error) {
 // CountKeysFor iterates over well-known keys of a given Kubernetes distro
 // and returns the number of keys and their values total size, in the
 // respective key range/subtree.
-func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, error) {
+func CountKeysFor(endpoint string, startkey, endkey string) (int, int, error) {
 	numkeys := 0
 	totalsize := 0
 	version, secure, err := ProbeEtcd(endpoint)
@@ -113,25 +113,13 @@ func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, err
 		}
 		defer func() { _ = c3.Close() }()
 		log.WithFields(log.Fields{"func": "discovery.CountKeysFor"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
-		switch distro {
-		case types.Vanilla:
-			err = Visit3(c3, types.KubernetesPrefix, "", types.Vanilla, func(path, val string, arg interface{}) error {
-				numkeys++
-				totalsize += len(val)
-				return nil
-			}, "")
-			if err != nil {
-				return 0, 0, err
-			}
-		case types.OpenShift:
-			err = Visit3(c3, types.OpenShiftPrefix, "", types.OpenShift, func(path, val string, arg interface{}) error {
-				numkeys++
-				totalsize += len(val)
-				return nil
-			}, "")
-			if err != nil {
-				return 0, 0, err
-			}
+		err = Visit3(c3, "", startkey, endkey, func(path, val string, arg interface{}) error {
+			numkeys++
+			totalsize += len(val)
+			return nil
+		}, "")
+		if err != nil {
+			return 0, 0, err
 		}
 	}
 	// deal with etcd2 servers:
@@ -142,30 +130,13 @@ func CountKeysFor(endpoint string, distro types.KubernetesDistro) (int, int, err
 		}
 		kapi := client.NewKeysAPI(c2)
 		log.WithFields(log.Fields{"func": "discovery.CountKeysFor"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
-		switch distro {
-		case types.Vanilla:
-			kprefix := types.LegacyKubernetesPrefix
-			_, gerr := kapi.Get(context.Background(), types.KubernetesPrefix, nil)
-			if gerr == nil { // key found
-				kprefix = types.KubernetesPrefix
-			}
-			err = Visit2(kapi, kprefix, "", func(path, val string, arg interface{}) error {
-				numkeys++
-				totalsize += len(val)
-				return nil
-			}, "")
-			if err != nil {
-				return 0, 0, err
-			}
-		case types.OpenShift:
-			err = Visit2(kapi, types.OpenShiftPrefix, "", func(path, val string, arg interface{}) error {
-				numkeys++
-				totalsize += len(val)
-				return nil
-			}, "")
-			if err != nil {
-				return 0, 0, err
-			}
+		err = Visit2(kapi, startkey, "", func(path, val string, arg interface{}) error {
+			numkeys++
+			totalsize += len(val)
+			return nil
+		}, "")
+		if err != nil {
+			return 0, 0, err
 		}
 	}
 	return numkeys, totalsize, nil

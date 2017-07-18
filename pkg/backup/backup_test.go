@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
-	"github.com/prometheus/common/log"
 )
 
 var (
@@ -49,27 +49,41 @@ func TestStore(t *testing.T) {
 	_ = os.RemoveAll(tmpTestDir)
 }
 
-func TestBackup(t *testing.T) {
+func TestBackupv2(t *testing.T) {
 	port := "4001"
-	// testing insecure etcd 2 and 3:
+	// testing insecure etcd 2:
 	tetcd := "http://127.0.0.1:" + port
 	// backing up to remote https://play.minio.io:9000:
 	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
 	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
-	etcd2Backup(t, port, tetcd, types.Vanilla)
-	etcd3Backup(t, port, tetcd, types.Vanilla)
-	etcd2Backup(t, port, tetcd, types.OpenShift)
-	etcd3Backup(t, port, tetcd, types.OpenShift)
-
-	// testing secure etcd 2 and 3:
-	tetcd = "https://127.0.0.1:" + port
-	etcd2Backup(t, port, tetcd, types.Vanilla)
-	etcd3Backup(t, port, tetcd, types.Vanilla)
-	etcd2Backup(t, port, tetcd, types.OpenShift)
-	etcd3Backup(t, port, tetcd, types.OpenShift)
+	etcd2Backup(t, port, tetcd, types.LegacyKubernetesPrefix+"/namespaces/kube-system")
+	etcd2Backup(t, port, tetcd, types.KubernetesPrefix+"/namespaces/kube-system")
+	etcd2Backup(t, port, tetcd, types.OpenShiftPrefix+"/builds")
 }
 
-func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro) {
+func TestBackupv3(t *testing.T) {
+	port := "4001"
+	// testing insecure etcd3:
+	tetcd := "http://127.0.0.1:" + port
+	// backing up to remote https://play.minio.io:9000:
+	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
+	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
+	etcd3Backup(t, port, tetcd, types.LegacyKubernetesPrefix+"/namespaces/kube-system")
+	etcd3Backup(t, port, tetcd, types.KubernetesPrefix+"/namespaces/kube-system")
+	etcd3Backup(t, port, tetcd, types.OpenShiftPrefix+"/builds")
+}
+
+func TestBackupSecure(t *testing.T) {
+	port := "4001"
+	// testing secure etcd 2:
+	tetcd := "https://127.0.0.1:" + port
+	// backing up to remote https://play.minio.io:9000:
+	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
+	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
+	etcd2Backup(t, port, tetcd, types.LegacyKubernetesPrefix+"/namespaces/kube-system")
+}
+
+func etcd2Backup(t *testing.T, port, tetcd, key string) {
 	defer func() { _ = util.EtcdDown() }()
 	_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
 	_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
@@ -85,27 +99,16 @@ func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		return
 	}
 	kapi := client.NewKeysAPI(c2)
-	testkey, testval, err := genentry("2", types.Vanilla)
+	val := "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}"
+	_, err = kapi.Set(context.Background(), key, val, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
 	if err != nil {
-		t.Errorf("%s", err)
+		t.Errorf("Can't create etcd entry %s=%s: %s", key, val, err)
 		return
 	}
-	log.Infof("K:%s V:%s", testkey, testval)
-	_, err = kapi.Set(context.Background(), testkey, testval, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
-	if err != nil {
-		t.Errorf("Can't create etcd entry %s=%s: %s", testkey, testval, err)
-		return
-	}
-	if distro == types.OpenShift {
-		testkey, testval, erro := genentry("2", types.OpenShift)
-		if erro != nil {
-			t.Errorf("%s", erro)
-			return
-		}
-		log.Infof("K:%s V:%s", testkey, testval)
-		_, err = kapi.Set(context.Background(), testkey, testval, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
+	if strings.HasPrefix(key, types.OpenShiftPrefix) { // make sure to add vanilla key as well
+		_, err = kapi.Set(context.Background(), types.KubernetesPrefix+"/namespaces/kube-system", val, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
 		if err != nil {
-			t.Errorf("Can't create etcd entry %s=%s: %s", testkey, testval, err)
+			t.Errorf("Can't create etcd entry %s=%s: %s", key, val, err)
 			return
 		}
 	}
@@ -123,7 +126,7 @@ func etcd2Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 	_ = os.Remove(opath + ".zip")
 }
 
-func etcd3Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro) {
+func etcd3Backup(t *testing.T, port, tetcd, key string) {
 	defer func() { _ = util.EtcdDown() }()
 	_ = os.Setenv("ETCDCTL_API", "3")
 	_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
@@ -139,22 +142,23 @@ func etcd3Backup(t *testing.T, port, tetcd string, distro types.KubernetesDistro
 		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
 		return
 	}
-	testkey, testval, err := genentry("3", distro)
+	val := "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}"
 	if err != nil {
 		t.Errorf("%s", err)
 		return
 	}
-	log.Infof("K:%s V:%s", testkey, testval)
-	_, err = c3.Put(context.Background(), testkey, testval)
+	_, err = c3.Put(context.Background(), key, val)
 	if err != nil {
-		t.Errorf("Can't create etcd entry %s=%s: %s", testkey, testval, err)
+		t.Errorf("Can't create etcd entry %s=%s: %s", key, val, err)
 		return
 	}
-	// val, err := c3.Get(context.Background(), testkey)
-	// if err != nil {
-	// 	t.Errorf("Can't get etcd key %s: %s", testkey, err)
-	// 	return
-	// }
+	if strings.HasPrefix(key, types.OpenShiftPrefix) { // make sure to add vanilla key as well
+		_, err = c3.Put(context.Background(), types.KubernetesPrefix+"/namespaces/kube-system", val)
+		if err != nil {
+			t.Errorf("Can't create etcd entry %s=%s: %s", key, val, err)
+			return
+		}
+	}
 	backupid, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
 	if err != nil {
 		t.Errorf("Error during backup: %s", err)
