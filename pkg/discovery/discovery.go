@@ -24,12 +24,12 @@ func ProbeEtcd(endpoint string) (version, apiversion string, secure bool, err er
 	if err != nil {
 		return "", "", false, fmt.Errorf("Can't parse endpoint %s: %s", endpoint, err)
 	}
-	secure = false
 	switch u.Scheme {
 	case "https": // secure etcd
 		secure = true
-		clientcert, clientkey, err := util.ClientCertAndKeyFromEnv()
-		if err != nil {
+		clientcert, clientkey, cerr := util.ClientCertAndKeyFromEnv()
+		if cerr != nil {
+			err = cerr
 			return "", "", false, err
 		}
 		version, err = getVersionSecure(u.String(), clientcert, clientkey)
@@ -37,6 +37,7 @@ func ProbeEtcd(endpoint string) (version, apiversion string, secure bool, err er
 			return "", "", false, err
 		}
 	case "http":
+		secure = false
 		version, err = getVersion(u.String())
 		if err != nil {
 			return "", "", false, err
@@ -53,7 +54,7 @@ func ProbeEtcd(endpoint string) (version, apiversion string, secure bool, err er
 	if kprefix != "" { // a v2 API in an etcd3
 		apiversion = "v2"
 	}
-	return version, apiversion, false, nil
+	return version, apiversion, secure, nil
 }
 
 // ProbeKubernetesDistro probes an etcd cluster for which Kubernetes

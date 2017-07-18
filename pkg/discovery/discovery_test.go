@@ -111,7 +111,7 @@ func testEtcdX(t *testing.T, etcdLaunchFunc func(string, string) (bool, error), 
 		return
 	}
 	if !strings.HasPrefix(v, version) || s != secure {
-		t.Errorf("discovery.ProbeEtcd(%s://%s) => got (%s, %t) but want (%s.x.x, %t)", scheme, tetcd, v, s, version, secure)
+		t.Errorf("discovery.ProbeEtcd(%s) => got (%s, %t) but want (%s.x.x, %t)", tetcd, v, s, version, secure)
 	}
 }
 
