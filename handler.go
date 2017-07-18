@@ -35,9 +35,13 @@ func epstatsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(merr)
 		return
 	}
-	vk, vs, err := discovery.CountKeysFor(endpoint, types.Vanilla)
+	vk, vs, err := discovery.CountKeysFor(endpoint, types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast)
 	if err != nil {
-		merr := fmt.Sprintf("Having problems calculating stats: %s", err)
+		log.Info("Didn't find legacy keys, trying moderns now")
+	}
+	vk, vs, err = discovery.CountKeysFor(endpoint, types.KubernetesPrefix, types.KubernetesPrefixLast)
+	if err != nil {
+		merr := fmt.Sprintf("Having problems calculating stats, no vanialla keys found: %s", err)
 		http.Error(w, merr, http.StatusInternalServerError)
 		log.Error(merr)
 		return
@@ -46,7 +50,7 @@ func epstatsHandler(w http.ResponseWriter, r *http.Request) {
 	// note: ignoring error here since we're adding up the stats
 	// and if this happens to be a non-OpenShift distro we simply
 	// add 0 to the overall count, and it's still fine:
-	osk, oss, _ := discovery.CountKeysFor(endpoint, types.OpenShift)
+	osk, oss, _ := discovery.CountKeysFor(endpoint, types.OpenShiftPrefix, types.OpenShiftPrefixLast)
 	log.Debugf("openshift [keys:%d, size:%d]", osk, oss)
 	_ = json.NewEncoder(w).Encode(struct {
 		NumKeys         int `json:"numkeys"`
