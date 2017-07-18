@@ -38,7 +38,7 @@ var restoreCmd = &cobra.Command{
 		if remote != "" {
 			fmt.Printf("Using source: remote %s, bucket %s\n", remote, bucket)
 		}
-		fmt.Printf("Successfully restored %d key(s) from %s.zip in %d sec\n\n", krestored, bid, etime.Seconds())
+		fmt.Printf("Successfully restored %d key(s) from %s.zip in %f sec\n\n", krestored, bid, etime.Seconds())
 	},
 }
 
