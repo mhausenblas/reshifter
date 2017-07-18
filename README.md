@@ -40,13 +40,13 @@ If you want to use the ReShifter app, that is the Web UI, you need to use the Do
 For example, to launch the ReShifter app locally, do:
 
 ```
-$ docker run --rm -p 8080:8080 quay.io/mhausenblas/reshifter:0.3.12
+$ docker run --rm -p 8080:8080 quay.io/mhausenblas/reshifter:0.3.13
 ```
 
 If you want to use the ReShifter API, for example as a head-less service, you can simply use the binary, no other dependencies required:
 
 ```
-$ curl -s -L https://github.com/mhausenblas/reshifter/releases/download/v0.3.12-alpha/reshifter -o reshifter
+$ curl -s -L https://github.com/mhausenblas/reshifter/releases/download/v0.3.13-alpha/reshifter -o reshifter
 $ chmod +x reshifter
 $ ./reshifter
 ```
@@ -83,7 +83,7 @@ yourself.
 ## CLI tool
 
 ReShifter also provides for a CLI tool called `rcli`.
-Get binary releases for Linux and macOS via the [GitHub release page](https://github.com/mhausenblas/reshifter/releases/tag/v0.3.12-alpha).
+Get binary releases for Linux and macOS via the [GitHub release page](https://github.com/mhausenblas/reshifter/releases/tag/v0.3.13-alpha).
 
 ```
 $ rcli -h
