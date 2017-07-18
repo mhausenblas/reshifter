@@ -37,13 +37,17 @@ func docollectstats(endpoint string) {
 		log.Errorf(fmt.Sprintf("%s", err))
 		return
 	}
-	vk, vs, err := discovery.CountKeysFor(endpoint, types.Vanilla)
+	vk, vs, err := discovery.CountKeysFor(endpoint, types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast)
+	if err != nil {
+		log.Info("Didn't find legacy keys, trying modern keys now …")
+	}
+	vk, vs, err = discovery.CountKeysFor(endpoint, types.KubernetesPrefix, types.KubernetesPrefixLast)
 	if err != nil {
 		log.Error(fmt.Sprintf("Having problems calculating stats: %s", err))
 		return
 	}
 	fmt.Printf("Vanilla Kubernetes [keys:%d, size:%d]\n", vk, vs)
-	osk, oss, _ := discovery.CountKeysFor(endpoint, types.OpenShift)
+	osk, oss, _ := discovery.CountKeysFor(endpoint, types.OpenShiftPrefix, types.OpenShiftPrefixLast)
 	if osk > 0 {
 		fmt.Printf("OpenShift [keys:%d, size:%d]\n\n", osk, oss)
 	}
