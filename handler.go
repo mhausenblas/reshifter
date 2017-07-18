@@ -35,18 +35,18 @@ func epstatsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(merr)
 		return
 	}
-	vk, vs, err := discovery.CountKeysFor(endpoint, types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast)
+	vlk, vls, err := discovery.CountKeysFor(endpoint, types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast)
 	if err != nil {
-		log.Info("Didn't find legacy keys, trying moderns now")
+		log.Info("Didn't find legacy keys, trying modern keys now")
 	}
-	vk, vs, err = discovery.CountKeysFor(endpoint, types.KubernetesPrefix, types.KubernetesPrefixLast)
+	vk, vs, err := discovery.CountKeysFor(endpoint, types.KubernetesPrefix, types.KubernetesPrefixLast)
 	if err != nil {
 		merr := fmt.Sprintf("Having problems calculating stats, no vanialla keys found: %s", err)
 		http.Error(w, merr, http.StatusInternalServerError)
 		log.Error(merr)
 		return
 	}
-	log.Debugf("vanilla [keys:%d, size:%d]", vk, vs)
+	log.Debugf("vanilla [keys:%d, size:%d]", vlk+vk, vls+vs)
 	// note: ignoring error here since we're adding up the stats
 	// and if this happens to be a non-OpenShift distro we simply
 	// add 0 to the overall count, and it's still fine:
@@ -56,8 +56,8 @@ func epstatsHandler(w http.ResponseWriter, r *http.Request) {
 		NumKeys         int `json:"numkeys"`
 		TotalSizeValues int `json:"totalsizevalbytes"`
 	}{
-		vk + osk,
-		vs + oss,
+		vlk + vk + osk,
+		vls + vs + oss,
 	})
 }
 
@@ -87,7 +87,7 @@ func explorerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	secure := "insecure etcd, no SSL/TLS configured"
 	if issecure {
-		secure = "secure etcd, SSL/TLS configure"
+		secure = "secure etcd, SSL/TLS configured"
 	}
 	_ = json.NewEncoder(w).Encode(struct {
 		EtcdVersion  string `json:"etcdversion"`
