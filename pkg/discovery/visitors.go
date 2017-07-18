@@ -19,7 +19,7 @@ func Visit2(kapi client.KeysAPI, path, target string, reapfn types.Reap, reapfnN
 	res, err := kapi.Get(context.Background(),
 		path,
 		&client.GetOptions{
-			Recursive: false,
+			Recursive: true,
 			Quorum:    false,
 		},
 	)

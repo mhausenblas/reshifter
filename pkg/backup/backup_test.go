@@ -101,7 +101,7 @@ func TestBackupv2inv3(t *testing.T) {
 		t.Errorf("Can't create etcd entry %s=%s: %s", key, val, err)
 		return
 	}
-	key = types.LegacyKubernetesPrefix + "ThirdPartyResourceData/stable.example.com/crontabs/dohnto/my-new-cron-object"
+	key = types.LegacyKubernetesPrefix + "/ThirdPartyResourceData/stable.example.com/crontabs/dohnto/my-new-cron-object"
 	val = "{\"kind\":\"ThirdPartyResource\",\"apiVersion\":\"v1\"}"
 	_, err = kapi.Set(context.Background(), key, val, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
 	if err != nil {
