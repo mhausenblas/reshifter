@@ -1,6 +1,6 @@
 # Development
 
-If you plan to fix bugs or contribute to ReShifter, please consider the following.
+If you plan to contribute to ReShifter, please read the [contributor guidelines](CONTRIBUTING.md) first and note the below.
 
 ## Builds and releases
 
