@@ -39,66 +39,39 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Can't determine Kubernetes distro: %s", err)
 	}
-
-	strategyName, strategy := pickStrategy()
-
-	// deal with etcd3 servers:
-	if strings.HasPrefix(version, "3") {
-		c3, cerr := util.NewClient3(endpoint, secure)
+	switch {
+	case strings.HasPrefix(version, "3"): // etcd3 server
+		kprefix, cerr := checkv2(endpoint, secure)
 		if cerr != nil {
-			return "", fmt.Errorf("Can't connect to etcd3: %s", cerr)
+			return "", cerr
 		}
-		defer func() { _ = c3.Close() }()
-		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
-		kprefix := types.LegacyKubernetesPrefix
-		klprefix := types.LegacyKubernetesPrefixLast
-		kgv, _ := c3.Get(context.Background(), kprefix+"/*", clientv3.WithRange(klprefix))
-		if kgv.Count == 0 { // legacy key not found, must be new key space
-			kprefix = types.KubernetesPrefix
-			klprefix = types.KubernetesPrefixLast
-		}
-		err = discovery.Visit3(c3, target, kprefix, klprefix, strategy, strategyName)
-		if err != nil {
-			return "", err
-		}
-		if distrotype == types.OpenShift {
-			err = discovery.Visit3(c3, target, types.OpenShiftPrefix, types.OpenShiftPrefixLast, strategy, strategyName)
+		if kprefix != "" { // a v2 API in an etcd3
+			err = backupv2(endpoint, target, secure, distrotype)
 			if err != nil {
 				return "", err
 			}
+			break
 		}
-	}
-	// deal with etcd2 servers:
-	if strings.HasPrefix(version, "2") {
-		c2, cerr := util.NewClient2(endpoint, secure)
-		if cerr != nil {
-			return "", fmt.Errorf("Can't connect to etcd2: %s", cerr)
-		}
-		kapi := client.NewKeysAPI(c2)
-		log.WithFields(log.Fields{"func": "backup.Backup"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
-		kprefix := types.LegacyKubernetesPrefix
-		kgv, _ := kapi.Get(context.Background(), kprefix, nil)
-		if kgv == nil { // legacy key not found, must be new key space
-			kprefix = types.KubernetesPrefix
-		}
-		err = discovery.Visit2(kapi, kprefix, target, strategy, strategyName)
+		err = backupv3(endpoint, target, secure, distrotype)
 		if err != nil {
 			return "", err
 		}
-		if distrotype == types.OpenShift {
-			err = discovery.Visit2(kapi, types.OpenShiftPrefix, target, strategy, strategyName)
-			if err != nil {
-				return "", err
-			}
+	case strings.HasPrefix(version, "2"): // etcd2 server
+		err = backupv2(endpoint, target, secure, distrotype)
+		if err != nil {
+			return "", err
 		}
+	default:
+		return "", fmt.Errorf("Can't understand etcd version, seems to be neither v3 nor v2 :(")
 	}
-
+	strategyName, _ := pickStrategy()
 	if strategyName == types.ReapFunctionRaw {
 		// create ZIP file of the reaped content:
 		_, err = arch(target)
 		if err != nil {
 			return "", err
 		}
+		// store in S3-compatible remote storage, if requested:
 		if remote != "" {
 			err = remotes.StoreInS3(remote, bucket, target, based)
 			if err != nil {
@@ -106,8 +79,95 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 			}
 		}
 	}
-
 	return based, nil
+}
+
+func backupv3(endpoint, target string, secure bool, distrotype types.KubernetesDistro) error {
+	c3, err := util.NewClient3(endpoint, secure)
+	if err != nil {
+		return fmt.Errorf("Can't connect to etcd3: %s", err)
+	}
+	defer func() { _ = c3.Close() }()
+	log.WithFields(log.Fields{"func": "backup.backupv3"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
+	kprefix := types.LegacyKubernetesPrefix
+	klprefix := types.LegacyKubernetesPrefixLast
+	kgv, _ := c3.Get(context.Background(), kprefix+"/*", clientv3.WithRange(klprefix))
+	if kgv.Count == 0 { // legacy key not found, must be new key space
+		kprefix = types.KubernetesPrefix
+		klprefix = types.KubernetesPrefixLast
+	}
+	strategyName, strategy := pickStrategy()
+	err = discovery.Visit3(c3, target, kprefix, klprefix, strategy, strategyName)
+	if err != nil {
+		return err
+	}
+	if distrotype == types.OpenShift {
+		err = discovery.Visit3(c3, target, types.OpenShiftPrefix, types.OpenShiftPrefixLast, strategy, strategyName)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func backupv2(endpoint, target string, secure bool, distrotype types.KubernetesDistro) error {
+	c2, err := util.NewClient2(endpoint, secure)
+	if err != nil {
+		return fmt.Errorf("Can't connect to etcd2: %s", err)
+	}
+	log.WithFields(log.Fields{"func": "backup.checkv2"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
+	kapi := client.NewKeysAPI(c2)
+	kprefix, err := checkv2(endpoint, secure)
+	if err != nil {
+		return err
+	}
+	if kprefix == "" {
+		return fmt.Errorf("Can't find well-known v2 keyspaces")
+	}
+	strategyName, strategy := pickStrategy()
+	err = discovery.Visit2(kapi, kprefix, target, strategy, strategyName)
+	if err != nil {
+		return err
+	}
+	if distrotype == types.OpenShift {
+		err = discovery.Visit2(kapi, types.OpenShiftPrefix, target, strategy, strategyName)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func checkv2(endpoint string, secure bool) (string, error) {
+	c2, err := util.NewClient2(endpoint, secure)
+	if err != nil {
+		return "", fmt.Errorf("Can't connect to etcd2: %s", err)
+	}
+	log.WithFields(log.Fields{"func": "backup.checkv2"}).Debug(fmt.Sprintf("Got etcd2 cluster with %v", c2.Endpoints()))
+	kapi := client.NewKeysAPI(c2)
+	kprefix := types.LegacyKubernetesPrefix
+	kfound, _ := kapi.Get(context.Background(), kprefix, nil)
+	if kfound != nil { // legacy v2 keyspace found
+		return kprefix, nil
+	}
+	kprefix = types.KubernetesPrefix
+	kfound, _ = kapi.Get(context.Background(), kprefix, nil)
+	if kfound != nil { // modern v2 keyspace found
+		return kprefix, nil
+	}
+	return "", nil
+}
+
+func pickStrategy() (string, types.Reap) {
+	backupstrategy := os.Getenv("RS_BACKUP_STRATEGY")
+	switch backupstrategy {
+	case "raw":
+		return types.ReapFunctionRaw, raw
+	case "render":
+		return types.ReapFunctionRender, render
+	default:
+		return types.ReapFunctionRaw, raw
+	}
 }
 
 // List generates a list of available backup IDs.
@@ -137,16 +197,4 @@ func List(remote, bucket string) ([]string, error) {
 		return nil, fmt.Errorf("Can't read backup IDs from remote: %s", err)
 	}
 	return backupIDs, nil
-}
-
-func pickStrategy() (string, types.Reap) {
-	backupstrategy := os.Getenv("RS_BACKUP_STRATEGY")
-	switch backupstrategy {
-	case "raw":
-		return types.ReapFunctionRaw, raw
-	case "render":
-		return types.ReapFunctionRender, render
-	default:
-		return types.ReapFunctionRaw, raw
-	}
 }

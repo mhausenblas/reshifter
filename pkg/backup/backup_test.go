@@ -73,6 +73,55 @@ func TestBackupv3(t *testing.T) {
 	etcd3Backup(t, port, tetcd, types.OpenShiftPrefix+"/builds")
 }
 
+func TestBackupv2inv3(t *testing.T) {
+	defer func() { _ = util.EtcdDown() }()
+	port := "4001"
+	// testing insecure etcd 3:
+	tetcd := "http://127.0.0.1:" + port
+	// backing up to remote https://play.minio.io:9000:
+	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
+	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
+
+	// adding key using v2 API in an etcd3
+	_, err := util.LaunchEtcd3(tetcd, port)
+	if err != nil {
+		t.Errorf("%s", err)
+		return
+	}
+	c2, err := util.NewClient2(tetcd, false)
+	if err != nil {
+		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
+		return
+	}
+	kapi := client.NewKeysAPI(c2)
+	key := types.LegacyKubernetesPrefix + "/namespaces/kube-system"
+	val := "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}"
+	_, err = kapi.Set(context.Background(), key, val, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
+	if err != nil {
+		t.Errorf("Can't create etcd entry %s=%s: %s", key, val, err)
+		return
+	}
+	key = types.LegacyKubernetesPrefix + "ThirdPartyResourceData/stable.example.com/crontabs/dohnto/my-new-cron-object"
+	val = "{\"kind\":\"ThirdPartyResource\",\"apiVersion\":\"v1\"}"
+	_, err = kapi.Set(context.Background(), key, val, &client.SetOptions{Dir: false, PrevExist: client.PrevNoExist})
+	if err != nil {
+		t.Errorf("Can't create etcd entry %s=%s: %s", key, val, err)
+		return
+	}
+	backupid, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
+	if err != nil {
+		t.Errorf("Error during backup: %s", err)
+		return
+	}
+	opath, _ := filepath.Abs(filepath.Join(types.DefaultWorkDir, backupid))
+	_, err = os.Stat(opath + ".zip")
+	if err != nil {
+		t.Errorf("No archive found: %s", err)
+	}
+	// make sure to clean up:
+	_ = os.Remove(opath + ".zip")
+}
+
 func TestBackupSecure(t *testing.T) {
 	port := "4001"
 	// testing secure etcd 2:
