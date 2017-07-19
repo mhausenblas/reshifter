@@ -4,8 +4,9 @@
 [![godoc](https://godoc.org/github.com/mhausenblas/reshifter?status.svg)](https://godoc.org/github.com/mhausenblas/reshifter)
 [![Docker Repository on Quay](https://quay.io/repository/mhausenblas/reshifter/status "Docker Repository on Quay")](https://quay.io/repository/mhausenblas/reshifter)
 [![Swagger API definition](https://img.shields.io/badge/API-Swagger-blue.svg)](https://app.swaggerhub.com/apis/mhausenblas/reshifter/1.0.0)
+[![Proudly packaged with Golang dep](images/NERDY.png](https://github.com/golang/dep)
 
-A cluster admin backup and restore tool for Kubernetes distros such as OpenShift, using etcd to query and manipulate the state of all objects.
+A cluster admin backup and restore tool for Kubernetes distros (OpenShift, etc.), using etcd to query and manipulate the state of all objects.
 
 [![Screen cast: Introducing ReShifter](images/reshifter-demo.png)](https://www.useloom.com/share/e590aedeb95b441fb23ab4f9e9e80c32 "Introducing ReShifter")  
 
