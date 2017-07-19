@@ -32,7 +32,7 @@ func docollectstats(endpoint string) {
 		log.Error(merr)
 		return
 	}
-	_, _, err := discovery.ProbeEtcd(endpoint)
+	_, _, _, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
 		log.Errorf(fmt.Sprintf("%s", err))
 		return

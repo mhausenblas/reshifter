@@ -33,7 +33,7 @@ func doexplore(endpoint string) {
 		log.Error(merr)
 		return
 	}
-	version, issecure, err := discovery.ProbeEtcd(endpoint)
+	version, apiversion, issecure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
 		log.Errorf(fmt.Sprintf("%s", err))
 		return
@@ -56,5 +56,5 @@ func doexplore(endpoint string) {
 	default:
 		distro = "no Kubernetes distro found"
 	}
-	fmt.Printf("Version: %s\nSecure: %s\nDistro: %s\n\n", version, secure, distro)
+	fmt.Printf("etcd version: %s\nAPI version: %s\nSecure: %s\nDistro: %s\n\n", version, apiversion, secure, distro)
 }

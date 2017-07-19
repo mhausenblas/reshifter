@@ -71,7 +71,7 @@ func explorerHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(merr)
 		return
 	}
-	version, issecure, err := discovery.ProbeEtcd(endpoint)
+	version, apiversion, issecure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
 		merr := fmt.Sprintf("%s", err)
 		http.Error(w, merr, http.StatusBadRequest)
@@ -91,10 +91,12 @@ func explorerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	_ = json.NewEncoder(w).Encode(struct {
 		EtcdVersion  string `json:"etcdversion"`
+		APIVersion   string `json:"apiversion"`
 		EtcdSecurity string `json:"etcdsec"`
 		K8SDistro    string `json:"k8sdistro"`
 	}{
 		version,
+		apiversion,
 		secure,
 		util.LookupDistro(distrotype),
 	})
