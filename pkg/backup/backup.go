@@ -31,7 +31,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		_ = os.Mkdir(target, 0700)
 	}
 	target, _ = filepath.Abs(filepath.Join(target, based))
-	version, secure, err := discovery.ProbeEtcd(endpoint)
+	version, apiversion, secure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
 		return "", fmt.Errorf("%s", err)
 	}
@@ -41,11 +41,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 	}
 	switch {
 	case strings.HasPrefix(version, "3"): // etcd3 server
-		kprefix, cerr := checkv2(endpoint, secure)
-		if cerr != nil {
-			return "", cerr
-		}
-		if kprefix != "" { // a v2 API in an etcd3
+		if apiversion == "v2" { // a v2 API in an etcd3
 			err = backupv2(endpoint, target, secure, distrotype)
 			if err != nil {
 				return "", err
