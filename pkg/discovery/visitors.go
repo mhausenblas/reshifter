@@ -56,7 +56,6 @@ func Visit3(c3 *clientv3.Client, target, path, endkey string, reapfn types.Reap,
 	log.WithFields(log.Fields{"func": "discovery.Visit3"}).Debug(fmt.Sprintf("Got %v", res))
 	for _, ev := range res.Kvs {
 		log.WithFields(log.Fields{"func": "discovery.Visit3"}).Debug(fmt.Sprintf("key: %s, value: %s", ev.Key, ev.Value))
-
 		// we're on a leaf node, so apply the reap function:
 		switch reapfnName {
 		case types.ReapFunctionRaw:
@@ -70,12 +69,12 @@ func Visit3(c3 *clientv3.Client, target, path, endkey string, reapfn types.Reap,
 				return err
 			}
 		default:
+			log.WithFields(log.Fields{"func": "discovery.Visit3"}).Debug(fmt.Sprintf("Calling %v with %v", reapfn, ev))
 			err = reapfn(string(ev.Key), string(ev.Value), nil)
 			if err != nil {
 				return err
 			}
 		}
-		return nil
 	}
 	return nil
 }
