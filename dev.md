@@ -4,8 +4,9 @@ If you plan to contribute to ReShifter, please read the [contributor guidelines]
 
 ## Builds and releases
 
+ReShifter is developed in [Go 1.8](https://beta.golang.org/doc/go1.8), so please make sure that you've got at least this version installed.
 We're following [semantic versioning](http://semver.org/). The canonical ReShifter release version is defined in one place only,
-in the [Makefile](https://github.com/mhausenblas/reshifter/blob/master/Makefile).
+in the first line of the [Makefile](https://github.com/mhausenblas/reshifter/blob/master/Makefile), following semver, for example, `0.3.14`.
 
 This version is then used in the Go code, in the Docker image as a tag and for all downstream deployments.
 
