@@ -61,7 +61,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 		return "", fmt.Errorf("Can't understand etcd version, seems to be neither v3 nor v2 :(")
 	}
 	strategyName, _ := pickStrategy()
-	if strategyName == types.ReapFunctionRaw {
+	if strategyName != types.ReapFunctionRender {
 		// create ZIP file of the reaped content:
 		_, err = arch(target)
 		if err != nil {

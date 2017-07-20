@@ -45,6 +45,7 @@ func filter(path, val string, target interface{}) error {
 	if !ok {
 		return fmt.Errorf("Can't use target %v, it should be a string!", target)
 	}
+	log.WithFields(log.Fields{"func": "backup.filter"}).Debug(fmt.Sprintf("On path %s", path))
 	if strings.Contains(path, "deployments") {
 		_, err := store(t, path, val)
 		if err != nil {

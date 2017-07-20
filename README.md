@@ -16,6 +16,7 @@ A cluster admin backup and restore tool for Kubernetes distros (OpenShift, etc.)
 - [Deploy app in OpenShift](#deploy-app-in-openshift)
 - [Deploy app in Kubernetes](#deploy-app-in-kubernetes)
 - [CLI tool](#cli-tool)
+- [Backup strategies](#backup-strategies)
 - [Configuration](#configuration)
 - [Test and development](#test-and-development)
 
@@ -32,7 +33,7 @@ There are many cases where ReShifter can be useful for you, for example:
 ## Status and roadmap
 
 See the [Trello board](https://trello.com/b/iOrEdJQ3/reshifter) for the current status of the work and roadmap items.
-You can also check out the design philosophy and [architecture](https://github.com/mhausenblas/reshifter/blob/master/architecture.md)
+You can also check out the design philosophy and [architecture](https://github.com/mhausenblas/reshifter/blob/master/docs/architecture.md)
 of ReShifter, if you want to learn more about why it works the way it does.
 
 ## Deploy app locally
@@ -131,6 +132,20 @@ $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
                -i 1498815551
 ```
 
+## Backup strategies
+
+ReShifter supports different backup [strategies](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md), including:
+
+- complete, _raw_ dump: storing the value of every key under the well-known top-level keys such as `/registry` or `/kubernetes.io`.
+- _render_ dump: writing the values to `stdout`.
+- _filter_: storing the value of selected (white-listed) keys under the well-known top-level, for example only `deployment` or `service`.
+
+You define the backup strategy using the `RS_BACKUP_STRATEGY` environment variable, for example, using the CLI tool `rcli`:
+
+```
+$ RS_BACKUP_STRATEGY=filter rcli backup create
+```
+
 ## Configuration
 
 ReShifter takes throughout the deployments (app, HTTP API, CLI) the following configuration parameters,
@@ -152,4 +167,4 @@ Note:
 
 ## Test and development
 
-See the pages for [testbed](https://github.com/mhausenblas/reshifter/tree/master/testbed) and [development](https://github.com/mhausenblas/reshifter/blob/master/dev.md).
+See the pages for [testbed](https://github.com/mhausenblas/reshifter/tree/master/testbed) and [development](https://github.com/mhausenblas/reshifter/blob/master/docs/dev.md).

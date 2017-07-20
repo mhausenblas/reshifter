@@ -36,7 +36,7 @@ func Visit2(kapi client.KeysAPI, path, target string, reapfn types.Reap, reapfnN
 	}
 	// we're on a leaf node, so apply the reap function:
 	switch reapfnName {
-	case types.ReapFunctionRaw:
+	case types.ReapFunctionRaw, types.ReapFunctionFilter:
 		return reapfn(res.Node.Key, string(res.Node.Value), target)
 	case types.ReapFunctionRender:
 		return reapfn(res.Node.Key, string(res.Node.Value), os.Stdout)
@@ -58,22 +58,12 @@ func Visit3(c3 *clientv3.Client, target, path, endkey string, reapfn types.Reap,
 		log.WithFields(log.Fields{"func": "discovery.Visit3"}).Debug(fmt.Sprintf("key: %s, value: %s", ev.Key, ev.Value))
 		// we're on a leaf node, so apply the reap function:
 		switch reapfnName {
-		case types.ReapFunctionRaw:
-			err = reapfn(string(ev.Key), string(ev.Value), target)
-			if err != nil {
-				return err
-			}
+		case types.ReapFunctionRaw, types.ReapFunctionFilter:
+			return reapfn(string(ev.Key), string(ev.Value), target)
 		case types.ReapFunctionRender:
-			err = reapfn(string(ev.Key), string(ev.Value), os.Stdout)
-			if err != nil {
-				return err
-			}
+			return reapfn(string(ev.Key), string(ev.Value), os.Stdout)
 		default:
-			log.WithFields(log.Fields{"func": "discovery.Visit3"}).Debug(fmt.Sprintf("Calling %v with %v", reapfn, ev))
-			err = reapfn(string(ev.Key), string(ev.Value), nil)
-			if err != nil {
-				return err
-			}
+			return reapfn(string(ev.Key), string(ev.Value), nil)
 		}
 	}
 	return nil
