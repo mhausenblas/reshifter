@@ -140,7 +140,8 @@ ReShifter supports different backup [strategies](https://github.com/mhausenblas/
 - _render_ dump: writing the values to `stdout`.
 - _filter_: storing the value of selected (white-listed) keys under the well-known top-level, for example only `deployment` or `service`.
 
-You define the backup strategy using the `RS_BACKUP_STRATEGY` environment variable, for example, using the CLI tool `rcli`:
+You define the backup strategy using the `RS_BACKUP_STRATEGY` environment variable, with a default of `raw`.
+For example, using the CLI tool `rcli`:
 
 ```
 $ RS_BACKUP_STRATEGY=filter rcli backup create

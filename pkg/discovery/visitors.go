@@ -59,11 +59,20 @@ func Visit3(c3 *clientv3.Client, target, path, endkey string, reapfn types.Reap,
 		// we're on a leaf node, so apply the reap function:
 		switch reapfnName {
 		case types.ReapFunctionRaw, types.ReapFunctionFilter:
-			return reapfn(string(ev.Key), string(ev.Value), target)
+			err := reapfn(string(ev.Key), string(ev.Value), target)
+			if err != nil {
+				return err
+			}
 		case types.ReapFunctionRender:
-			return reapfn(string(ev.Key), string(ev.Value), os.Stdout)
+			err := reapfn(string(ev.Key), string(ev.Value), os.Stdout)
+			if err != nil {
+				return err
+			}
 		default:
-			return reapfn(string(ev.Key), string(ev.Value), nil)
+			err := reapfn(string(ev.Key), string(ev.Value), nil)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

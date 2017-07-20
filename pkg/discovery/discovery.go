@@ -242,10 +242,10 @@ func statsv2(endpoint string, secure bool, startkey string) (numkeys, totalsize 
 func statsv3(endpoint string, secure bool, startkey, endkey string) (numkeys, totalsize int, err error) {
 	c3, cerr := util.NewClient3(endpoint, secure)
 	if cerr != nil {
-		return 0, 0, fmt.Errorf("%s", cerr)
+		return 0, 0, cerr
 	}
-	defer func() { _ = c3.Close() }()
-	log.WithFields(log.Fields{"func": "discovery.CountKeysFor"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
+	// defer func() { _ = c3.Close() }()
+	log.WithFields(log.Fields{"func": "discovery.statsv3"}).Debug(fmt.Sprintf("Got etcd3 cluster with endpoints %v", c3.Endpoints()))
 	err = Visit3(c3, "", startkey, endkey, func(path, val string, arg interface{}) error {
 		numkeys++
 		totalsize += len(val)
