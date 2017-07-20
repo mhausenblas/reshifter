@@ -42,7 +42,7 @@ func docollectstats(endpoint string) {
 		log.Info("Didn't find legacy keys, trying modern keys now …")
 	}
 	vk, vs, err := discovery.CountKeysFor(endpoint, types.KubernetesPrefix, types.KubernetesPrefixLast)
-	if err != nil {
+	if err != nil && derr != nil {
 		log.Error(fmt.Sprintf("Having problems calculating stats: %s", err))
 		return
 	}

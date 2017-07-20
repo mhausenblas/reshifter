@@ -161,6 +161,8 @@ func pickStrategy() (string, types.Reap) {
 		return types.ReapFunctionRaw, raw
 	case "render":
 		return types.ReapFunctionRender, render
+	case "filter":
+		return types.ReapFunctionFilter, filter
 	default:
 		return types.ReapFunctionRaw, raw
 	}

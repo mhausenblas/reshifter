@@ -38,6 +38,22 @@ func render(path, val string, writer interface{}) error {
 	return nil
 }
 
+// filter is a reap strategy that stores val in a path in directory target,
+// if a certain condition is  met (set of white-listed paths).
+func filter(path, val string, target interface{}) error {
+	t, ok := target.(string)
+	if !ok {
+		return fmt.Errorf("Can't use target %v, it should be a string!", target)
+	}
+	if strings.Contains(path, "deployments") {
+		_, err := store(t, path, val)
+		if err != nil {
+			return fmt.Errorf("Can't store %s%s in %s: %s", t, path, val, err)
+		}
+	}
+	return nil
+}
+
 // store creates a file at based+path with val as its content.
 // based is the output directory to use and path can be
 // any valid etcd key (with ':'' characters being escaped automatically).

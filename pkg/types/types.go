@@ -27,6 +27,8 @@ const (
 	ReapFunctionRaw = "raw"
 	// ReapFunctionRender represents the reap function that dumps the values of all keys to stdout.
 	ReapFunctionRender = "render"
+	// ReapFunctionFilter represents the reap function that dumps the values of certain keys to disk.
+	ReapFunctionFilter = "filter"
 	// NotADistro represents the fact that no Kubernetes distro-related prefixes exit in etcd
 	NotADistro KubernetesDistro = iota
 	// Vanilla represents the vanilla, upstream Kubernetes distribution.
