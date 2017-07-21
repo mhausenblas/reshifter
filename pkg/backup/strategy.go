@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -45,15 +46,31 @@ func filter(path, val string, target interface{}) error {
 	if !ok {
 		return fmt.Errorf("Can't use target %v, it should be a string!", target)
 	}
-	// backupstrategy := os.Getenv("RS_BACKUP_STRATEGY")
-	log.WithFields(log.Fields{"func": "backup.filter"}).Debug(fmt.Sprintf("On path %s", path))
-	if strings.Contains(path, "deployments") {
+	backupstrategy := os.Getenv("RS_BACKUP_STRATEGY")
+	re := regexp.MustCompile("filter\\:.*")
+	if !re.Match([]byte(backupstrategy)) {
+		return fmt.Errorf("Can't use filter, must use format `filter:object1,object2`!")
+	}
+	// for example, RS_BACKUP_STRATEGY=filter:deployment,service -> filter:deployment,service
+	whitelist := strings.Split(backupstrategy, ":")[1]
+	log.WithFields(log.Fields{"func": "backup.filter"}).Debug(fmt.Sprintf("On path %s with whitelist %s", path, whitelist))
+	if in(path, whitelist) {
 		_, err := store(t, path, val)
 		if err != nil {
 			return fmt.Errorf("Can't store %s%s in %s: %s", t, path, val, err)
 		}
 	}
 	return nil
+}
+
+func in(path string, whitelist string) bool {
+	w := strings.Split(whitelist, ",")
+	for _, element := range w {
+		if strings.Contains(path, element) {
+			return true
+		}
+	}
+	return false
 }
 
 // store creates a file at based+path with val as its content.

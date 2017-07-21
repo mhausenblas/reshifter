@@ -156,12 +156,12 @@ func checkv2(endpoint string, secure bool) (string, error) {
 
 func pickStrategy() (string, types.Reap) {
 	backupstrategy := os.Getenv("RS_BACKUP_STRATEGY")
-	switch backupstrategy {
-	case "raw":
+	switch {
+	case backupstrategy == "raw":
 		return types.ReapFunctionRaw, raw
-	case "render":
+	case backupstrategy == "render":
 		return types.ReapFunctionRender, render
-	case "filter":
+	case strings.HasPrefix(backupstrategy, "filter"):
 		return types.ReapFunctionFilter, filter
 	default:
 		return types.ReapFunctionRaw, raw

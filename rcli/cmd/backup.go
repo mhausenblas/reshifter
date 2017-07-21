@@ -32,8 +32,9 @@ var createBackupCmd = &cobra.Command{
 		bid, err := backup.Backup(ep, target, remote, bucket)
 		if err != nil {
 			log.Error(err)
+			return
 		}
-		if os.Getenv("RS_BACKUP_STRATEGY") == types.ReapFunctionRaw {
+		if os.Getenv("RS_BACKUP_STRATEGY") != types.ReapFunctionRender {
 			fmt.Printf("Successfully created backup: %s/%s.zip\n", target, bid)
 			if remote != "" {
 				fmt.Printf("Pushed to remote %s in bucket %s\n\n", remote, bucket)

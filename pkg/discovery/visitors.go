@@ -37,12 +37,22 @@ func Visit2(kapi client.KeysAPI, path, target string, reapfn types.Reap, reapfnN
 	// we're on a leaf node, so apply the reap function:
 	switch reapfnName {
 	case types.ReapFunctionRaw, types.ReapFunctionFilter:
-		return reapfn(res.Node.Key, string(res.Node.Value), target)
+		err := reapfn(res.Node.Key, string(res.Node.Value), target)
+		if err != nil {
+			return err
+		}
 	case types.ReapFunctionRender:
-		return reapfn(res.Node.Key, string(res.Node.Value), os.Stdout)
+		err := reapfn(res.Node.Key, string(res.Node.Value), os.Stdout)
+		if err != nil {
+			return err
+		}
 	default:
-		return reapfn(res.Node.Key, string(res.Node.Value), nil)
+		err := reapfn(res.Node.Key, string(res.Node.Value), nil)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // Visit3 visits the given path of an etcd3 server and applies the reap function
