@@ -4,7 +4,7 @@
 
 ReShifter's architecture is as follows:
 
-![ReShifter architecture](images/reshifter-architecture.png)
+![ReShifter architecture](../images/reshifter-architecture.png)
 
 - You can make backups and restore of a Kubernetes cluster, either by storing the archive (ZIP file with the content of the underlying etcd) locally or in a remote location (S3-compatible object storage).
 - Both the server (exposing a HTTP API) and the CLI tool `rcli`are leveraging the ReShifter library [github.com/mhausenblas/reshifter/pkg](https://godoc.org/github.com/mhausenblas/reshifter/pkg).
