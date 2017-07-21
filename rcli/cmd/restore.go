@@ -6,6 +6,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/mhausenblas/reshifter/pkg/restore"
+	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +48,7 @@ func init() {
 
 	restoreCmd.Flags().StringP("endpoint", "e", "http://127.0.0.1:2379", "The URL of the etcd to use")
 	restoreCmd.Flags().StringP("backupid", "i", "", "The ID of the backup to use for the restore operation")
-	restoreCmd.Flags().StringP("target", "t", "/tmp", "Optionally, the target directory for the resulting ZIP file of the backup")
+	restoreCmd.Flags().StringP("target", "t", types.DefaultWorkDir, "Optionally, the target directory for the resulting ZIP file of the backup")
 	restoreCmd.Flags().StringP("remote", "r", "", "Optionally, the S3-compatible storage endpoint")
 	restoreCmd.Flags().StringP("bucket", "b", "", "Optionally, the target bucket in the S3-compatible storage endpoint")
 }
