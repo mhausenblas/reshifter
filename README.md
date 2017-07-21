@@ -12,10 +12,11 @@ A cluster admin backup and restore tool for Kubernetes distros (OpenShift, etc.)
 
 - [Use Cases](#use-cases)
 - [Status and roadmap](#status-and-roadmap)
-- [Deploy app locally](#deploy-app-locally)
-- [Deploy app in OpenShift](#deploy-app-in-openshift)
-- [Deploy app in Kubernetes](#deploy-app-in-kubernetes)
 - [CLI tool](#cli-tool)
+- [Web app](#web-app)
+ - [Deploy app locally](#deploy-app-locally)
+ - [Deploy app in OpenShift](#deploy-app-in-openshift)
+ - [Deploy app in Kubernetes](#deploy-app-in-kubernetes)
 - [Backup strategies](#backup-strategies)
 - [Configuration](#configuration)
 - [Test and development](#test-and-development)
@@ -36,7 +37,9 @@ See the [Trello board](https://trello.com/b/iOrEdJQ3/reshifter) for the current 
 You can also check out the design philosophy and [architecture](https://github.com/mhausenblas/reshifter/blob/master/docs/architecture.md)
 of ReShifter, if you want to learn more about why it works the way it does.
 
-## Deploy app locally
+## Web app
+
+### Deploy app locally
 
 If you want to use the ReShifter app, that is the Web UI, you need to use the Docker image since it bundles the static assets such as HTML, CSS, and JS and the Go binary.
 For example, to launch the ReShifter app locally, do:
@@ -55,7 +58,7 @@ $ ./reshifter
 
 The ReShifter HTTP API is defined in and available via Swagger: [swaggerhub.com/apis/mhausenblas/reshifter/1.0.0](https://swaggerhub.com/apis/mhausenblas/reshifter/1.0.0)
 
-## Deploy app in OpenShift
+### Deploy app in OpenShift
 
 To install the ReShifter app on OpenShift, we use a [Makefile](https://github.com/mhausenblas/reshifter/blob/master/Makefile)
 that creates a new project called `reshifter`, launches the app from the Docker image, and finally exposes the service via a route
@@ -67,7 +70,7 @@ $ make init
 $ make publish
 ```
 
-## Deploy app in Kubernetes
+### Deploy app in Kubernetes
 
 To install the ReShifter app in a portable way, use `kubectl` and the YAML files provided.
 The following requires access to a vanilla Kubernetes 1.5 or above cluster and also the
