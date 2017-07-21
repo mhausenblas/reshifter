@@ -120,6 +120,9 @@ func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 		Outcome:  operationSuccess,
 		BackupID: "0",
 	}
+	if breq.Filter != "" {
+		_ = os.Setenv("RS_BACKUP_STRATEGY", breq.Filter)
+	}
 	target := types.DefaultWorkDir
 	bid, err := backup.Backup(breq.Endpoint, target, breq.Remote, breq.Bucket)
 	if err != nil {

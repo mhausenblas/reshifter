@@ -89,14 +89,15 @@ $(document).ready(function($){
 
   $('#dobackup').click(function(event) {
     var ep = $('#endpoint').val();
+    var filter = $('#filter').val();
     var default_remote = ibstorage.getItem('reshifter.info/default-remote');
     var sepidx = default_remote.indexOf(' ');
     var remote = '';
-    var payload = '{"endpoint": "' + ep +'" }';
+    var payload = '{"endpoint": "' + ep + '", "filter": "' + filter + '" }';
     if (sepidx != -1){
       remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
       bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1);
-      payload = '{"endpoint": "' + ep +'", "remote": "' + remote +'", "bucket": "' + bucket +'" }',
+      payload = '{"endpoint": "' + ep + '", "filter": "' + filter + '", "remote": "' + remote +'", "bucket": "' + bucket +'" }',
       console.info('Backing up to remote [' + remote + '] in bucket [' + bucket + ']');
     }
     $('#backup-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');

@@ -8,6 +8,7 @@ type BackupRequest struct {
 	Endpoint string `json:"endpoint"`
 	Remote   string `json:"remote"`
 	Bucket   string `json:"bucket"`
+	Filter   string `json:"filter"`
 }
 
 // BackupResult represents the results of a backup operation.

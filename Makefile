@@ -3,7 +3,7 @@ git_version := `git rev-parse HEAD`
 app_name := reshifter-app
 main_dir := `pwd`
 
-.PHONY: gtest gbuild cbuild cpush release init build publish destroy
+.PHONY: gtest gbuild gbuildcli gbuildapp cbuild cpush release init build publish destroy
 
 gtest :
 	@echo This will take ca. 3 min to complete so get a cuppa tea for now ...
@@ -11,13 +11,14 @@ gtest :
 	go test -short -run Test* ./pkg/backup
 	go test -short -run Test* ./pkg/restore
 
-gbuild :
+gbuild : gbuildcli gbuildapp
+
+gbuildcli :
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-linux rcli/main.go
-	go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-macos rcli/main.go
 
-ginstall :
-	@go install -ldflags "-X main.releaseVersion=$(reshifter_version)" .
+gbuildapp :
+	go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-macos rcli/main.go
 
 cbuild :
 	@docker build --build-arg rversion=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
