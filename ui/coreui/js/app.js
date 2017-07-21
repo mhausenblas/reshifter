@@ -100,6 +100,7 @@ $(document).ready(function($){
       payload = '{"endpoint": "' + ep + '", "filter": "' + filter + '", "remote": "' + remote +'", "bucket": "' + bucket +'" }',
       console.info('Backing up to remote [' + remote + '] in bucket [' + bucket + ']');
     }
+    console.info('Using filter [' + filter + ']');
     $('#backup-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "POST",

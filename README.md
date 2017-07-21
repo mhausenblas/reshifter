@@ -40,7 +40,7 @@ of ReShifter, if you want to learn more about why it works the way it does.
 ## CLI tool
 
 You can use ReShifter from the CLI via the `rcli` binaries.
-Get binary releases for Linux and macOS via the [GitHub release page](https://github.com/mhausenblas/reshifter/releases/tag/v0.3.17-alpha).
+Get binary releases for Linux and macOS via the [GitHub release page](https://github.com/mhausenblas/reshifter/releases/tag/v0.3.18-alpha).
 
 ```
 $ rcli -h
@@ -98,13 +98,13 @@ If you want to use the ReShifter app, that is the Web UI, you need to use the Do
 For example, to launch the ReShifter app locally, do:
 
 ```
-$ docker run --rm -p 8080:8080 quay.io/mhausenblas/reshifter:0.3.17
+$ docker run --rm -p 8080:8080 quay.io/mhausenblas/reshifter:0.3.18
 ```
 
 If you want to use the ReShifter API, for example as a head-less service, you can simply use the binary, no other dependencies required:
 
 ```
-$ curl -s -L https://github.com/mhausenblas/reshifter/releases/download/v0.3.17-alpha/reshifter -o reshifter
+$ curl -s -L https://github.com/mhausenblas/reshifter/releases/download/v0.3.18-alpha/reshifter -o reshifter
 $ chmod +x reshifter
 $ ./reshifter
 ```

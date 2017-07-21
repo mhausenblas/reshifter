@@ -1,4 +1,4 @@
-reshifter_version := 0.3.17
+reshifter_version := 0.3.18
 git_version := `git rev-parse HEAD`
 app_name := reshifter-app
 main_dir := `pwd`
@@ -14,19 +14,19 @@ gtest :
 gbuild : gbuildcli gbuildapp
 
 gbuildcli :
-	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
+	go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-macos rcli/main.go
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-linux rcli/main.go
 
 gbuildapp :
-	go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-macos rcli/main.go
+	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
+
+crelease : cbuild cpush
 
 cbuild :
 	@docker build --build-arg rversion=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
 
 cpush :
 	@docker push quay.io/mhausenblas/reshifter:$(reshifter_version)
-
-crelease : cbuild cpush
 
 clean :
 	@rm reshifter

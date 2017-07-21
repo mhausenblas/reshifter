@@ -120,8 +120,10 @@ func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 		Outcome:  operationSuccess,
 		BackupID: "0",
 	}
+	fmt.Printf("%v\n", breq)
 	if breq.Filter != "" {
-		_ = os.Setenv("RS_BACKUP_STRATEGY", breq.Filter)
+		_ = os.Setenv("RS_BACKUP_STRATEGY", fmt.Sprintf("filter:%s", breq.Filter))
+		log.Infof("Using filter backup strategy with following whitelist: %s", breq.Filter)
 	}
 	target := types.DefaultWorkDir
 	bid, err := backup.Backup(breq.Endpoint, target, breq.Remote, breq.Bucket)
