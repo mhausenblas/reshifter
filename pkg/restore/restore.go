@@ -36,7 +36,7 @@ func Restore(endpoint, backupid, target, remote, bucket string) (int, time.Durat
 	}
 	switch {
 	case strings.HasPrefix(version, "3"): // etcd3 server
-		if apiversion == "v2" { // a v2 API in an etcd3
+		if apiversion == types.EtcdAPIVersion2 { // a v2 API in an etcd3
 			return 0, time.Duration(0), fmt.Errorf("The v2 API in etcd3 restore is not yet implemented")
 			// break
 		}

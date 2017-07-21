@@ -41,7 +41,7 @@ func Backup(endpoint, target, remote, bucket string) (string, error) {
 	}
 	switch {
 	case strings.HasPrefix(version, "3"): // etcd3 server
-		if apiversion == "v2" { // a v2 API in an etcd3
+		if apiversion == types.EtcdAPIVersion2 { // a v2 API in an etcd3
 			err = backupv2(endpoint, target, secure, distrotype)
 			if err != nil {
 				return "", err

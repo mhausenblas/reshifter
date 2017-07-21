@@ -46,13 +46,13 @@ func ProbeEtcd(endpoint string) (version, apiversion string, secure bool, err er
 		return "", "", false, fmt.Errorf("Can't determine what scheme is use")
 	}
 	// try to figure out if v2 API is in use:
-	apiversion = "v3"
+	apiversion = types.EtcdAPIVersion3
 	kprefix, err := checkv2(endpoint, secure)
 	if err != nil {
 		return "", "", false, err
 	}
 	if kprefix != "" { // a v2 API in an etcd3
-		apiversion = "v2"
+		apiversion = types.EtcdAPIVersion2
 	}
 	return version, apiversion, secure, nil
 }
@@ -68,12 +68,12 @@ func ProbeKubernetesDistro(endpoint string) (distro types.KubernetesDistro, err 
 	switch {
 	case strings.HasPrefix(version, "3"):
 		switch apiversion {
-		case "v2":
+		case types.EtcdAPIVersion2:
 			distro, err = getKubeDistrov2(endpoint, secure)
 			if err != nil {
 				return distro, err
 			}
-		case "v3":
+		case types.EtcdAPIVersion3:
 			distro, err = getKubeDistrov3(endpoint, secure)
 			if err != nil {
 				return distro, err
@@ -99,12 +99,12 @@ func CountKeysFor(endpoint string, startkey, endkey string) (numkeys, totalsize 
 	switch {
 	case strings.HasPrefix(version, "3"):
 		switch apiversion {
-		case "v2":
+		case types.EtcdAPIVersion2:
 			numkeys, totalsize, err = statsv2(endpoint, secure, startkey)
 			if err != nil {
 				return 0, 0, err
 			}
-		case "v3":
+		case types.EtcdAPIVersion3:
 			numkeys, totalsize, err = statsv3(endpoint, secure, startkey, endkey)
 			if err != nil {
 				return 0, 0, err

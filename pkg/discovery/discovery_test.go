@@ -20,12 +20,12 @@ var (
 		start      string
 		end        string
 	}{
-		{"2.x", "v2", types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast},
-		{"2.x", "v2", types.KubernetesPrefix, types.KubernetesPrefixLast},
-		{"3.x", "v2", types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast},
-		{"3.x", "v2", types.KubernetesPrefix, types.KubernetesPrefixLast},
-		{"3.x", "v3", types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast},
-		{"3.x", "v3", types.KubernetesPrefix, types.KubernetesPrefixLast},
+		{"2.x", types.EtcdAPIVersion2, types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast},
+		{"2.x", types.EtcdAPIVersion2, types.KubernetesPrefix, types.KubernetesPrefixLast},
+		{"3.x", types.EtcdAPIVersion2, types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast},
+		{"3.x", types.EtcdAPIVersion2, types.KubernetesPrefix, types.KubernetesPrefixLast},
+		{"3.x", types.EtcdAPIVersion3, types.LegacyKubernetesPrefix, types.LegacyKubernetesPrefixLast},
+		{"3.x", types.EtcdAPIVersion3, types.KubernetesPrefix, types.KubernetesPrefixLast},
 	}
 	probetests = []struct {
 		launchfunc func(string, string) (bool, error)
@@ -75,7 +75,7 @@ func testCountX(t *testing.T, version, apiversion, start, end string) {
 			return
 		}
 		switch apiversion {
-		case "v2": // a v2 API in an etcd3
+		case types.EtcdAPIVersion2: // a v2 API in an etcd3
 			c2, cerr := util.NewClient2(tetcd, false)
 			if cerr != nil {
 				t.Errorf("Can't connect to local etcd2 at %s: %s", tetcd, err)
@@ -92,7 +92,7 @@ func testCountX(t *testing.T, version, apiversion, start, end string) {
 				t.Errorf("Can't create etcd entry: %s", err)
 				return
 			}
-		case "v3":
+		case types.EtcdAPIVersion3:
 			c3, err := util.NewClient3(tetcd, false)
 			if err != nil {
 				t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
