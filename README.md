@@ -134,18 +134,7 @@ $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
 
 ## Backup strategies
 
-ReShifter supports different backup [strategies](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md), including:
-
-- complete, _raw_ dump: storing the value of every key under the well-known top-level keys such as `/registry` or `/kubernetes.io`.
-- _render_ dump: writing the values to `stdout`.
-- _filter_: storing the value of selected (white-listed) keys under the well-known top-level, for example only `deployment` or `service`.
-
-You define the backup strategy using the `RS_BACKUP_STRATEGY` environment variable, with a default of `raw`.
-For example, using the CLI tool `rcli`:
-
-```
-$ RS_BACKUP_STRATEGY=filter rcli backup create
-```
+ReShifter supports different backup [strategies](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md).
 
 ## Configuration
 
@@ -160,6 +149,7 @@ setup in use or what you want to achieve, for example, backing up to an S3-compa
 | `RS_ETCD_CLIENT_CERT` | path to etcd client cert file | when using a secure etcd |
 | `RS_ETCD_CLIENT_KEY` | path to etcd client key file | when using a secure etcd |
 | `RS_ETCD_CA_CERT` | path to etcd CA cert file | when using a secure etcd |
+| `RS_BACKUP_STRATEGY` | selects backup [strategy](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md) | for `backup` |
 
 Note:
 
