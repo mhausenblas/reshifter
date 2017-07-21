@@ -71,17 +71,21 @@ $(document).ready(function($){
 
   $('#dosaveconfig').click(function(event) {
     var endpoint = $('#endpoint').val();
+    var apiversion = $('#apiversion').val();
     var remoteep = $('#remoteep').val();
     var remote = $('#remote:checked').val();
     if (remote === 's3'){
       remote += ' ' + remoteep + ' '+ $('#bucket').val();
     }
     ibstorage.setItem('reshifter.info/default-etcd', endpoint);
-    console.info('reshifter.info/default-etcd:'+endpoint);
+    console.info('reshifter.info/default-etcd: '+ endpoint);
+    ibstorage.setItem('reshifter.info/default-apiversion', apiversion);
+    console.info('reshifter.info/default-apiversion: '+ apiversion);
     ibstorage.setItem('reshifter.info/default-remote', remote);
-    console.info('reshifter.info/default-remote:'+remote);
+    console.info('reshifter.info/default-remote: '+ remote);
     $('#config-result').html('<h2>Result</h2><div>All settings stored locally:</div><div><ul>');
     $('#config-result').append('<li>Using etcd endpoint: <code>' + ibstorage.getItem('reshifter.info/default-etcd') + '</code></li>');
+    $('#config-result').append('<li>Using etcd API version: <code>' + ibstorage.getItem('reshifter.info/default-apiversion') + '</code></li>');
     $('#config-result').append('<li>Using backup target: <code>' + ibstorage.getItem('reshifter.info/default-remote') + '</code></li>');
     $('#config-result').append('</ul></div>');
     $('#config-result').append('<div style="margin-bottom: 50px"></div>');
@@ -91,9 +95,10 @@ $(document).ready(function($){
     var ep = $('#endpoint').val();
     var filter = $('#filter').val();
     var default_remote = ibstorage.getItem('reshifter.info/default-remote');
+    var default_apiversion = ibstorage.getItem('reshifter.info/default-apiversion');
     var sepidx = default_remote.indexOf(' ');
     var remote = '';
-    var payload = '{"endpoint": "' + ep + '", "filter": "' + filter + '" }';
+    var payload = '{"endpoint": "' + ep + '", "filter": "' + filter + '", "apiversion": "' + default_apiversion + '" }';
     if (sepidx != -1){
       remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
       bucket =  default_remote.substring(default_remote.lastIndexOf(' ')+1);
@@ -305,6 +310,7 @@ function getVersion(){
 
 function setDefaults(){
   var default_ep = ibstorage.getItem('reshifter.info/default-etcd');
+  var default_apiversion = ibstorage.getItem('reshifter.info/default-apiversion');
   var default_remote = ibstorage.getItem('reshifter.info/default-remote');
   var sepidx = 0;
   var remote = '';
@@ -313,14 +319,20 @@ function setDefaults(){
   if (default_ep == null) {
     ibstorage.setItem('reshifter.info/default-etcd', 'http://localhost:2379');
   }
+  if (default_apiversion == null) {
+    ibstorage.setItem('reshifter.info/default-apiversion', 'auto');
+  }
   if (default_remote == null) {
     ibstorage.setItem('reshifter.info/default-remote', 's3 play.minio.io:9000 reshifter-xxx');
   }
   sepidx = default_remote.indexOf(' ');
-  console.info('reshifter.info/default-etcd:'+default_ep)
+  console.info('reshifter.info/default-etcd: '+default_ep)
   $('#endpoint').val(default_ep);
 
-  console.info('reshifter.info/default-remote:'+default_remote);
+  console.info('reshifter.info/default-apiversion: '+default_apiversion)
+  $('#apiversion').val(default_apiversion);
+
+  console.info('reshifter.info/default-remote: '+default_remote);
 
   remote =  default_remote.substring(sepidx+1, default_remote.lastIndexOf(' '));
   if (sepidx == -1){ // download as ZIP file

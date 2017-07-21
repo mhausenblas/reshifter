@@ -58,6 +58,17 @@
                    <input class="form-control" style="width: 300px;" id="endpoint" value="http://localhost:2379">
                  </div>
                </form>
+               <legend>etcd API version</legend>
+               <form>
+                 <div class="form-group">
+                   <p>Use this to define which etcd API version to use for backup, restore, and statistics.</p>
+                   <select class="form-control" style="width: 260px" id="apiversion">
+                     <option value="auto">Auto (let ReShifter auto-discover)</option>
+                     <option value="v2">v2</option>
+                     <option value="v3">v3</option>
+                   </select>
+                 </div>
+               </form>
                <legend>Target environment</legend>
                  <div class="form-check">
                    <p>Use this setting for backup and restore targets. You've got two options: 1. work locally—that's the local storage of the container ReShifter is running in and if you want to preserve the data beyond the runtime of the container you'll have to mount that volume to some persistent storage such as NFS or EBS— by downloading and uploading the backups as ZIP file, or 2. store the backups in an S3-compatible remote storage.</p>

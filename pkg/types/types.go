@@ -5,10 +5,11 @@ type KubernetesDistro int
 
 // BackupRequest represents the request for a backup operation.
 type BackupRequest struct {
-	Endpoint string `json:"endpoint"`
-	Remote   string `json:"remote"`
-	Bucket   string `json:"bucket"`
-	Filter   string `json:"filter"`
+	Endpoint   string `json:"endpoint"`
+	Remote     string `json:"remote"`
+	Bucket     string `json:"bucket"`
+	Filter     string `json:"filter"`
+	APIversion string `json:"apiversion"`
 }
 
 // BackupResult represents the results of a backup operation.

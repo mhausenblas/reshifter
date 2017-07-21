@@ -125,6 +125,10 @@ func backupCreateHandler(w http.ResponseWriter, r *http.Request) {
 		_ = os.Setenv("RS_BACKUP_STRATEGY", fmt.Sprintf("filter:%s", breq.Filter))
 		log.Infof("Using filter backup strategy with following whitelist: %s", breq.Filter)
 	}
+	if breq.APIversion != "" {
+		_ = os.Setenv("RS_ETCD_API_VERSION", fmt.Sprintf("%s", breq.APIversion))
+		log.Infof("Using etcd API version: %s", breq.APIversion)
+	}
 	target := types.DefaultWorkDir
 	bid, err := backup.Backup(breq.Endpoint, target, breq.Remote, breq.Bucket)
 	if err != nil {
