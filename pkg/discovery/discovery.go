@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"net/http"
@@ -45,14 +46,19 @@ func ProbeEtcd(endpoint string) (version, apiversion string, secure bool, err er
 	default:
 		return "", "", false, fmt.Errorf("Can't determine what scheme is use")
 	}
-	// try to figure out if v2 API is in use:
-	apiversion = types.EtcdAPIVersion3
-	kprefix, err := checkv2(endpoint, secure)
-	if err != nil {
-		return "", "", false, err
-	}
-	if kprefix != "" { // a v2 API in an etcd3
-		apiversion = types.EtcdAPIVersion2
+	overwriteetcdversion := os.Getenv("RS_ETCD_API_VERSION")
+	switch overwriteetcdversion {
+	case "": // try to figure out which API is in use
+		apiversion = types.EtcdAPIVersion3
+		kprefix, err := checkv2(endpoint, secure)
+		if err != nil {
+			return "", "", false, err
+		}
+		if kprefix != "" { // a v2 API in an etcd3
+			apiversion = types.EtcdAPIVersion2
+		}
+	default:
+		apiversion = overwriteetcdversion
 	}
 	return version, apiversion, secure, nil
 }

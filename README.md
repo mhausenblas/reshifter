@@ -149,7 +149,8 @@ setup in use or what you want to achieve, for example, backing up to an S3-compa
 | `RS_ETCD_CLIENT_CERT` | path to etcd client cert file | when using a secure etcd |
 | `RS_ETCD_CLIENT_KEY` | path to etcd client key file | when using a secure etcd |
 | `RS_ETCD_CA_CERT` | path to etcd CA cert file | when using a secure etcd |
-| `RS_BACKUP_STRATEGY` | selects backup [strategy](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md) | for `backup` |
+| `RS_BACKUP_STRATEGY` | if present, selects backup [strategy](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md) | for `backup` |
+| `RS_ETCD_API_VERSION` | if present, overwrites auto-discovery and forces ReShifter to use the specified etcd API version; allowed values are `v2` or `v3` | for `backup`, `restore`, and `stats` |
 
 Note:
 
