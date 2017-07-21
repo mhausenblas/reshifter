@@ -8,9 +8,13 @@ ReShifter supports different backup strategies, including:
 
 You define the backup strategy using the `RS_BACKUP_STRATEGY` environment variable, with a default value of `raw`.
 
-For example, using the CLI tool `rcli`:
+For example, using the CLI tool `rcli`, here's how to use the `filter` strategy:
 
 ```
+# only back up objects below '/namespaces/mycoolproject'
+$ RS_BACKUP_STRATEGY=filter:/namespaces/mycoolproject rcli backup create
+
+# only back up objects which path contains 'deployment' or 'service'
 $ RS_BACKUP_STRATEGY=filter:deployment,service rcli backup create
 ```
 
