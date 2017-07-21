@@ -64,7 +64,7 @@ Here's a simple usage example which assumes that you've got a Kubernetes cluster
 
 ```
 # explore the endpoint, overwrite default for etcd endpoint:
-$ rcli explore -e http://localhost:4001
+$ rcli explore --endpoint http://localhost:4001
 
 # collect stats using default for etcd endpoint:
 $ rcli stats
@@ -72,19 +72,19 @@ $ rcli stats
 # back up Kubernetes cluster to Minio playground:
 $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
   SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
-  rcli backup create -e http://localhost:4001 \
-                     -r play.minio.io:9000 \
-                     -b mh9-test
+  rcli backup create --endpoint http://localhost:4001 \
+                     --remote play.minio.io:9000 \
+                     --bucket mh9-test
 
 # restart/empty etcd now or launch a new one as a restore target
 
 # restore cluster from Minio playground, using backup ID 1498815551:
 $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
   SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
-  rcli restore -e http://localhost:4001 \
-               -r play.minio.io:9000 \
-               -b mh9-test \
-               -i 1498815551
+  rcli restore --endpoint http://localhost:4001 \
+               --remote play.minio.io:9000 \
+               --bucket mh9-test \
+               --backupid 1498815551
 ```
 
 See also backup [strategies](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md) as well as
