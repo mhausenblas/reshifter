@@ -39,7 +39,7 @@ of ReShifter, if you want to learn more about why it works the way it does.
 
 ## CLI tool
 
-ReShifter also provides for a CLI tool called `rcli`.
+You can use ReShifter from the CLI via the `rcli` binaries.
 Get binary releases for Linux and macOS via the [GitHub release page](https://github.com/mhausenblas/reshifter/releases/tag/v0.3.17-alpha).
 
 ```
