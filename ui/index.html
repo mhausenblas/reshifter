@@ -60,6 +60,14 @@
           remote storage location. ReShifter currently supports S3-compatible remote storage endpoints, incl. Amazon S3, Google Storage,
           and Minio.
         </p>
+        <p>You can use ReShifter for many different things including but not limited to:</p>
+        <ul>
+          <li><strong>Restore</strong> When running a Kubernetes cluster in production, you can use ReShifter to back up the current state of the deployed apps and global resources such as namespaces. The backup can be useful as a basis for a restore process (into the same or a new cluster) or for auditing purposes.</li>
+          <li><strong>Disaster Recovery</strong> When operating two or more clusters, you can use ReShifter to replicate the state for DR failover scenarios.</li>
+          <li><strong>Saving money</strong> When running development or test clusters in a public cloud setting, you might not want to pay for the whole time, only when you actively use it. You can use ReShifter to snapshot the state, shut down the cluster and once ramped up again, restore the state.</li>
+          <li><strong>Troubleshooting</strong> For any kind of Kubernetes clusters, be it prod or testing, you can use ReShifter to capture the state of the cluster at a certain point in time for offline debugging and troubleshooting or to share the state with a provider, who then can take care of looking into a support case.</li>
+          <li><strong>Upgrading</strong> When you are upgrading a cluster, say, from Kubernetes 1.5 to 1.6, you can use ReShifter to achieve zero-downtime upgrades with minimal manual effort.</li>
+        </ul>
         <p>
           Learn more about the <a href="https://hackernoon.com/introducing-reshifter-for-kubernetes-backup-restore-migration-upgrade-ffaf78da36" target="_new">origins and philosophy</a>
           of ReShifter, check out the <a href="https://trello.com/b/iOrEdJQ3/reshifter" target="_new">roadmap</a> or let us know about <a href="https://github.com/mhausenblas/reshifter/issues" target="_new">issues</a>.
