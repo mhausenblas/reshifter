@@ -2,9 +2,9 @@
 
 ReShifter supports different backup strategies, including:
 
-- _raw_ dump: storing the value of every key under the well-known top-level keys such as `/registry` or `/kubernetes.io`.
-- _render_ dump: writing the values to `stdout`.
-- _filter_: storing the value of selected (white-listed) keys under the well-known top-level, for example only `deployment` or `service`.
+- **raw**: storing the value of every key below well-known top-level keys such as `/registry` or `/kubernetes.io` to disk (and optionally into S3-compatible remote).
+- **render**: writing the value of every key below well-known top-level keys such as `/registry` or `/kubernetes.io` to `stdout` (render on screen).
+- **filter**: storing the value of selected (white-listed) keys below the well-known top-level, for example only `deployment` or `service`.
 
 You define the backup strategy using the `RS_BACKUP_STRATEGY` environment variable, with a default value of `raw`.
 
