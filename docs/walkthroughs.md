@@ -36,6 +36,23 @@ $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
                --backupid 1498815551
 ```
 
+### Strategies
+
+```
+# only back up objects below '/namespaces/mycoolproject':
+$ RS_BACKUP_STRATEGY=filter:/namespaces/mycoolproject rcli backup create
+
+# only back up objects which path contains 'deployment' or 'service':
+$ RS_BACKUP_STRATEGY=filter:deployment,service rcli backup create
+```
+
+### Overwrite auto-discovery
+
+```
+# make ReShifter use the etcd v2 API:
+$ RS_ETCD_API_VERSION=v2 rcli backup create
+```
+
 ## App
 
 This is the ReShifter app (Web UI) walkthrough. Have a look at the following screen share (soon to be updated, the UI has changed dramatically):

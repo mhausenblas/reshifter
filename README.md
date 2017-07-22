@@ -93,7 +93,7 @@ the [configuration options](#configuration) for more ways to use the ReShifter C
 
 ## Web app
 
-If you want to see the app in actions, have a look at the [app walkthrough](https://github.com/mhausenblas/reshifter/blob/master/docs/walkthroughs.md#app).
+If you want to see the app in action, have a look at the [app walkthrough](https://github.com/mhausenblas/reshifter/blob/master/docs/walkthroughs.md#app).
 
 ### Deploy app locally
 
