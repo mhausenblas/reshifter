@@ -27,6 +27,16 @@ var (
 		{"/" + tmpTestDir + "/first-level", "another"},
 		{"/" + tmpTestDir + "/this:also", "escaped"},
 	}
+	filtertests = []struct {
+		filter string
+		path   string
+		exists bool
+	}{
+		{"filter:abc", "/abc", true},
+		{"filter:abc", "/def", false},
+		{"filter:name", "/some/name", true},
+		{"filter:abc,def", "/some/other/def", true},
+	}
 )
 
 func TestStore(t *testing.T) {
@@ -130,6 +140,22 @@ func TestBackupSecure(t *testing.T) {
 	_ = os.Setenv("ACCESS_KEY_ID", "Q3AM3UQ867SPQQA43P2F")
 	_ = os.Setenv("SECRET_ACCESS_KEY", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
 	etcd2Backup(t, port, tetcd, types.LegacyKubernetesPrefix+"/namespaces/kube-system")
+}
+
+func TestFilters(t *testing.T) {
+	for _, ft := range filtertests {
+		_ = os.Setenv("RS_BACKUP_STRATEGY", ft.filter)
+		_ = filter(ft.path, ".", "/tmp")
+		got := true
+		if _, err := os.Stat("/tmp" + ft.path); os.IsNotExist(err) {
+			got = false
+		}
+		want := ft.exists
+		if got != want {
+			t.Errorf("backup.filter(\"%s\", \".\", \"/tmp\") with %s => %t, want %t", ft.path, ft.filter, got, want)
+		}
+	}
+
 }
 
 func etcd2Backup(t *testing.T, port, tetcd, key string) {
