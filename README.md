@@ -34,7 +34,7 @@ There are many cases where ReShifter can be useful for you, for example:
 - **Billing** No matter if you charge your (internal) customers by volume or by time, you need to record who has been running what. With ReShifter you can snapshot the state of all objects in a Kubernetes cluster and use this as a basis for billing.
 - **$aving money** When running development or test clusters in a public cloud setting, you might not want to pay for the whole time, only when you actively use it. You can use ReShifter to snapshot the state, shut down the cluster and once ramped up again, restore the state.
 - **Troubleshooting** For any kind of Kubernetes clusters, be it prod or testing, you can use ReShifter to capture the state of the cluster at a certain point in time for offline debugging and troubleshooting or to share the state with a provider, who then can take care of looking into a support case.
-- **Capacity planning** To estimate how many worked nodes you might need to add in the future you need to have an idea about the overall load over a longer period of time. ReShifter can help you gathering data points for this capacity planning process.
+- **Capacity planning** To estimate how many worker nodes you might need to add to your Kubernetes cluster in the future you need to have an idea about the overall load over a longer period of time. ReShifter can help you gathering data points for this capacity planning process.
 - **Upgrading** When you are upgrading a cluster, say, from Kubernetes 1.5 to 1.6, you can use ReShifter to achieve zero-downtime upgrades with minimal manual effort.
 - **Restore** If you are running a Kubernetes cluster in production, you can use ReShifter to back up the current state of the deployed apps. The backup can be useful as a basis for a restore process, into the same or a new cluster.
 - **Disaster Recovery** When operating two or more clusters, you can use ReShifter to replicate the state for DR failover scenarios.
@@ -71,20 +71,12 @@ Available Commands:
 Here's a simple usage example which assumes that you've got a Kubernetes cluster with an etcd on `http://localhost:4001` running:
 
 ```
-# explore the endpoint, overwrite default for etcd endpoint:
-$ rcli explore --endpoint http://localhost:4001
-
-# collect stats using default for etcd endpoint:
-$ rcli stats
-
 # back up Kubernetes cluster to Minio playground:
 $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
   SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG \
   rcli backup create --endpoint http://localhost:4001 \
                      --remote play.minio.io:9000 \
                      --bucket mh9-test
-
-# restart/empty etcd now or launch a new one as a restore target
 
 # restore cluster from Minio playground, using backup ID 1498815551:
 $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
@@ -95,10 +87,13 @@ $ ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2F \
                --backupid 1498815551
 ```
 
-See also backup [strategies](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md) as well as
-the [configuration options](#configuration) for more ways to use ReShifter most effectively.
+OK, now that you know about the basic usage, why not learn more by checking out the [CLI walkthrough](https://github.com/mhausenblas/reshifter/blob/master/docs/walkthroughs.md#cli)?
+You can also have a look at the backup [strategies](https://github.com/mhausenblas/reshifter/blob/master/docs/strategies.md) as well as
+the [configuration options](#configuration) for more ways to use the ReShifter CLI most effectively.
 
 ## Web app
+
+If you want to see the app in actions, have a look at the [app walkthrough](https://github.com/mhausenblas/reshifter/blob/master/docs/walkthroughs.md#app).
 
 ### Deploy app locally
 
