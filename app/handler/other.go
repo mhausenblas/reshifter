@@ -15,7 +15,7 @@ import (
 // Version responds to HTTP GET requests of the form:
 //		http GET localhost:8080/v1/version
 func Version(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "ReShifter in version %s", ReleaseVersion)
+	fmt.Fprintf(w, "ReShifter in version %s", releaseVersion)
 }
 
 // EPstats responds to HTTP GET requests such as:

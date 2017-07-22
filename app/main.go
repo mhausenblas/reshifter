@@ -1,4 +1,3 @@
-// ReShifter enables backing up and restoring Kubernetes clusters.
 // The ReShifter app launches an API and a UI at port 8080 and uses the
 // ReShifter library to communicate and manipulate etcd. The API is
 // instrumented, exposing Prometheus metrics. When launching the app with

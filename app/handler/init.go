@@ -5,8 +5,7 @@ import (
 )
 
 var (
-	// ReleaseVersion which is set by main
-	ReleaseVersion string
+	releaseVersion string
 	backupTotal    *prometheus.CounterVec
 	keysRestored   prometheus.Counter
 )
