@@ -44,7 +44,7 @@ func ProbeEtcd(endpoint string) (version, apiversion string, secure bool, err er
 			return "", "", false, err
 		}
 	default:
-		return "", "", false, fmt.Errorf("Can't determine what scheme is use")
+		return "", "", false, fmt.Errorf("Can't determine what scheme you used")
 	}
 	overwriteetcdversion := os.Getenv("RS_ETCD_API_VERSION")
 	switch overwriteetcdversion {
