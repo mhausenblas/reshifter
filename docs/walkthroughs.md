@@ -6,7 +6,7 @@ Welcome to the ReShifter walkthroughs. Here, we guide you through both the CLI t
 
 This is the ReShifter CLI (`rcli`) walkthrough. Have a look at the following screen cast or see below for concrete examples you can copy and paste:
 
-[![Screen cast: ReShifter CLI tool walkthrough](../images/rcli.png)](https://www.useloom.com/embed/41d7ea95a0fa4131bf2ee140ea831266 "Screen cast: ReShifter CLI tool walkthrough")  
+[![Screen cast: ReShifter CLI tool walkthrough](../images/rcli.png)](https://www.useloom.com/share/41d7ea95a0fa4131bf2ee140ea831266 "Screen cast: ReShifter CLI tool walkthrough")  
 
 Let's start with the simplest case—using the defaults:
 
