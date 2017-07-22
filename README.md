@@ -6,7 +6,11 @@
 [![Swagger API definition](https://img.shields.io/badge/API-Swagger-blue.svg)](https://app.swaggerhub.com/apis/mhausenblas/reshifter/1.0.0)
 [![Proudly packaged with Golang dep](images/NERDY.png)](https://github.com/golang/dep)
 
-A cluster admin backup and restore tool for Kubernetes distros (OpenShift, etc.), using etcd to query and manipulate the state of all objects.
+ReShifter is a Kubernetes cluster state management library and tool.
+You can use it on the command line for one-off tasks, as a Web app with an UI, or
+in a cron job. It uses the etcd API to query and manipulate the state of
+Kubernetes-related objects, supporting legacy (`v2`, `/registry`), modern
+(`v2`/`v3`, `/Kubernetes.io`) as well as distro-specific keys such as OpenShift.
 
 [![Screen cast: Introducing ReShifter](images/reshifter-demo.png)](https://www.useloom.com/share/e590aedeb95b441fb23ab4f9e9e80c32 "Introducing ReShifter")  
 
