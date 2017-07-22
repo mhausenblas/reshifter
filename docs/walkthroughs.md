@@ -4,7 +4,11 @@ Welcome to the ReShifter walkthroughs. Here, we guide you through both the CLI t
 
 ## CLI
 
-This is the ReShifter CLI (`rcli`) walkthrough. Let's start with the simplest case—using the defaults:
+This is the ReShifter CLI (`rcli`) walkthrough. Have a look at the following screen cast or see below for concrete examples you can copy and paste:
+
+[![Screen cast: ReShifter CLI tool walkthrough](../images/rcli.png)](https://www.useloom.com/embed/41d7ea95a0fa4131bf2ee140ea831266 "Screen cast: ReShifter CLI tool walkthrough")  
+
+Let's start with the simplest case—using the defaults:
 
 ```
 # collect stats using default for etcd endpoint:
@@ -55,6 +59,6 @@ $ RS_ETCD_API_VERSION=v2 rcli backup create
 
 ## App
 
-This is the ReShifter app (Web UI) walkthrough. Have a look at the following screen share (soon to be updated, the UI has changed dramatically):
+This is the ReShifter app (Web UI) walkthrough. Have a look at the following screen cast (soon to be updated, the UI has changed dramatically):
 
 [![Screen cast: Introducing ReShifter](../images/reshifter-ui.png)](https://www.useloom.com/share/e590aedeb95b441fb23ab4f9e9e80c32 "Introducing ReShifter")  
