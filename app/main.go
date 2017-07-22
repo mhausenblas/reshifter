@@ -13,6 +13,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
+	"github.com/mhausenblas/reshifter/app/handler"
 	"github.com/mhausenblas/reshifter/pkg/util"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -26,14 +27,14 @@ func main() {
 	r := mux.NewRouter()
 	// the HTTP API:
 	r.Handle("/metrics", promhttp.Handler())
-	r.HandleFunc("/v1/version", versionHandler).Methods("GET")
-	r.HandleFunc("/v1/explorer", explorerHandler).Methods("GET")
-	r.HandleFunc("/v1/epstats", epstatsHandler).Methods("GET")
-	r.HandleFunc("/v1/backup", backupCreateHandler).Methods("POST")
-	r.HandleFunc("/v1/backup/all", backupListHandler).Methods("GET")
-	r.HandleFunc("/v1/backup/{backupid:[0-9]+}", backupRetrieveHandler).Methods("GET")
-	r.HandleFunc("/v1/restore", restoreHandler).Methods("POST")
-	r.HandleFunc("/v1/restore/upload", restoreUploadHandler).Methods("POST")
+	r.HandleFunc("/v1/version", handler.Version).Methods("GET")
+	r.HandleFunc("/v1/explorer", handler.Explorer).Methods("GET")
+	r.HandleFunc("/v1/epstats", handler.EPstats).Methods("GET")
+	r.HandleFunc("/v1/backup", handler.BackupCreate).Methods("POST")
+	r.HandleFunc("/v1/backup/all", handler.BackupList).Methods("GET")
+	r.HandleFunc("/v1/backup/{backupid:[0-9]+}", handler.BackupRetrieve).Methods("GET")
+	r.HandleFunc("/v1/restore", handler.Restore).Methods("POST")
+	r.HandleFunc("/v1/restore/upload", handler.RestoreUpload).Methods("POST")
 	log.Printf("Serving API from: %s:%s/v1", host, port)
 	// the Web UI:
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./ui/")))

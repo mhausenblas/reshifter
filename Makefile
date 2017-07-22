@@ -1,4 +1,4 @@
-reshifter_version := 0.3.19
+reshifter_version := 0.3.20
 git_version := `git rev-parse HEAD`
 app_name := reshifter-app
 main_dir := `pwd`
@@ -6,7 +6,7 @@ main_dir := `pwd`
 .PHONY: gtest gbuild gbuildcli gbuildapp cbuild cpush release init build publish destroy
 
 gtest :
-	@echo This will take ca. 3 min to complete so get a cuppa tea for now ...
+	@echo Testing the library. This will take ca. 3 min to complete so get a cuppa tea for now ...
 	go test -short -run Test* ./pkg/discovery
 	go test -short -run Test* ./pkg/backup
 	go test -short -run Test* ./pkg/restore
@@ -14,11 +14,11 @@ gtest :
 gbuild : gbuildcli gbuildapp
 
 gbuildcli :
-	go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-macos rcli/main.go
-	GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli/rcli-linux rcli/main.go
+	go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli-macos rcli/main.go
+	GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/mhausenblas/reshifter/rcli/cmd.releaseVersion=$(reshifter_version)" -o ./rcli-linux rcli/main.go
 
 gbuildapp :
-	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" .
+	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.releaseVersion=$(reshifter_version)" -o ./reshifter app/main.go
 
 crelease : cbuild cpush
 
