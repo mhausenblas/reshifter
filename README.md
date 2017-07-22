@@ -10,7 +10,8 @@ ReShifter is a Kubernetes cluster state management library and tool.
 You can use it on the command line for one-off tasks, as a Web app with an UI, or
 in a cron job. It uses the etcd API to query and manipulate the state of
 Kubernetes-related objects, supporting legacy (`v2`, `/registry`), modern
-(`v2`/`v3`, `/Kubernetes.io`) as well as distro-specific keys such as OpenShift.
+(`v2`/`v3`, `/kubernetes.io`) as well as distro-specific keys such as the ones
+used in the enterprise Kubernetes distro OpenShift.
 
 [![Screen cast: Introducing ReShifter](images/reshifter-demo.png)](https://www.useloom.com/share/e590aedeb95b441fb23ab4f9e9e80c32 "Introducing ReShifter")  
 
@@ -29,11 +30,14 @@ Kubernetes-related objects, supporting legacy (`v2`, `/registry`), modern
 
 There are many cases where ReShifter can be useful for you, for example:
 
-- **Restore** When running a Kubernetes cluster in production, you can use ReShifter to back up the current state of the deployed apps and global resources such as namespaces. The backup can be useful as a basis for a restore process (into the same or a new cluster) or for auditing purposes.
-- **Disaster Recovery** When operating two or more clusters, you can use ReShifter to replicate the state for DR failover scenarios.
+- **Auditing** To comply with regulations, you often have to provide an audit trail. ReShifter allows you to generate one by capturing the state of all objects in a Kubernetes cluster.
+- **Billing** No matter if you charge your (internal) customers by volume or by time, you need to record who has been running what. With ReShifter you can snapshot the state of all objects in a Kubernetes cluster and use this as a basis for billing.
 - **$aving money** When running development or test clusters in a public cloud setting, you might not want to pay for the whole time, only when you actively use it. You can use ReShifter to snapshot the state, shut down the cluster and once ramped up again, restore the state.
 - **Troubleshooting** For any kind of Kubernetes clusters, be it prod or testing, you can use ReShifter to capture the state of the cluster at a certain point in time for offline debugging and troubleshooting or to share the state with a provider, who then can take care of looking into a support case.
+- **Capacity planning** To estimate how many worked nodes you might need to add in the future you need to have an idea about the overall load over a longer period of time. ReShifter can help you gathering data points for this capacity planning process.
 - **Upgrading** When you are upgrading a cluster, say, from Kubernetes 1.5 to 1.6, you can use ReShifter to achieve zero-downtime upgrades with minimal manual effort.
+- **Restore** If you are running a Kubernetes cluster in production, you can use ReShifter to back up the current state of the deployed apps. The backup can be useful as a basis for a restore process, into the same or a new cluster.
+- **Disaster Recovery** When operating two or more clusters, you can use ReShifter to replicate the state for DR failover scenarios.
 
 ## Status and roadmap
 
