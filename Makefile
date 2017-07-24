@@ -44,16 +44,16 @@ cpush :
 
 init :
 	@oc new-project reshifter
-	@oc new-app --strategy=docker --name='$(app_name)' app/ --output yaml > app.yaml
+	@oc new-app --strategy=docker --name='$(app_name)' --context-dir='./app/' . --output yaml > app.yaml
 	@oc apply -f app.yaml
+	# @rm app.yaml
 
 build :
-	@oc start-build $(app_name) --from-dir app/
+	@oc start-build $(app_name) --from-dir .
 	@oc logs -f bc/$(app_name)
 
 publish :
 	@oc expose svc/$(app_name)
 
 destroy :
-	@rm app.yaml
 	@oc delete project reshifter
