@@ -3,8 +3,10 @@ git_version := `git rev-parse HEAD`
 app_name := reshifter-app
 main_dir := `pwd`
 
-.PHONY: gtest gbuild gbuildcli gbuildapp cbuild cpush release init build publish destroy
+.PHONY: gtest gbuild gbuildcli gbuildapp gclean cbuild cpush release init build publish destroy
 
+###############################################################################
+# commands related to Go testing and builds --> binaries (HTTP API and CLI tool)
 gtest :
 	@echo Testing the library. This will take ca. 3 min to complete so get a cuppa tea for now ...
 	go test -short -run Test* ./pkg/discovery
@@ -20,24 +22,33 @@ gbuildcli :
 gbuildapp :
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/mhausenblas/reshifter/app/handler.releaseVersion=$(reshifter_version)" -o ./reshifter app/main.go
 
+gclean :
+	@rm reshifter
+	@rm rcli-macos
+	@rm rcli-linux
+
+
+###############################################################################
+# commands related to container image builds
 crelease : cbuild cpush
 
 cbuild :
-	@docker build --build-arg rversion=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
+	@docker build --build-arg rversion=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) app/
 
 cpush :
 	@docker push quay.io/mhausenblas/reshifter:$(reshifter_version)
 
-clean :
-	@rm reshifter
+
+###############################################################################
+# commands related to OpenShift-specific build and deployment
 
 init :
 	@oc new-project reshifter
-	@oc new-app --strategy=docker --name='$(app_name)' . --output yaml > app.yaml
+	@oc new-app --strategy=docker --name='$(app_name)' app/ --output yaml > app.yaml
 	@oc apply -f app.yaml
 
 build :
-	@oc start-build $(app_name) --from-dir .
+	@oc start-build $(app_name) --from-dir app/
 	@oc logs -f bc/$(app_name)
 
 publish :
