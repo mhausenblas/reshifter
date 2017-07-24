@@ -1,4 +1,4 @@
-FROM centos:7
+FROM centos
 ARG rversion
 LABEL version=$rversion \
       description="Kubernetes admin tool for backup and restoring clusters" \
