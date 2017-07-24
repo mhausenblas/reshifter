@@ -88,7 +88,7 @@ func backupv3(endpoint, target string, secure bool, distrotype types.KubernetesD
 	kprefix := types.LegacyKubernetesPrefix
 	klprefix := types.LegacyKubernetesPrefixLast
 	kgv, _ := c3.Get(context.Background(), kprefix+"/*", clientv3.WithRange(klprefix))
-	if kgv.Count == 0 { // legacy key not found, must be new key space
+	if kgv != nil && kgv.Count == 0 { // legacy key not found, must be new key space
 		kprefix = types.KubernetesPrefix
 		klprefix = types.KubernetesPrefixLast
 	}
