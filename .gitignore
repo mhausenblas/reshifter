@@ -1,14 +1,13 @@
 .DS_Store
 vendor/
 app.yaml
-rcli/rcli-*
 
 # Binaries for programs and plugins
 *.exe
 *.dll
 *.so
 *.dylib
-rcli/rcli
+rcli-*
 reshifter
 
 # Test binary, build with `go test -c`
