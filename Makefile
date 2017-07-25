@@ -44,9 +44,10 @@ cpush :
 
 init :
 	@oc new-project reshifter
-	@oc new-app --strategy=docker --name='$(app_name)' --context-dir='./app/' . --output yaml > app.yaml
-	@oc apply -f app.yaml
-	# @rm app.yaml
+	@echo --build-arg=rversion=$(reshifter_version) > ocbuild.env
+	@oc new-app --strategy=docker --name='$(app_name)' --context-dir='./app/' .
+	@oc set env bc/$(app_name) rversion=$(reshifter_version)
+	# @oc apply -f app.yaml
 
 build :
 	@oc start-build $(app_name) --from-dir .
