@@ -123,6 +123,7 @@ cluster and also the [oc](https://github.com/openshift/origin/releases/tag/v1.5.
 
 ```
 $ make init
+$ make build
 $ make publish
 ```
 
