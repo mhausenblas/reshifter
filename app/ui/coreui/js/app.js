@@ -31,7 +31,7 @@ $(document).ready(function($){
     $('#config-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "GET",
-        url: 'http://localhost:8080/v1/explorer?endpoint='+encodeURIComponent(ep),
+        url: '/v1/explorer?endpoint='+encodeURIComponent(ep),
         dataType: 'json',
         async: false,
         data: '{"endpoint": "' + ep +'"}',
@@ -49,7 +49,7 @@ $(document).ready(function($){
     })
     $.ajax({
         type: "GET",
-        url: 'http://localhost:8080/v1/epstats?endpoint='+encodeURIComponent(ep),
+        url: '/v1/epstats?endpoint='+encodeURIComponent(ep),
         dataType: 'json',
         async: false,
         data: '{"endpoint": "' + ep +'"}',
@@ -109,7 +109,7 @@ $(document).ready(function($){
     $('#backup-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "POST",
-        url: 'http://localhost:8080/v1/backup',
+        url: '/v1/backup',
         dataType: 'json',
         async: false,
         data: payload,
@@ -147,7 +147,7 @@ $(document).ready(function($){
     $('#restore-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "GET",
-        url: 'http://localhost:8080/v1/backup/all'+payload,
+        url: '/v1/backup/all'+payload,
         dataType: 'json',
         error: function (d) {
           console.info(d);
@@ -186,7 +186,7 @@ $(document).ready(function($){
     $('#restore-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "POST",
-        url: 'http://localhost:8080/v1/restore',
+        url: '/v1/restore',
         dataType: 'json',
         async: false,
         data: payload,
@@ -214,7 +214,7 @@ $(document).ready(function($){
     $('#restore-result').html('<div><img src="./img/standby.gif" alt="please wait" width="64px"></div>');
     $.ajax({
         type: "POST",
-        url: 'http://localhost:8080/v1/restore/upload',
+        url: '/v1/restore/upload',
         data: bfdata,
         cache: false,
         contentType: false,
@@ -296,7 +296,7 @@ $(document).ready(function($){
 function getVersion(){
   $.ajax({
       type: "GET",
-      url: 'http://localhost:8080/v1/version',
+      url: '/v1/version',
       async: false,
       error: function (d) {
         console.info(d);
