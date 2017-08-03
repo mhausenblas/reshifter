@@ -27,6 +27,7 @@ level, such as using the Kubernetes API Server-level. This brings a couple of ad
 
 In the course of researching the backup/restore topic in the context of Kubernetes I've come across the following attempts, solutions, and proposals:
 
+- NEW: [heptio/ark](https://github.com/heptio/ark), a utility for managing disaster recovery, specifically for your Kubernetes cluster resources and persistent volumes
 - Backup & restore with `etcdctl`, [v2](https://coreos.com/etcd/docs/latest/v2/admin_guide.html) and [v3](https://coreos.com/etcd/docs/latest/op-guide/recovery.html).
 - [kubernetes/kubernetes/cluster/restore-from-backup.sh](https://github.com/kubernetes/kubernetes/blob/master/cluster/restore-from-backup.sh) by [Wojciech Tyczynski](https://github.com/wojtek-t)
 - [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube/blob/master/Documentation/disaster-recovery.md#bootkube-recover), a low-level recovery tool
