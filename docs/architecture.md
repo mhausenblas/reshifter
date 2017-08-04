@@ -30,6 +30,7 @@ In the course of researching the backup/restore topic in the context of Kubernet
 - NEW: [heptio/ark](https://github.com/heptio/ark), a utility for managing disaster recovery, specifically for your Kubernetes cluster resources and persistent volumes
 - Backup & restore with `etcdctl`, [v2](https://coreos.com/etcd/docs/latest/v2/admin_guide.html) and [v3](https://coreos.com/etcd/docs/latest/op-guide/recovery.html).
 - [kubernetes/kubernetes/cluster/restore-from-backup.sh](https://github.com/kubernetes/kubernetes/blob/master/cluster/restore-from-backup.sh) by [Wojciech Tyczynski](https://github.com/wojtek-t)
+- [ose-auto/backup.sh](https://github.com/sterburg/ose-auto/blob/master/backup.sh), master-config (etcd) and statefull data backup using pod (technology) discovery by [Samuel Terburg](https://github.com/sterburg)
 - [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube/blob/master/Documentation/disaster-recovery.md#bootkube-recover), a low-level recovery tool
 - [pieterlange/kube-backup](https://github.com/pieterlange/kube-backup), a resource state sync to Git inspired by RANCID
 - The OpenShift [Backup and Restore](https://docs.openshift.com/container-platform/3.5/admin_guide/backup_restore.html) docs
