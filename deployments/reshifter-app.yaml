@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name:     reshifter-app
-        image:    quay.io/mhausenblas/reshifter:0.3.19
+        image:    quay.io/mhausenblas/reshifter:0.3.21
         ports:
         - containerPort: 8080
         env:
