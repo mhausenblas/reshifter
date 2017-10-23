@@ -6,6 +6,8 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
+	"google.golang.org/grpc"
+	"math"
 )
 
 // NewClient3 creates an etcd3 client, optionally using SSL/TLS if secure is true.
@@ -18,10 +20,14 @@ func NewClient3(endpoint string, secure bool) (*clientv3.Client, error) {
 		}
 		return cs, nil
 	}
+
+	dialOptions := createGRPCOptions()
+
 	// create plain HTTP-based client:
 	c, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{endpoint},
 		DialTimeout: time.Second,
+		DialOptions: dialOptions,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("Can't connect to etcd3: %s", err)
@@ -47,12 +53,25 @@ func newSecureEtcd3Client(endpoint string) (*clientv3.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	dialOptions := createGRPCOptions()
+
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{endpoint},
-		TLS:       tlsConfig,
+		DialOptions: dialOptions,
+		Endpoints:   []string{endpoint},
+		TLS:         tlsConfig,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return cli, nil
+}
+
+// This sets the sizes for grpc transfers to MaxUint32. This is the largest
+// payload supported from the goloang client.
+func createGRPCOptions() []grpc.DialOption {
+	var dialOptions []grpc.DialOption
+	dialOptions = append(dialOptions, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxUint32)))
+	dialOptions = append(dialOptions, grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxUint32)))
+	return dialOptions
 }
