@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"errors"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/mhausenblas/reshifter/pkg/backup"
@@ -20,7 +21,7 @@ var createBackupCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Creates a backup of a Kubernetes cluster",
 	Long:  `Backups are created by travesing the underlying etcd and storing the content in a ZIP file in the local filesystem and optionally in an S3-compatible remote storage`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (error) {
 		ep := cmd.Flag("endpoint").Value.String()
 		target := cmd.Flag("target").Value.String()
 		remote := cmd.Flag("remote").Value.String()
@@ -32,7 +33,7 @@ var createBackupCmd = &cobra.Command{
 		bid, err := backup.Backup(ep, target, remote, bucket)
 		if err != nil {
 			log.Error(err)
-			return
+			return err
 		}
 		if os.Getenv("RS_BACKUP_STRATEGY") != types.ReapFunctionRender {
 			fmt.Printf("Successfully created backup: %s/%s.zip\n", target, bid)
@@ -40,23 +41,27 @@ var createBackupCmd = &cobra.Command{
 				fmt.Printf("Pushed to remote %s in bucket %s\n\n", remote, bucket)
 			}
 		}
+
+		return nil
 	},
 }
 
 var listBackupCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Lists backups of a Kubernetes cluster",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (error) {
 		remote := cmd.Flag("remote").Value.String()
 		bucket := cmd.Flag("bucket").Value.String()
 		backupIDs, err := backup.List(remote, bucket)
 		if err != nil {
 			log.Error(err)
-			return
+			return err
 		}
 		for _, bid := range backupIDs {
 			fmt.Printf("%s\n", bid)
 		}
+
+		return nil
 	},
 }
 

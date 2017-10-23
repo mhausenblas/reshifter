@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"errors"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/mhausenblas/reshifter/pkg/discovery"
@@ -15,10 +16,10 @@ var exploreCmd = &cobra.Command{
 	Use:   "explore",
 	Short: "Probes an etcd endpoint",
 	Long:  `Probes an etc endpoint at path /version to figure which version of etcd it is and in which mode (secure or insecure) it is used as well as if a Kubernetes distro can be detected`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (error) {
 		ep := cmd.Flag("endpoint").Value.String()
 		fmt.Printf("Exploring etcd endpoint %s\n", ep)
-		doexplore(ep)
+		return doexplore(ep)
 	},
 }
 
@@ -27,21 +28,21 @@ func init() {
 	exploreCmd.Flags().StringP("endpoint", "e", "http://127.0.0.1:2379", "The URL of the etcd to probe")
 }
 
-func doexplore(endpoint string) {
+func doexplore(endpoint string) (error) {
 	if endpoint == "" || strings.Index(endpoint, "http") != 0 {
 		merr := "The endpoint is malformed"
 		log.Error(merr)
-		return
+		return errors.New(merr)
 	}
 	version, apiversion, issecure, err := discovery.ProbeEtcd(endpoint)
 	if err != nil {
 		log.Errorf(fmt.Sprintf("%s", err))
-		return
+		return err
 	}
 	distrotype, err := discovery.ProbeKubernetesDistro(endpoint)
 	if err != nil {
 		log.Errorf(fmt.Sprintf("Can't determine Kubernetes distro: %s", err))
-		return
+		return err
 	}
 	secure := "insecure etcd, no SSL/TLS configured"
 	if issecure {
@@ -57,4 +58,6 @@ func doexplore(endpoint string) {
 		distro = "no Kubernetes distro found"
 	}
 	fmt.Printf("etcd version: %s\nAPI version: %s\nSecure: %s\nDistro: %s\n\n", version, apiversion, secure, distro)
+
+	return nil
 }
