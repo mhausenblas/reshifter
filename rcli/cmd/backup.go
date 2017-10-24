@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"time"
-	"errors"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/mhausenblas/reshifter/pkg/backup"
