@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"time"
+	"errors"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/mhausenblas/reshifter/pkg/restore"
@@ -16,7 +17,7 @@ var restoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Performs a restore of a Kubernetes cluster",
 	Long:  `Performs a restore of a Kubernetes cluster from the content of a ZIP file, either local or from an S3-compatible remote storage`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (error) {
 		ep := cmd.Flag("endpoint").Value.String()
 		bid := cmd.Flag("backupid").Value.String()
 		target := cmd.Flag("target").Value.String()
@@ -26,7 +27,7 @@ var restoreCmd = &cobra.Command{
 		if !util.IsBackupID(bid) {
 			abortreason := fmt.Sprintf("Aborting restore: %s is not a valid backup ID", bid)
 			log.Error(abortreason)
-			return
+			return errors.New(abortreason)
 		}
 		if remote != "" && bucket == "" {
 			bucket = "reshifter-" + time.Now().UTC().Format("2006-01-02")
@@ -35,11 +36,14 @@ var restoreCmd = &cobra.Command{
 		krestored, etime, err := restore.Restore(ep, bid, target, remote, bucket)
 		if err != nil {
 			log.Error(err)
+			return err
 		}
 		if remote != "" {
 			fmt.Printf("Using source: remote %s, bucket %s\n", remote, bucket)
 		}
 		fmt.Printf("Successfully restored %d key(s) from %s.zip in %f sec\n\n", krestored, bid, etime.Seconds())
+
+		return nil
 	},
 }
 
