@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"math/rand"
+	"time"
 
 	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/types"
@@ -81,6 +83,7 @@ func TestBackupv3(t *testing.T) {
 	etcd3Backup(t, port, tetcd, types.LegacyKubernetesPrefix+"/namespaces/kube-system")
 	etcd3Backup(t, port, tetcd, types.KubernetesPrefix+"/namespaces/kube-system")
 	etcd3Backup(t, port, tetcd, types.OpenShiftPrefix+"/builds")
+	etc3BackupWithLargeSubkeys(t, port, tetcd, types.KubernetesPrefix+"/test/bigsubkeys")
 }
 
 func TestBackupv2inv3(t *testing.T) {
@@ -155,7 +158,6 @@ func TestFilters(t *testing.T) {
 			t.Errorf("backup.filter(\"%s\", \".\", \"/tmp\") with %s => %t, want %t", ft.path, ft.filter, got, want)
 		}
 	}
-
 }
 
 func etcd2Backup(t *testing.T, port, tetcd, key string) {
@@ -201,6 +203,46 @@ func etcd2Backup(t *testing.T, port, tetcd, key string) {
 	_ = os.Remove(opath + ".zip")
 }
 
+func etc3BackupWithLargeSubkeys(t *testing.T, port, tetcd, key string) {
+	defer func() { _ = util.EtcdDown() }()
+	_ = os.Setenv("ETCDCTL_API", "3")
+	_ = os.Setenv("RS_ETCD_CLIENT_CERT", filepath.Join(util.Certsdir(), "client.pem"))
+	_ = os.Setenv("RS_ETCD_CLIENT_KEY", filepath.Join(util.Certsdir(), "client-key.pem"))
+	_ = os.Setenv("RS_ETCD_CA_CERT", filepath.Join(util.Certsdir(), "ca.pem"))
+	secure, err := util.LaunchEtcd3(tetcd, port)
+	if err != nil {
+		t.Errorf("%s", err)
+		return
+	}
+	c3, err := util.NewClient3(tetcd, secure)
+	if err != nil {
+		t.Errorf("Can't connect to local etcd3 at %s: %s", tetcd, err)
+		return
+	}
+	stringSize := int(0.5 * 1024 * 1024)
+	for i := 0; i < 10; i++ {
+		subkey := fmt.Sprintf("%s/%d", key, i)
+		_, err = c3.Put(context.Background(), subkey, generateRandomString(stringSize))
+
+		if err != nil {
+			t.Errorf("Can't create etcd entry %s: %s", subkey, err)
+			return
+		}
+	}
+	backupid, err := Backup(tetcd, types.DefaultWorkDir, "play.minio.io:9000", "reshifter-test-cluster")
+	if err != nil {
+		t.Errorf("Error during backup: %s", err)
+		return
+	}
+	opath, _ := filepath.Abs(filepath.Join(types.DefaultWorkDir, backupid))
+	_, err = os.Stat(opath + ".zip")
+	if err != nil {
+		t.Errorf("No archive found: %s", err)
+	}
+	// make sure to clean up:
+	_ = os.Remove(opath + ".zip")
+}
+
 func etcd3Backup(t *testing.T, port, tetcd, key string) {
 	defer func() { _ = util.EtcdDown() }()
 	_ = os.Setenv("ETCDCTL_API", "3")
@@ -218,10 +260,6 @@ func etcd3Backup(t *testing.T, port, tetcd, key string) {
 		return
 	}
 	val := "{\"kind\":\"Namespace\",\"apiVersion\":\"v1\"}"
-	if err != nil {
-		t.Errorf("%s", err)
-		return
-	}
 	_, err = c3.Put(context.Background(), key, val)
 	if err != nil {
 		t.Errorf("Can't create etcd entry %s=%s: %s", key, val, err)
@@ -260,4 +298,33 @@ func genentry(etcdversion string, distro types.KubernetesDistro) (string, string
 	default:
 		return "", "", fmt.Errorf("That's not a Kubernetes distro")
 	}
+}
+
+// src: https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-golang
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const (
+	letterIdxBits = 6                    // 6 bits to represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
+func generateRandomString(n int) string {
+	var src = rand.NewSource(time.Now().UnixNano())
+
+	b := make([]byte, n)
+	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
+	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = src.Int63(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+			b[i] = letterBytes[idx]
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+
+	return string(b)
 }
