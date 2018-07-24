@@ -33,7 +33,7 @@ gclean :
 crelease : cbuild cpush
 
 cbuild :
-	@docker build --build-arg rversion=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) app/
+	@docker build --build-arg rversion=$(reshifter_version) -t quay.io/mhausenblas/reshifter:$(reshifter_version) .
 
 cpush :
 	@docker push quay.io/mhausenblas/reshifter:$(reshifter_version)

@@ -203,7 +203,7 @@
   name = "google.golang.org/grpc"
   packages = [".","codes","credentials","grpclb/grpc_lb_v1","grpclog","internal","keepalive","metadata","naming","peer","stats","status","tap","transport"]
   revision = "b15215fb911b24a5d61d57feec4233d610530464"
-  version = "v1.4.2"
+  version = "v1.11.3"
 
 [[projects]]
   branch = "v2"
