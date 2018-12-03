@@ -10,6 +10,10 @@ import (
 	"math"
 )
 
+// maxMsgSize use 200MB as the default message size limit.
+// grpc library default is 4MB
+const maxMsgSize = 1024 * 1024 * 200
+
 // NewClient3 creates an etcd3 client, optionally using SSL/TLS if secure is true.
 // The endpoint is an URL such as http://localhost:2379.
 func NewClient3(endpoint string, secure bool) (*clientv3.Client, error) {
@@ -57,9 +61,11 @@ func newSecureEtcd3Client(endpoint string) (*clientv3.Client, error) {
 	dialOptions := createGRPCOptions()
 
 	cli, err := clientv3.New(clientv3.Config{
-		DialOptions: dialOptions,
-		Endpoints:   []string{endpoint},
-		TLS:         tlsConfig,
+		DialOptions:        dialOptions,
+		Endpoints:          []string{endpoint},
+		TLS:                tlsConfig,
+		MaxCallSendMsgSize: maxMsgSize,
+		MaxCallRecvMsgSize: maxMsgSize,
 	})
 	if err != nil {
 		return nil, err
