@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/pkg/transport"
-	"google.golang.org/grpc"
 	"math"
+
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/pkg/transport"
+	"google.golang.org/grpc"
 )
 
 // maxMsgSize use 200MB as the default message size limit.

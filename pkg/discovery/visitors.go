@@ -5,9 +5,9 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/coreos/etcd/client"
-	"github.com/coreos/etcd/clientv3"
 	"github.com/mhausenblas/reshifter/pkg/types"
+	"go.etcd.io/etcd/client"
+	"go.etcd.io/etcd/clientv3"
 	"golang.org/x/net/context"
 )
 

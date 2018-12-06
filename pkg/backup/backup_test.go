@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	"math/rand"
 	"time"
 
-	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
+	"go.etcd.io/etcd/client"
 )
 
 var (

@@ -12,9 +12,9 @@ import (
 	"net/url"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
+	"go.etcd.io/etcd/client"
 )
 
 // ProbeEtcd probes an endpoint at path /version to figure

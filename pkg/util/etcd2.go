@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/coreos/etcd/client"
+	"go.etcd.io/etcd/client"
 )
 
 // NewClient2 creates an etcd2 client, optionally using SSL/TLS if secure is true.

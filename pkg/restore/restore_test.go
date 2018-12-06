@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/coreos/etcd/client"
 	"github.com/mhausenblas/reshifter/pkg/backup"
 	"github.com/mhausenblas/reshifter/pkg/types"
 	"github.com/mhausenblas/reshifter/pkg/util"
+	"go.etcd.io/etcd/client"
 )
 
 func TestRestorev2(t *testing.T) {
